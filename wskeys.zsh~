@@ -203,7 +203,6 @@ wsdialog_dialogtest_diall4a_msg="#First message!# Enter a *string* "
 wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
 
 wsdialog_dialogtest_secondl4_msg="#A second message...#"
-declare -A wsdialog_dialogtest_secondl4_funcs
 wsdialog_dialogtest_secondl4_funcs["y"]="wsdialog-l4b-yes"
 wsdialog_dialogtest_secondl4_funcs["Y"]="wsdialog-l4b-yes"
 wsdialog_dialogtest_secondl4_funcs["n"]="wsdialog-l4b-no"
