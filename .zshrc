@@ -1,5 +1,6 @@
 # TEMP: directory
-dir=$(dirname $0)
+#dir=$(dirname $0)
+dir=$ZDOTDIR
 # zsh ws theme
 
 # set terminal options
