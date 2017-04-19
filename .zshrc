@@ -1,5 +1,5 @@
 # TEMP: directory
-dir=~/zwsh
+dir=$(dirname $0)
 # zsh ws theme
 
 # set terminal options
