@@ -155,7 +155,7 @@ wsblock-accept() {
     if [[ -z $kk ]]; then
         BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
     fi
-    zle -M "buffer=#$BUFFER#"
+#    zle -M "buffer=#$BUFFER#"
     wsblock-leave-mode
     zle accept-line
 }
@@ -194,7 +194,7 @@ wsblock-delupd() { # update $kb, $kk, $kkend, $block text after delete
 	    return
 	fi
     else
-	zle -M "kb=$kb kbend=$kbend kk=$kk kkend=$kkend curs=$CURSOR len=$len"
+#	zle -M "kb=$kb kbend=$kbend kk=$kk kkend=$kkend curs=$CURSOR len=$len"
 	if [[ $cursend -lt $kbend && $CURSOR -lt $kb ]]; then
 	    kb=$CURSOR
 	elif [[ $CURSOR -lt $kb ]]; then
@@ -400,8 +400,3 @@ wsblock-kr-insert() {
     wsblock-insert-string $wskr_text
     unset wskr_text
 }
-
-
-
-
-
