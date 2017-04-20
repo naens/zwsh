@@ -1,3 +1,5 @@
+skip() {}
+
 # prepare dialogs
 wsdialog-prepare() {
     for dialog in wsdialog_modes; do
@@ -65,47 +67,8 @@ wsdialog-run() {
 
 # put text of the argument in $wsdialog_pft, format in $wsdialog_pff
 # format is made of 3 items: begin, end and type (bold/standout...)
-# switches: '*' bold, '#' standout, '_' underline
+# skip: * bold switch, # stand out switch
 wsdialod-parse-format() {
-    unset wsdialog_pft
-    unset wsdialog_pff
-    local str=$1
-    local bold=""
-    local standout=""	
-    local underline=""
-    local count=1
-    local ti=1
-    for i in {1..${#str}}; do
-        local c=$str[i]
-        if [[ "$c" == "*" ]]; then
-            if [[ -z $bold ]]; then
-                bold=$ti
-            else
-                wsdialog_pff[count]="$bold $ti bold"
-                count=$(( count + 1 ))
-                bold=""
-            fi
-        elif [[ "$c" == "#" ]]; then
-            if [[ -z $standout ]]; then
-                standout=$ti
-            else
-                wsdialog_pff[count]="$standout $ti standout"
-                count=$(( count + 1 ))
-                standout=""
-            fi
-        elif [[ "$c" == "_" ]]; then
-            if [[ -z $underline ]]; then
-                underline=$ti
-            else
-                wsdialog_pff[count]="$underline $ti underline"
-                count=$(( count + 1 ))
-                underline=""
-            fi
-        else
-            wsdialog_pft+="$c"
-            ti=$(( ti + 1 ))
-        fi
-    done
 }
 
 

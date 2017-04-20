@@ -241,13 +241,7 @@ test-wsdialog() {
     wsdialog-dialogtest-run
 }
 
-bindkey -M zsh-ws "^Qm" test-format
-zle -N test-format
 test-format() {
     wsdialod-parse-format $BUFFER
-    local fmt_string=""
-    for fmt in $wsdialog_pff; do
-    fmt_string+="[$fmt]"
-    done
-    zle -M "text=$wsdialog_pft format=$fmt_string"
+    zle -M "text=$pft format=$pff"
 }

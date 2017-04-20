@@ -65,15 +65,14 @@ setopt PROMPT_SUBST
 export PROMPT=ZSH'$(collapse_pwd)>'
 
 # options completion
-#setopt menu_complete
-#setopt auto_menu
-#autoload -Uz compinit
-#compinit
-#zstyle ':completion:*' menu yes select
+setopt menu_complete
+setopt auto_menu
+autoload -Uz compinit
+compinit
+zstyle ':completion:*' menu yes select
 
 HISTFILE=~/.zsh_history
 
 lesskey $dir/wsless.txt
 
 INPUTRC=$dir/wsinputrc.txt
-bindkey -A zsh-ws main
