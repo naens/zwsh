@@ -261,14 +261,17 @@ zle -N test-format
 test-format() {
     wsdialod-parse-format $BUFFER
     local fmt_string=""
+    BUFFER=$wsdialog_pft
+    CURSOR=${#wsdialog_pft}
+
     for fmt in $wsdialog_pff; do
         fmt_string+="[$fmt]"
     done
-    zle -M "text=$wsdialog_pft format=$fmt_string"
-    BUFFER=$wsdialog_pft
-    CURSOR=${#wsdialog_pft}
+
     region_highlight=""
     for fmt in $wsdialog_pff; do
 	region_highlight+=($fmt)
     done
+
+    zle -M "text=$wsdialog_pft format=$fmt_string"
 }
