@@ -83,9 +83,24 @@ bindkey -M zsh-ws "^H" backward-delete-char
 bindkey -M zsh-ws "^?" backward-delete-char
 bindkey -M zsh-ws "^Y" kill-whole-line
 bindkey -M zsh-ws "^T" kill-word
-bindkey -M zsh-ws "^Qy" kill-line
-bindkey -M zsh-ws "^QY" kill-line
-bindkey -M zsh-ws "^Q^H" backward-kill-line
+bindkey -M zsh-ws "^[h" backward-kill-word
+bindkey -M zsh-ws "^[H" backward-kill-word
+bindkey -M zsh-ws "^[y" delword
+bindkey -M zsh-ws "^[Y" delword
+bindkey -M zsh-ws "^Qg" kill-line
+bindkey -M zsh-ws "^QG" kill-line
+bindkey -M zsh-ws "^Qh" backward-kill-line
+bindkey -M zsh-ws "^QH" backward-kill-line
+
+zle -N delword
+delword() {
+    zle forward-word
+    zle backward-word
+    zle delete-word
+    if [[ $BUFFER[CURSOR] =~ [[:space:]] ]]; then
+	zle delete-char
+    fi
+}
 
 # Block Keys
 zle -N ws-kb
@@ -247,7 +262,13 @@ test-format() {
     wsdialod-parse-format $BUFFER
     local fmt_string=""
     for fmt in $wsdialog_pff; do
-    fmt_string+="[$fmt]"
+        fmt_string+="[$fmt]"
     done
     zle -M "text=$wsdialog_pft format=$fmt_string"
+    BUFFER=$wsdialog_pft
+    CURSOR=${#wsdialog_pft}
+    region_highlight=""
+    for fmt in $wsdialog_pff; do
+	region_highlight+=($fmt)
+    done
 }

@@ -74,7 +74,7 @@ wsdialod-parse-format() {
     local standout=""	
     local underline=""
     local count=1
-    local ti=1
+    local ti=0
     for i in {1..${#str}}; do
         local c=$str[i]
         if [[ "$c" == "*" ]]; then
