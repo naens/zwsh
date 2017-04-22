@@ -1,10 +1,6 @@
 # TEMP: directory
 #dir=$(dirname $0)
-if [[ -n $ZDOTDIR ]]; then
-    dir=$ZDOTDIR
-else
-    dir="~"
-
+dir=$ZDOTDIR
 # zsh ws theme
 
 # set terminal options

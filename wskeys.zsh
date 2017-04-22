@@ -203,7 +203,6 @@ ws-print-pos() {
     fi
 }
 
-wsdialog-prepare
 
 # testing dialog
 wsdialog_modes[1]="dialogtest"
@@ -224,6 +223,8 @@ wsdialog_dialogtest_secondl4_funcs["Y"]="wsdialog-l4b-yes"
 wsdialog_dialogtest_secondl4_funcs["n"]="wsdialog-l4b-no"
 wsdialog_dialogtest_secondl4_funcs["N"]="wsdialog-l4b-no"
 wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
+
+wsdialog-prepare
 
 wsdialog-dialtest-accept() {
     zle -M "dialtest: accept"
@@ -253,13 +254,14 @@ bindkey -M zsh-ws "^Ql" test-wsdialog
 zle -N test-wsdialog
 
 test-wsdialog() {
+    wsdialog_dialogtest_msg=$BUFFER		
     wsdialog-dialogtest-run
 }
 
 bindkey -M zsh-ws "^Qm" test-format
 zle -N test-format
 test-format() {
-    wsdialod-parse-format $BUFFER
+    wsdialog-parse-format $BUFFER
     local fmt_string=""
     BUFFER=$wsdialog_pft
     CURSOR=${#wsdialog_pft}
@@ -269,7 +271,8 @@ test-format() {
     done
 
     region_highlight=""
-    for fmt in $wsdialog_pff; do
+    local fmts=($wsdialog_pff)
+    for fmt in $fmts; do
 	region_highlight+=($fmt)
     done
 

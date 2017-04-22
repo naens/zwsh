@@ -16,9 +16,12 @@ wsline-init() {
     else
 	wsline_delpoint=$wsline_begin
     fi
+    wsline-update
 }
 
 wsline-update() {
+    wsline_len=$(( ${#BUFFER} - $wsline_begin - $wsline_end ))
+    wsline_text=$BUFFER[wsline_begin+1,wsline_begin+wsline_len]
     if [[ -n $wsline_update ]]; then
         $wsline_update
     fi

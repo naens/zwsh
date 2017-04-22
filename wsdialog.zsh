@@ -1,6 +1,6 @@
 # prepare dialogs
 wsdialog-prepare() {
-    for dialog in wsdialog_modes; do
+    for dialog in ${wsdialog_modes[@]}; do
         local dname="wsdialog_"$dialog
         local dfn="wsdialog-"$dialog
         local mname=$dname"_line"
@@ -28,45 +28,43 @@ wsdialog-prepare() {
 wsdialog-run() {
     local dialog=$1
     local msgvar=wsdialog_${dialog}_msg
-    local msg=$(eval echo \$$msgvar)
+    local msg=${(P)msgvar}
 
     zle end-of-line
     wsdialog_start=$CURSOR
     wsdialog_init_highlight=$region_highlight
 
-    local line1=$msgvar
+    local line1=$msg
     local line2=" *RETURN* done | *Backspace* or *^H* erase left"
     local line3="  *^U* cancel  |       *Del* or *^G* erase char"
     wsdialog-parse-format $line1
     local line1_txt=$wsdialog_pft
-    wsdialog_line1_fmt=$wsdialog_pff
+    wsdialog_line1_fmt=($wsdialog_pff)
     wsdialog-parse-format $line2
     local line2_txt=$wsdialog_pft
-    wsdialog_line2_fmt=$wsdialog_pff
+    wsdialog_line2_fmt=($wsdialog_pff)
     wsdialog-parse-format $line3
     local line3_txt=$wsdialog_pft
-    wsdialog_line3_fmt=$wsdialog_pff
-
-    wsdialog-parse-format $text_form
+    wsdialog_line3_fmt=($wsdialog_pff)
+    
     LBUFFER+=$'\n'$line1_txt$'\n'$line2_txt$'\n'$line3_txt
     wsdialog_line2_start=$(( $wsdialog_start + ${#line1_txt} + 1 ))
     wsdialog_line3_start=$(( $wsdialog_line2_start + ${#line2_txt} + 1 ))
-    wsdialog_prompt_begin=$(( $wskw_start + ${#line1_txt} + 1 ))
+    wsdialog_prompt_begin=$(( $wsdialog_start + ${#line1_txt} + 1 ))
     wsdialog_prompt_end=$(( ${#BUFFER} - $wsdialog_prompt_begin ))
     wsdialog_end=$(( $wskw_prompt_end - ${#line2_txt} - ${#line3_txt} - 2 ))
-    CURSOR=$wskw_prompt_begin
+    CURSOR=$wsdialog_prompt_begin
     local cols=$(tput cols)
     wsline_maxlen=$(( $cols - ${#line1_txt} - 1))
-    wsline-init "wsdialog-hlupd"
-    local mname=$dialog"_line"
+    wsline-init "wsdialog-hlupd"	
+    local mname=wsdialog_$dialog"_line"
     zle -K $mname
-    wsdialog-hlupd
 }
 
 # put text of the argument in $wsdialog_pft, format in $wsdialog_pff
 # format is made of 3 items: begin, end and type (bold/standout...)
 # switches: '*' bold, '#' standout, '_' underline
-wsdialod-parse-format() {
+wsdialog-parse-format() {
     unset wsdialog_pft
     unset wsdialog_pff
     local str=$1
@@ -111,19 +109,29 @@ wsdialod-parse-format() {
 
 wsdialog-apply-format() {
     local shift=$1
-    local begin=$2
-    local end=$3
-    local type=$4
-    local from=$(( $begin + $shift ))
-    local to=$(( $end + $shift ))
-    region_highlight+=($from $to $type)
+    shift
+    local fmt=$1
+    while [[ -n $fmt ]]; do
+        local a=("${(@s/ /)fmt}")
+        local begin=$a[1]
+        local end=$a[2]
+        local type=$a[3]
+        local from=$(( $begin + $shift ))
+        local to=$(( $end + $shift ))
+        local ff=($from $to $type)
+        region_highlight+=$ff
+        shift
+        fmt=$1
+    done
 }
 
 wsdialog-hlupd() {
     region_highlight=$wsdialog_init_highlight
     wsdialog-apply-format $wsdialog_start $wsdialog_line1_fmt
-    wsdialog-apply-format $wsdialog_line2_start $wsdialog_line2_fmt
-    wsdialog-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
+    local l2s=$((wsdialog_line2_start + wsline_len + 1))
+    local l3s=$((wsdialog_line3_start + wsline_len + 1))
+    wsdialog-apply-format $l2s $wsdialog_line2_fmt
+    wsdialog-apply-format $l3s $wsdialog_line3_fmt
 }
 
 # remove dialog l4 and restore cursor
