@@ -19,6 +19,14 @@ wsline-init() {
     wsline-update
 }
 
+wsline-finalize() {
+    unset wsline_update
+    unset wsline_begin
+    unset wsline_end
+    unset wsline_len
+    unset wsline_text
+}
+
 wsline-update() {
     wsline_len=$(( ${#BUFFER} - $wsline_begin - $wsline_end ))
     wsline_text=$BUFFER[wsline_begin+1,wsline_begin+wsline_len]

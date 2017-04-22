@@ -4,6 +4,7 @@ if [[ -n $ZDOTDIR ]]; then
     dir=$ZDOTDIR
 else
     dir="~"
+fi
 
 # zsh ws theme
 
@@ -21,7 +22,7 @@ stty werase  undef # ^W
 stty lnext   undef # ^V
 stty discard undef # ^O
 
-stty eof '^\'
+stty eof "^\\"
 stty intr '^]'
 
 # line mode
@@ -80,4 +81,5 @@ HISTFILE=~/.zsh_history
 lesskey $dir/wsless.txt
 
 INPUTRC=$dir/wsinputrc.txt
+
 bindkey -A zsh-ws main

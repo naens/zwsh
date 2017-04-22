@@ -210,8 +210,8 @@ wsdialog_modes[1]="dialogtest"
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="diall4a"
 wsdialog_dialogtest_modes[2]="secondl4"
-wsdialog_dialogtest_accept="wsdialog-dialtest-accept"
-wsdialog_dialogtest_restore="wsdialog-dialtest-restore"
+wsdialog_dialogtest_accept="wsdialog-dialogtest-accept"
+wsdialog_dialogtest_restore="wsdialog-dialogtest-restore"
 
 wsdialog_dialogtest_diall4a_msg="#First message!# Enter a *string* "
 wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
@@ -226,35 +226,35 @@ wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
 
 wsdialog-prepare
 
-wsdialog-dialtest-accept() {
-    zle -M "dialtest: accept"
+wsdialog-dialogtest-accept() {
+    zle -M "dialogtest: accept: \"$wsdialog_text\""
 }
 
-wsdialog-dialtest-restore() {
+wsdialog-dialogtest-restore() {
     CURSOR=0
 }
 
 wsdialog-l4a-accept() {
-    zle -M "dialtest (a): l4-ok"
+    zle -M "dialogtest (a): l4-ok"
 }
 
 wsdialog-l4b-yes() {
-    zle -M "dialtest (b): yes"
+    zle -M "dialogtest (b): yes"
 }
 
 wsdialog-l4b-no() {
-    zle -M "dialtest (b): no"
+    zle -M "dialogtest (b): no"
 }
 
 wsdialog-l4b-cm() {
-    zle -M "dialtest (b): ok"
+    zle -M "dialogtest (b): ok"
 }
 
 bindkey -M zsh-ws "^Ql" test-wsdialog
 zle -N test-wsdialog
 
 test-wsdialog() {
-    wsdialog_dialogtest_msg=$BUFFER		
+    wsdialog_dialogtest_msg="msg is: "		
     wsdialog-dialogtest-run
 }
 
