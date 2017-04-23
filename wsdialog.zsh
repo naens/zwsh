@@ -53,25 +53,29 @@ wsdialog-unsetvars() {
     unset wsdialog_savemode
 }
 
+# ask caller what to do
 wsdialog-acceptfn() {
     local dialog=$1
     local do_accept=wsdialog-${dialog}-accept
-    wsdialog_text="$wsline_text"
+    local textvar=wsline_wsdialog_$dialog
+    wsdialog_text="${(P)textvar}"
 
-    wsline-finalize
+    $do_accept     # defines $wsdialog_l4mode
+    if [[ -n $wsdialog_l4mode ]]; then
+    # chose mode, enter l4mode
+    else    
+        wsline-finalize $dialog
 
-    #restore text, cursor and region_highlight
-    wsdialog-close
-    CURSOR=wsdialog_savecurs
-    region_highlight=$wsdialog_init_highlight
+        #restore text, cursor and region_highlight
+        wsdialog-close
+        CURSOR=wsdialog_savecurs
+        region_highlight=$wsdialog_init_highlight
 
-    zle -K $wsdialog_savemode
+        zle -K $wsdialog_savemode
 
-    # call accept function
-    $do_accept	
-
-    # unset variables
-    wsdialog-unsetvars
+        # unset variables
+        wsdialog-unsetvars
+    fi
 }
 
 # !!!cursor & highlight state save/restore by caller!!!
@@ -111,7 +115,7 @@ wsdialog-run() {
     CURSOR=$wsdialog_prompt_begin
     local cols=$(tput cols)
     wsline_maxlen=$(( $cols - ${#line1_txt} - 1))
-    wsline-init "wsdialog-hlupd"	
+    wsline-init wsdialog-hlupd wsdialog_$dialog
     local mname=wsdialog_$dialog"_line"
     zle -K $mname
 }

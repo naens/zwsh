@@ -8,24 +8,64 @@
 bindkey -N wsline
 
 wsline-init() {
-    wsline_update=$1
-    wsline_begin=$(( $CURSOR ))
-    wsline_end=$(( ${#BUFFER} - $CURSOR ))
-    if [[ $wsline_maxlen -ge 1 ]]; then
-	wsline_delpoint=$(( $wsline_begin + $wsline_maxlen - 1 ))
+    local name=$1
+    wsline_${name}_update=$2
+    wsline_${name}_begin=$(( $CURSOR ))
+    wsline_${name}_end=$(( ${#BUFFER} - $CURSOR ))
+    if [[ $wsline_${name}_maxlen -ge 1 ]]; then
+	wsline_${name}_delpoint=$(( $wsline_${name}_begin + $wsline_${name}_maxlen - 1 ))
     else
-	wsline_delpoint=$wsline_begin
+	wsline_${name}_delpoint=$wsline_${name}_begin
     fi
+    wsline-getvars $name
     wsline-update
 }
 
+# called when closing wsline
 wsline-finalize() {
+    local name=$1
+    unset wsline_${name}_update
+    unset wsline_${name}_begin
+    unset wsline_${name}_end
+    unset wsline_${name}_len
+    unset wsline_${name}_text
+    unset wsline_${name}_delpoint
     unset wsline_update
     unset wsline_begin
     unset wsline_end
     unset wsline_len
     unset wsline_text
+    unset wsline_delpoint
 }
+
+# TODO: call when coming back from another wsline and on init
+wsline-getvars() {
+    local name=$1
+    local v=wsline_${name}_update
+    wsline_update=${(P)v}
+    v=wsline_${name}_begin
+    wsline_begin=${(P)v}
+    v=wsline_${name}_end
+    wsline_end=${(P)v}
+    v=wsline_${name}_len
+    wsline_len=${(P)v}
+    v=wsline_${name}_text
+    wsline_text=${(P)v}
+    v=wsline_${name}_delpoint
+    wsline_delpoint=${(P)v}
+}
+
+# TODO: call when leaving to other wsline without closing
+wsline-setvars() {
+    local name=$1
+    declare wsline_${name}_update=$wsline_update
+    declare wsline_${name}_begin=$wsline_begin
+    declare wsline_${name}_end=$wsline_end
+    declare wsline_${name}_len=$wsline_len
+    declare wsline_${name}_text=$wsline_text
+    declare wsline_${name}_delpoint=$wsline_delpoint
+}
+
 
 wsline-update() {
     wsline_len=$(( ${#BUFFER} - $wsline_begin - $wsline_end ))
@@ -35,10 +75,10 @@ wsline-update() {
     fi
 }
 
-# insertions
-zle -N wsline-self-insert
+zle -N wsline-$name-self-insert
 bindkey -M wsline -R "!"-"~" wsline-self-insert
 bindkey -M wsline " " wsline-self-insert
+# insertions
 wsline-self-insert() {
     if [[ wsline_maxlen -lt 1 ]]; then
 	return

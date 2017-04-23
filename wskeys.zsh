@@ -213,10 +213,10 @@ wsdialog_dialogtest_modes[2]="secondl4"
 wsdialog_dialogtest_accept="wsdialog-dialogtest-accept"
 wsdialog_dialogtest_restore="wsdialog-dialogtest-restore"
 
-wsdialog_dialogtest_diall4a_msg="#First message!# Enter a *string* "
+wsdialog_dialogtest_diall4a_msg="#The string is short!# *Type* something... "
 wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
 
-wsdialog_dialogtest_secondl4_msg="#A second message...#"
+wsdialog_dialogtest_secondl4_msg="The string should not be #empty#..."
 declare -A wsdialog_dialogtest_secondl4_funcs
 wsdialog_dialogtest_secondl4_funcs["y"]="wsdialog-l4b-yes"
 wsdialog_dialogtest_secondl4_funcs["Y"]="wsdialog-l4b-yes"
@@ -226,8 +226,16 @@ wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
 
 wsdialog-prepare
 
+# decide based on $wsdialog_text what to do
 wsdialog-dialogtest-accept() {
-    zle -M "dialogtest: accept: \"$wsdialog_text\""
+    if [[ -z $wsdialog_text ]]; then
+        wsdialog_l4mode=secondl4_msg
+    elif [[ ${#wsdialog_text} -lt 3 ]]; then
+        wsdialog_l4mode=diall4a
+    else
+        undef wsdialog_l4mode
+        zle -M "dialogtest: accept: \"$wsdialog_text\""
+    fi
 }
 
 wsdialog-dialogtest-restore() {
