@@ -76,6 +76,8 @@ wskr-insert() {
     unset wskr_text
 }
 
+bindkey -M zsh-ws "^[[200~" bracketed-paste
+
 
 # Delete Keys
 bindkey -M zsh-ws "^G" delete-char-or-list
