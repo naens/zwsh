@@ -76,6 +76,7 @@ wskr-insert() {
     unset wskr_text
 }
 
+# TODO: remove standout OR integrate with blocks
 bindkey -M zsh-ws "^[[200~" bracketed-paste
 
 
