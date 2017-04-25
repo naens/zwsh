@@ -2,13 +2,13 @@
 wsdialog-prepare() {
     for dialog in ${wsdialog_modes[@]}; do
         local dname="wsdialog_"$dialog
-        local dfn="wsdialog-"$dialog
+        local dfn="wsdialog_"$dialog
         local mname=$dname"_line"
         bindkey -N $mname wsline
-        zle -N ${dfn}"-acceptfn"
-        bindkey -M $mname "^M" ${dfn}-acceptfn
-        zle -N $dname"_restore"
-        bindkey -M $mname "^U" $dname"_restore"
+#        zle -N ${dfn}"-acceptfn"
+#        bindkey -M $mname "^M" ${dfn}-acceptfn
+        zle -N ${dfn}-restore
+        bindkey -M $mname "^U" ${dfn}-restore
         local modesvar=$dname"_modes"
         local modes=$(eval echo \$$modesvar)
         for l4mode in $modes; do
@@ -20,6 +20,7 @@ wsdialog-prepare() {
         eval ${dfn}-run() { wsdialog-run $dialog }
         eval ${dfn}-rml4() { wsdialog-rml4 $dialog }
         eval ${dfn}-acceptfn() { wsdialog-acceptfn $dialog }
+        wsline-prepare $dname
     done
 }
 
@@ -28,11 +29,9 @@ wsdialog-prepare() {
 wsdialog-close() {
     local bufsz=${#BUFFER}
     local end=$((bufsz - wsdialog_end + 1))
-echo s=$wsdialog_start ee=$wsdialog_end e=$end sz=$bufsz > /dev/pts/3
 #    BUFFER=$BUFFER[1,wsdialog_start]$BUFFER[end,bufsz]
     local str1=$BUFFER[1,wsdialog_start]
     local str2=$BUFFER[end,bufsz]
-    echo str1=$str1 str2=$str2 > /dev/pts/3
     BUFFER=$str1$str2
 }
 
@@ -56,26 +55,27 @@ wsdialog-unsetvars() {
 # ask caller what to do
 wsdialog-acceptfn() {
     local dialog=$1
-    local do_accept=wsdialog-${dialog}-accept
-    local textvar=wsline_wsdialog_$dialog
+    local do_accept=wsdialog_${dialog}-accept
+    local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
 
-    $do_accept     # defines $wsdialog_l4mode
-    if [[ -n $wsdialog_l4mode ]]; then
-    # chose mode, enter l4mode
-    else    
-        wsline-finalize $dialog
-
+#    $do_accept     # defines $wsdialog_l4mode
+#    if [[ -n $wsdialog_l4mode ]]; then
+#    # chose mode, enter l4mode
+#        echo abcd > /dev/null
+#    else    
+#        wsline-finalize $dialog
+#
         #restore text, cursor and region_highlight
-        wsdialog-close
-        CURSOR=wsdialog_savecurs
-        region_highlight=$wsdialog_init_highlight
+#        wsdialog-close
+#        CURSOR=wsdialog_savecurs
+#        region_highlight=$wsdialog_init_highlight
 
-        zle -K $wsdialog_savemode
+#        zle -K $wsdialog_savemode
 
         # unset variables
-        wsdialog-unsetvars
-    fi
+#        wsdialog-unsetvars
+#    fi
 }
 
 # !!!cursor & highlight state save/restore by caller!!!
@@ -114,8 +114,9 @@ wsdialog-run() {
     wsdialog_end=$(( $wsdialog_prompt_end - ${#line2_txt} - ${#line3_txt} - 2 ))
     CURSOR=$wsdialog_prompt_begin
     local cols=$(tput cols)
-    wsline_maxlen=$(( $cols - ${#line1_txt} - 1))
-    wsline-init wsdialog-hlupd wsdialog_$dialog
+    declare wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))
+    echo WSDIALOG: wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1)) > /dev/pts/4
+    wsline-init wsdialog_$dialog wsdialog-hlupd
     local mname=wsdialog_$dialog"_line"
     zle -K $mname
 }

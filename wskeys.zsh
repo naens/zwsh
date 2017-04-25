@@ -213,8 +213,8 @@ wsdialog_modes[1]="dialogtest"
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="diall4a"
 wsdialog_dialogtest_modes[2]="secondl4"
-wsdialog_dialogtest_accept="wsdialog-dialogtest-accept"
-wsdialog_dialogtest_restore="wsdialog-dialogtest-restore"
+wsdialog_dialogtest_accept="wsdialog_dialogtest-accept"
+wsdialog_dialogtest_restore="wsdialog_dialogtest-restore"
 
 wsdialog_dialogtest_diall4a_msg="#The string is short!# *Type* something... "
 wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
@@ -230,7 +230,8 @@ wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
 wsdialog-prepare
 
 # decide based on $wsdialog_text what to do
-wsdialog-dialogtest-accept() {
+wsdialog_dialogtest-accept() {
+    echo DIALOGTEST_ACCEPT: \"$wsdialog_text\" > /dev/pts/4
     if [[ -z $wsdialog_text ]]; then
         wsdialog_l4mode=secondl4_msg
     elif [[ ${#wsdialog_text} -lt 3 ]]; then
@@ -241,7 +242,7 @@ wsdialog-dialogtest-accept() {
     fi
 }
 
-wsdialog-dialogtest-restore() {
+wsdialog_dialogtest-restore() {
     CURSOR=0
 }
 
@@ -266,7 +267,7 @@ zle -N test-wsdialog
 
 test-wsdialog() {
     wsdialog_dialogtest_msg="msg is: "		
-    wsdialog-dialogtest-run
+    wsdialog_dialogtest-run
 }
 
 bindkey -M zsh-ws "^Qm" test-format

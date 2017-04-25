@@ -9,16 +9,41 @@ bindkey -N wsline
 
 wsline-init() {
     local name=$1
-    wsline_${name}_update=$2
-    wsline_${name}_begin=$(( $CURSOR ))
-    wsline_${name}_end=$(( ${#BUFFER} - $CURSOR ))
-    if [[ $wsline_${name}_maxlen -ge 1 ]]; then
-	wsline_${name}_delpoint=$(( $wsline_${name}_begin + $wsline_${name}_maxlen - 1 ))
+    local update=$2
+    local begin=$CURSOR
+    local end=$(( ${#BUFFER} - $CURSOR ))
+    local v=wsline_${name}_maxlen
+    local maxlen=${(P)v}
+    declare wsline_${name}_update=$update
+    declare wsline_${name}_begin=$begin
+    declare wsline_${name}_end=$end
+    declare wsline_${name}_maxlen=$maxlen
+    if [[ $maxlen -ge 1 ]]; then
+        local delpoint=$(( $begin + $maxlen - 1 ))
     else
-	wsline_${name}_delpoint=$wsline_${name}_begin
+	local delpoint=$begin
     fi
+    declare wsline_${name}_delpoint=$delpoint
     wsline-getvars $name
     wsline-update
+#    echo wsline: update=$update begin=$begin end=$end v=$v "#${(P)v}#" > /dev/pts/4
+#    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > /dev/pts/4
+}
+
+wsline-acceptX() {
+    local name=$1
+    wsline-getvars
+    $name-acceptfn
+#    echo WSLINE_ACCEPT name=$name > /dev/pts/4
+}
+
+wsline-prepare() {
+    local name=$1
+    zle -N wsline-$name-acceptX
+    bindkey -M ${name}_line "^M" wsline-$name-acceptX
+    eval wsline-$name-acceptX() { wsline-acceptX $name }
+#    echo eval wsline-$name-acceptX() { wsline-acceptX $name } > /dev/pts/4
+#    echo WSLINE_INIT name=$name > /dev/pts/4
 }
 
 # called when closing wsline
@@ -53,6 +78,8 @@ wsline-getvars() {
     wsline_text=${(P)v}
     v=wsline_${name}_delpoint
     wsline_delpoint=${(P)v}
+    v=wsline_${name}_maxlen
+    wsline_maxlen=${(P)v}
 }
 
 # TODO: call when leaving to other wsline without closing
@@ -75,11 +102,13 @@ wsline-update() {
     fi
 }
 
-zle -N wsline-$name-self-insert
+zle -N wsline-self-insert
 bindkey -M wsline -R "!"-"~" wsline-self-insert
 bindkey -M wsline " " wsline-self-insert
 # insertions
 wsline-self-insert() {
+#    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > /dev/pts/4
+#    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> /dev/pts/4
     if [[ wsline_maxlen -lt 1 ]]; then
 	return
     fi
