@@ -58,7 +58,7 @@ wsdialog-acceptfn() {
     local do_accept=wsdialog_${dialog}-accept
     local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
-
+    echo "WSDIALOG_ACCEPTFN" > $debugfile
 #    $do_accept     # defines $wsdialog_l4mode
 #    if [[ -n $wsdialog_l4mode ]]; then
 #    # chose mode, enter l4mode
@@ -115,7 +115,7 @@ wsdialog-run() {
     CURSOR=$wsdialog_prompt_begin
     local cols=$(tput cols)
     declare wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))
-    echo WSDIALOG: wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1)) > /dev/pts/4
+    echo WSDIALOG: wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1)) > $debugfile
     wsline-init wsdialog_$dialog wsdialog-hlupd
     local mname=wsdialog_$dialog"_line"
     zle -K $mname

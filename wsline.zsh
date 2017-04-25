@@ -26,24 +26,30 @@ wsline-init() {
     declare wsline_${name}_delpoint=$delpoint
     wsline-getvars $name
     wsline-update
-#    echo wsline: update=$update begin=$begin end=$end v=$v "#${(P)v}#" > /dev/pts/4
-#    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > /dev/pts/4
+#    echo wsline: update=$update begin=$begin end=$end v=$v "#${(P)v}#" > $debugfile
+#    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > $debugfile
 }
 
 wsline-acceptX() {
     local name=$1
-    wsline-getvars
-    $name-acceptfn
-#    echo WSLINE_ACCEPT name=$name > /dev/pts/4
+    echo WSLINE_ACCEPT name=$name > $debugfile
+#    wsline-getvars
+#    $name-acceptfn
 }
 
 wsline-prepare() {
     local name=$1
+    echo wsline-prepare $name > $debugfile
+    local name_name=wsline_${name}_name
+    declare $name_name=$name
     zle -N wsline-$name-acceptX
-    bindkey -M ${name}_line "^M" wsline-$name-acceptX
-    eval wsline-$name-acceptX() { wsline-acceptX $name }
-#    echo eval wsline-$name-acceptX() { wsline-acceptX $name } > /dev/pts/4
-#    echo WSLINE_INIT name=$name > /dev/pts/4
+    bindkey -M ${1}_line "^M" wsline-$name-acceptX
+    local fnm="wsline-$name-acceptX"
+    echo a=$name_name b=${(P)name_name} > $debugfile
+    eval "${fnm}() { wsline-acceptX "${name_name}" }"
+#    eval wsline-$name-acceptX() { wsline-acceptX $name }
+#    echo eval wsline-$name-acceptX() { wsline-acceptX $name } > $debugfile
+#    echo WSLINE_INIT name=$name > $debugfile
 }
 
 # called when closing wsline
@@ -107,8 +113,8 @@ bindkey -M wsline -R "!"-"~" wsline-self-insert
 bindkey -M wsline " " wsline-self-insert
 # insertions
 wsline-self-insert() {
-#    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > /dev/pts/4
-#    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> /dev/pts/4
+#    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > $debugfile
+#    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> $debugfile
     if [[ wsline_maxlen -lt 1 ]]; then
 	return
     fi

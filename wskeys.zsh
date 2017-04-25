@@ -24,7 +24,6 @@ zle-line-init() {
     unset kr
     unset ws_select
     unset region_highlight
-    zle -K zsh-ws
 }
 
 # Cursor Keys
@@ -208,6 +207,7 @@ ws-print-pos() {
 
 
 # testing dialog
+debugfile=/dev/pts/5
 wsdialog_modes[1]="dialogtest"
 
 wsdialog_dialogtest_msg="Test dialog: "
