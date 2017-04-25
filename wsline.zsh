@@ -30,26 +30,18 @@ wsline-init() {
 #    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > $debugfile
 }
 
-wsline-acceptX() {
+wsline-accept() {
     local name=$1
-    echo WSLINE_ACCEPT name=$name > $debugfile
-#    wsline-getvars
-#    $name-acceptfn
+    wsline-setvars $name
+    echo wsline-accept: name=$name text=$wsline_wsdialog_dialogtest_text > $debugfile
+    $name-acceptfn
 }
 
 wsline-prepare() {
     local name=$1
-    echo wsline-prepare $name > $debugfile
-    local name_name=wsline_${name}_name
-    declare $name_name=$name
-    zle -N wsline-$name-acceptX
-    bindkey -M ${1}_line "^M" wsline-$name-acceptX
-    local fnm="wsline-$name-acceptX"
-    echo a=$name_name b=${(P)name_name} > $debugfile
-    eval "${fnm}() { wsline-acceptX "${name_name}" }"
-#    eval wsline-$name-acceptX() { wsline-acceptX $name }
-#    echo eval wsline-$name-acceptX() { wsline-acceptX $name } > $debugfile
-#    echo WSLINE_INIT name=$name > $debugfile
+    zle -N wsline-$name-accept
+    bindkey -M ${1}_line "^M" wsline-$name-accept
+    eval "wsline-$name-accept() { wsline-accept $name }"
 }
 
 # called when closing wsline
@@ -69,7 +61,6 @@ wsline-finalize() {
     unset wsline_delpoint
 }
 
-# TODO: call when coming back from another wsline and on init
 wsline-getvars() {
     local name=$1
     local v=wsline_${name}_update
@@ -95,7 +86,7 @@ wsline-setvars() {
     declare wsline_${name}_begin=$wsline_begin
     declare wsline_${name}_end=$wsline_end
     declare wsline_${name}_len=$wsline_len
-    declare wsline_${name}_text=$wsline_text
+    eval wsline_${name}_text=\'$wsline_text\'
     declare wsline_${name}_delpoint=$wsline_delpoint
 }
 

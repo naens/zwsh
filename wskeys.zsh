@@ -207,7 +207,7 @@ ws-print-pos() {
 
 
 # testing dialog
-debugfile=/dev/pts/5
+debugfile=/dev/null
 wsdialog_modes[1]="dialogtest"
 
 wsdialog_dialogtest_msg="Test dialog: "
@@ -231,14 +231,14 @@ wsdialog-prepare
 
 # decide based on $wsdialog_text what to do
 wsdialog_dialogtest-accept() {
-    echo DIALOGTEST_ACCEPT: \"$wsdialog_text\" > /dev/pts/4
+    echo DIALOGTEST_ACCEPT: \"$wsdialog_text\" > $debugfile
     if [[ -z $wsdialog_text ]]; then
         wsdialog_l4mode=secondl4_msg
     elif [[ ${#wsdialog_text} -lt 3 ]]; then
         wsdialog_l4mode=diall4a
     else
-        undef wsdialog_l4mode
-        zle -M "dialogtest: accept: \"$wsdialog_text\""
+        unset wsdialog_l4mode
+#        zle -M "dialogtest: accept: \"$wsdialog_text\""
     fi
 }
 

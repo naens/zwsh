@@ -17,9 +17,9 @@ wsdialog-prepare() {
             zle -N "${dfn}-rml4"
             bindkey -M $l4mname "^U" "${dfn}-rml4"
         done
-        eval ${dfn}-run() { wsdialog-run $dialog }
-        eval ${dfn}-rml4() { wsdialog-rml4 $dialog }
-        eval ${dfn}-acceptfn() { wsdialog-acceptfn $dialog }
+        eval "${dfn}-run() { wsdialog-run $dialog }"
+        eval "${dfn}-rml4() { wsdialog-rml4 $dialog }"
+        eval "${dfn}-acceptfn() { wsdialog-acceptfn $dialog }"
         wsline-prepare $dname
     done
 }
@@ -32,6 +32,10 @@ wsdialog-close() {
 #    BUFFER=$BUFFER[1,wsdialog_start]$BUFFER[end,bufsz]
     local str1=$BUFFER[1,wsdialog_start]
     local str2=$BUFFER[end,bufsz]
+    echo WSDIALOG_CLOSE: wsdialog_start=$wsdialog_start wsdialog_end=$wsdialog_end > $debugfile
+    echo WSDIALOG_CLOSE: bufsz=$bufsz end=$end > $debugfile
+    echo WSDIALOG_CLOSE: str1\[1,$wsdialog_start\]=\#$str1\# > $debugfile
+    echo WSDIALOG_CLOSE: str2\[$end,$bufsz\]=\#$str2\# > $debugfile
     BUFFER=$str1$str2
 }
 
@@ -58,24 +62,24 @@ wsdialog-acceptfn() {
     local do_accept=wsdialog_${dialog}-accept
     local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
-    echo "WSDIALOG_ACCEPTFN" > $debugfile
-#    $do_accept     # defines $wsdialog_l4mode
-#    if [[ -n $wsdialog_l4mode ]]; then
-#    # chose mode, enter l4mode
-#        echo abcd > /dev/null
-#    else    
-#        wsline-finalize $dialog
-#
-        #restore text, cursor and region_highlight
-#        wsdialog-close
-#        CURSOR=wsdialog_savecurs
-#        region_highlight=$wsdialog_init_highlight
+    echo "WSDIALOG_ACCEPTFN" var=$textvar text=\"$wsdialog_text\"> $debugfile
+    $do_accept     # defines $wsdialog_l4mode
+    if [[ -n $wsdialog_l4mode ]]; then
+    # chose mode, enter l4mode
+        echo abcd > /dev/null
+    else    
+        wsline-finalize $dialog
 
-#        zle -K $wsdialog_savemode
+        #restore text, cursor and region_highlight
+        wsdialog-close
+        CURSOR=wsdialog_savecurs
+        region_highlight=$wsdialog_init_highlight
+
+        zle -K $wsdialog_savemode
 
         # unset variables
-#        wsdialog-unsetvars
-#    fi
+        wsdialog-unsetvars
+    fi
 }
 
 # !!!cursor & highlight state save/restore by caller!!!
