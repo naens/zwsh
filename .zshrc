@@ -78,6 +78,11 @@ export PROMPT=ZSH'$(collapse_pwd)>'
 
 HISTFILE=~/.zsh_history
 
+# Remember about a years worth of history (AWESOME)
+SAVEHIST=10000
+HISTSIZE=10000
+
+
 lesskey $dir/wsless.txt
 
 INPUTRC=$dir/wsinputrc.txt
