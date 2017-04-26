@@ -34,9 +34,6 @@ stty intr '^]'
 # dialog mode
 . $dir/wsdialog.zsh
 	    
-# unbind emacs keys
-. $dir/bkey_und.zsh
-
 # bind ws keys
 . $dir/wskeys.zsh
 
