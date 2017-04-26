@@ -5,3 +5,5 @@
 # *.[oa]
 *~
 DEADJOE
+*.tex
+*.pdf
