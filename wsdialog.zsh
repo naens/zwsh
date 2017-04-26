@@ -7,8 +7,8 @@ wsdialog-prepare() {
         bindkey -N $mname wsline
 #        zle -N ${dfn}"-acceptfn"
 #        bindkey -M $mname "^M" ${dfn}-acceptfn
-        zle -N ${dfn}-restore
-        bindkey -M $mname "^U" ${dfn}-restore
+#        zle -N ${dfn}-restore
+#        bindkey -M $mname "^U" ${dfn}-restore
         local modesvar=$dname"_modes"
         local modes=$(eval echo \$$modesvar)
         for l4mode in $modes; do
@@ -20,6 +20,7 @@ wsdialog-prepare() {
         eval "${dfn}-run() { wsdialog-run $dialog }"
         eval "${dfn}-rml4() { wsdialog-rml4 $dialog }"
         eval "${dfn}-acceptfn() { wsdialog-acceptfn $dialog }"
+        eval "${dfn}-cancelfn() { wsdialog-cancelfn $dialog }"
         wsline-prepare $dname
     done
 }
@@ -60,13 +61,17 @@ wsdialog-unsetvars() {
 wsdialog-acceptfn() {
     local dialog=$1
     local do_accept=wsdialog_${dialog}-accept
+    local do_restore=wsdialog_${dialog}-restore
     local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
     echo "WSDIALOG_ACCEPTFN" var=$textvar text=\"$wsdialog_text\"> $debugfile
     $do_accept     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
-    # chose mode, enter l4mode
+        # chose mode, enter l4mode
         echo abcd > /dev/null
+
+        #TODO line4 mode: exists "accept" => input l4mode
+        #                 otherwise, readkey mode
     else    
         wsline-finalize $dialog
 
@@ -76,10 +81,31 @@ wsdialog-acceptfn() {
         region_highlight=$wsdialog_init_highlight
 
         zle -K $wsdialog_savemode
+        $do_restore
 
         # unset variables
         wsdialog-unsetvars
     fi
+}
+
+# close everything and call restore
+wsdialog-cancelfn() {
+    local dialog=$1
+    local do_restore=wsdialog_${dialog}-restore
+
+    unset wsdialog_text
+    wsline-finalize $dialog
+
+    #restore text, cursor and region_highlight
+    wsdialog-close
+    CURSOR=wsdialog_savecurs
+    region_highlight=$wsdialog_init_highlight
+
+    zle -K $wsdialog_savemode
+    $do_restore
+
+    # unset variables
+    wsdialog-unsetvars
 }
 
 # !!!cursor & highlight state save/restore by caller!!!

@@ -33,15 +33,25 @@ wsline-init() {
 wsline-accept() {
     local name=$1
     wsline-setvars $name
-    echo wsline-accept: name=$name text=$wsline_wsdialog_dialogtest_text > $debugfile
     $name-acceptfn
+}
+
+wsline-cancel() {
+    local name=$1
+    wsline-setvars $name
+    $name-cancelfn
 }
 
 wsline-prepare() {
     local name=$1
+
     zle -N wsline-$name-accept
     bindkey -M ${1}_line "^M" wsline-$name-accept
     eval "wsline-$name-accept() { wsline-accept $name }"
+
+    zle -N wsline-$name-cancel
+    bindkey -M ${1}_line "^U" wsline-$name-cancel
+    eval "wsline-$name-cancel() { wsline-cancel $name }"
 }
 
 # called when closing wsline

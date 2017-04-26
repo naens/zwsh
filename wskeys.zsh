@@ -238,12 +238,15 @@ wsdialog_dialogtest-accept() {
         wsdialog_l4mode=diall4a
     else
         unset wsdialog_l4mode
-#        zle -M "dialogtest: accept: \"$wsdialog_text\""
     fi
 }
 
 wsdialog_dialogtest-restore() {
-    CURSOR=0
+    if [[ -n $wsdialog_text ]]; then
+        zle -M "dialogtest: accept: \"$wsdialog_text\""
+    else
+        zle -M "dialogtext: no text in dialog"
+    fi
 }
 
 wsdialog-l4a-accept() {
