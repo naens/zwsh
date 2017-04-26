@@ -1,0 +1,82 @@
+#+TITLE: Editor mode
+* Introduction
+  If a command is complex, it may be easier to edit it in the *editor
+  mode*.  The main difference is that Enter/^M no longer executes the
+  program, but it is possible to switch to the main mode in order to
+  execute it.
+
+* Ways to get into /editor mode/
+  There are several ways to get into *editor mode*:
+ * switch to it using keybindings
+ * save the command as a file, which automatically puts into the
+   *editor mode*
+ * open a file (the current command is then lost / appended to
+   history?)
+
+* Ways to get out of /editor mode/
+  By using a special keybinding
+
+* Differences between main mode and the /editor mode/
+ * ^M/Enter split lines without executing
+ * ^N atcs the same way, except that it leaves the cursor on the
+   previous line (?inconsistency with the main mode?)
+ * No history commands
+ * Search & replace commands
+ * In order to tell the difference between two modes, a status bar at
+   the top (? or bottom/end) of file is inserted
+ * Open/Save/Write-block/Insert-from-file dialogs are on seperate
+   screen (?if full screen?)
+ * ?make the editor fullscreen?
+ * ?implement scroll functions/keybindings?
+
+* Key bindings for /editor mode/
+** main mode key bindings
+ * Switch to *editor mode* and open a file: ^KE
+ * Switch to *editor mode*: ^KD
+ * Switch to *editor mode* saving buffer as file: ^KS
+
+**  /editor mode/ key bindings
+ * Open a file: ^KE
+ * Save the current file: ^KS
+ * Save a copy of the current file: ^KO
+ * Close the currenpt file and save: ^KX
+   Exit *editor mode*, buffer empty
+ * Close the current file without saving: ^KQ
+   Exit *editor mode*, buffer empty
+ * Exit *editor mode* (do not save), with file contents as buffer: ^KD
+
+* WS document screen examples
+** non-document example
+   I:EXAMPLE.TXT       L00001  C01 Insert                                       
+Mo Layn Dodo Ko lo po?                                                         <
+Somi  goa  prepuddla.  Suso  kosho  be?  UUiipwz  koKO?  kdie!                 <
+Sizieidifi....                                                                 <
+                                                                               <
+fkkflj                                                                         ^
+                                                                               ^
+                                                                               ^
+
+** Properties
+ * TAB/^I inserts \t (size=8)
+ * Line non-empty: last char='<', line empty or last: last char='^' too long='+'
+ * Header shows file name / location, line, column, insert/overwrite mode
+ * When in overwrite mode, "Insert" disappears.
+
+** document example
+
+   I:EXAMPLE.TXT       P01 L03 C01 Insert Align                                 
+L----!----!----!----!----!----!----!----!----!----!----!--------R
+Mo Layn Dodo Ko lo po?                                                         <
+Somi  goa  prepuddla.  Suso  kosho be?  UUiipwz  koKO?  KkdieQ  !              <
+Sizieidifi....                                                                 <
+                                                                               <
+fkkflj                                                                         ^
+                                                                               ^
+                                                                               ^
+*** Properties
+ * TAB/^I inserts 5 spaces, until the next '!'
+ * L: col 1, !: cols 6,11,16...56 R:65
+ * Line non-empty: last char='<', line empty or last: last char='^'
+ * Header shows file name / location, page, line, column, insert/overwrite mode
+ * When in overwrite mode, "Insert" disappears.
+
