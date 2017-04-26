@@ -83,3 +83,4 @@ lesskey $dir/wsless.txt
 INPUTRC=$dir/wsinputrc.txt
 
 bindkey -A zsh-ws main
+function mpvcd { local d=$1; mkdir -pv $d; cd $d; }
