@@ -9,16 +9,49 @@ bindkey -N wsline
 
 wsline-init() {
     local name=$1
-    wsline_${name}_update=$2
-    wsline_${name}_begin=$(( $CURSOR ))
-    wsline_${name}_end=$(( ${#BUFFER} - $CURSOR ))
-    if [[ $wsline_${name}_maxlen -ge 1 ]]; then
-	wsline_${name}_delpoint=$(( $wsline_${name}_begin + $wsline_${name}_maxlen - 1 ))
+    local update=$2
+    local begin=$CURSOR
+    local end=$(( ${#BUFFER} - $CURSOR ))
+    local v=wsline_${name}_maxlen
+    local maxlen=${(P)v}
+    declare wsline_${name}_update=$update
+    declare wsline_${name}_begin=$begin
+    declare wsline_${name}_end=$end
+    declare wsline_${name}_maxlen=$maxlen
+    if [[ $maxlen -ge 1 ]]; then
+        local delpoint=$(( $begin + $maxlen - 1 ))
     else
-	wsline_${name}_delpoint=$wsline_${name}_begin
+	local delpoint=$begin
     fi
+    declare wsline_${name}_delpoint=$delpoint
     wsline-getvars $name
     wsline-update
+#    echo wsline: update=$update begin=$begin end=$end v=$v "#${(P)v}#" > $debugfile
+#    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > $debugfile
+}
+
+wsline-accept() {
+    local name=$1
+    wsline-setvars $name
+    $name-acceptfn
+}
+
+wsline-cancel() {
+    local name=$1
+    wsline-setvars $name
+    $name-cancelfn
+}
+
+wsline-prepare() {
+    local name=$1
+
+    zle -N wsline-$name-accept
+    bindkey -M ${1}_line "^M" wsline-$name-accept
+    eval "wsline-$name-accept() { wsline-accept $name }"
+
+    zle -N wsline-$name-cancel
+    bindkey -M ${1}_line "^U" wsline-$name-cancel
+    eval "wsline-$name-cancel() { wsline-cancel $name }"
 }
 
 # called when closing wsline
@@ -38,7 +71,6 @@ wsline-finalize() {
     unset wsline_delpoint
 }
 
-# TODO: call when coming back from another wsline and on init
 wsline-getvars() {
     local name=$1
     local v=wsline_${name}_update
@@ -53,6 +85,8 @@ wsline-getvars() {
     wsline_text=${(P)v}
     v=wsline_${name}_delpoint
     wsline_delpoint=${(P)v}
+    v=wsline_${name}_maxlen
+    wsline_maxlen=${(P)v}
 }
 
 # TODO: call when leaving to other wsline without closing
@@ -62,7 +96,7 @@ wsline-setvars() {
     declare wsline_${name}_begin=$wsline_begin
     declare wsline_${name}_end=$wsline_end
     declare wsline_${name}_len=$wsline_len
-    declare wsline_${name}_text=$wsline_text
+    eval wsline_${name}_text=\'$wsline_text\'
     declare wsline_${name}_delpoint=$wsline_delpoint
 }
 
@@ -75,11 +109,13 @@ wsline-update() {
     fi
 }
 
-zle -N wsline-$name-self-insert
+zle -N wsline-self-insert
 bindkey -M wsline -R "!"-"~" wsline-self-insert
 bindkey -M wsline " " wsline-self-insert
 # insertions
 wsline-self-insert() {
+#    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > $debugfile
+#    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> $debugfile
     if [[ wsline_maxlen -lt 1 ]]; then
 	return
     fi

@@ -24,7 +24,6 @@ zle-line-init() {
     unset kr
     unset ws_select
     unset region_highlight
-    zle -K zsh-ws
 }
 
 # Cursor Keys
@@ -137,84 +136,15 @@ bindkey -M zsh-ws "^J" run-help
 bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
-#########other(shared)-function(s)/variables#########
-ws_echo=$(sh -c 'which echo')
-
-ws-do-bold() {
-    i=$(( ${#region_highlight} + 1 ))
-    base=$1
-    y=0
-    shift
-    for x in $@
-    do
-        if [[ $y -eq 0 ]]; then
-            v1=$(( $base + $x ))
-            y=1
-        else
-            v2=$(( $base + $x ))
-            y=0
-	    region_highlight[$i]=("$v1 $v2 bold")
-	    i=$(( $i + 1 ))
-        fi
-    done
-}
-
-ws-pos() {
-    local from
-    local to
-    if [[ -n $1 ]]; then
-        from=$(( $1 + 1 ))
-    else
-        from=1
-    fi
-    if [[ -n $2 ]]; then
-        to=$(( $2 + 1 ))
-    else
-        to=$(( ${#BUFFER} + 1 ))
-    fi
-    local curs=$(( $CURSOR + 1 ))
-    if [[ $from -le $curs && $curs -le $to ]]; then
-        ws_row=1
-        ws_col=1
-        for i in {$from..$to}; do
-            if [[ $i -eq $curs ]]; then
-                break
-            fi
-            if [[ $BUFFER[$i] == $'\n' ]]; then
-                ws_row=$(( $ws_row + 1 ))
-                ws_col=1
-            elif [[ $BUFFER[$i] == $'\t' ]]; then
-                local rest=$(( ($ws_col - 1) % 8 ))
-                ws_col=$(( $ws_col + 8 - $rest))
-            elif [[ -n $kb && -z $kk && $i -eq $(( $kb + 1 )) ]]; then
-                ws_col=$(( $ws_col - 2 ))                
-            else
-                ws_col=$(( $ws_col + 1 ))
-            fi
-        done
-    fi
-}
-
-zle -N ws-print-pos
-bindkey -M zsh-ws "^P" ws-print-pos
-ws-print-pos() {
-    if [[ -z $firstcurs ]]; then
-        firstcurs=$CURSOR
-        ws-pos $firstcurs
-    else
-        ws-pos $firstcurs
-    fi
-}
-
-
 # testing dialog
+debugfile=/dev/pts/16
 wsdialog_modes[1]="dialogtest"
 
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="diall4a"
 wsdialog_dialogtest_modes[2]="secondl4"
-wsdialog_dialogtest_accept="wsdialog-dialogtest-accept"
-wsdialog_dialogtest_restore="wsdialog-dialogtest-restore"
+wsdialog_dialogtest_accept="wsdialog_dialogtest-accept"
+wsdialog_dialogtest_restore="wsdialog_dialogtest-restore"
 
 wsdialog_dialogtest_diall4a_msg="#The string is short!# *Type* something... "
 wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
@@ -229,24 +159,33 @@ wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
 
 wsdialog-prepare
 
-# decide based on $wsdialog_text what to do
-wsdialog-dialogtest-accept() {
+# decide whether display l4 or exit based on $wsdialog_text
+wsdialog_dialogtest-accept() {
     if [[ -z $wsdialog_text ]]; then
         wsdialog_l4mode=secondl4_msg
     elif [[ ${#wsdialog_text} -lt 3 ]]; then
         wsdialog_l4mode=diall4a
     else
-        undef wsdialog_l4mode
-        zle -M "dialogtest: accept: \"$wsdialog_text\""
+        unset wsdialog_l4mode
     fi
 }
 
-wsdialog-dialogtest-restore() {
-    CURSOR=0
+# function executed on return from dialog, $wsdialog_text holding the result
+wsdialog_dialogtest-restore() {
+    if [[ -n $wsdialog_text ]]; then
+        zle -M "dialogtest: accept: \"$wsdialog_text\""
+    else
+        zle -M "dialogtext: no text in dialog"
+    fi
 }
 
+# decide another l4 or return to prompt based on $wsdialog_text
 wsdialog-l4a-accept() {
-    zle -M "dialogtest (a): l4-ok"
+    if [[ -z $wsdialog_text ]]; then
+        wsdialog_l4mode=secondl4_msg
+    else
+        unset wsdialog_l4mode
+    fi
 }
 
 wsdialog-l4b-yes() {
@@ -266,26 +205,5 @@ zle -N test-wsdialog
 
 test-wsdialog() {
     wsdialog_dialogtest_msg="msg is: "		
-    wsdialog-dialogtest-run
-}
-
-bindkey -M zsh-ws "^Qm" test-format
-zle -N test-format
-test-format() {
-    wsdialog-parse-format $BUFFER
-    local fmt_string=""
-    BUFFER=$wsdialog_pft
-    CURSOR=${#wsdialog_pft}
-
-    for fmt in $wsdialog_pff; do
-        fmt_string+="[$fmt]"
-    done
-
-    region_highlight=""
-    local fmts=($wsdialog_pff)
-    for fmt in $fmts; do
-	region_highlight+=($fmt)
-    done
-
-    zle -M "text=$wsdialog_pft format=$fmt_string"
+    wsdialog_dialogtest-run
 }

@@ -25,6 +25,9 @@ stty discard undef # ^O
 stty eof "^\\"
 stty intr '^]'
 
+# global variables and functions
+. $dir/wsfun.zsh
+
 # line mode
 . $dir/wsline.zsh
 
@@ -77,6 +80,11 @@ export PROMPT=ZSH'$(collapse_pwd)>'
 #zstyle ':completion:*' menu yes select
 
 HISTFILE=~/.zsh_history
+
+# Remember about a years worth of history (AWESOME)
+SAVEHIST=10000
+HISTSIZE=10000
+
 
 lesskey $dir/wsless.txt
 
