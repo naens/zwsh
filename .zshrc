@@ -25,6 +25,9 @@ stty discard undef # ^O
 stty eof "^\\"
 stty intr '^]'
 
+# global variables and functions
+. $dir/wsfun.zsh
+
 # line mode
 . $dir/wsline.zsh
 
