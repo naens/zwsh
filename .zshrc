@@ -34,9 +34,6 @@ stty intr '^]'
 # dialog mode
 . $dir/wsdialog.zsh
 	    
-# unbind emacs keys
-. $dir/bkey_und.zsh
-
 # bind ws keys
 . $dir/wskeys.zsh
 
@@ -91,3 +88,4 @@ lesskey $dir/wsless.txt
 INPUTRC=$dir/wsinputrc.txt
 
 bindkey -A zsh-ws main
+function mpvcd { local d=$1; mkdir -pv $d; cd $d; }
