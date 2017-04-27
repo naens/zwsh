@@ -10,7 +10,7 @@ wsdialog-prepare() {
 #        zle -N ${dfn}-restore
 #        bindkey -M $mname "^U" ${dfn}-restore
         local modesvar=$dname"_modes"
-        local modes=$(eval echo \$$modesvar)
+        local modes=(${(P)modesvar})
         for l4mode in $modes; do
             local l4afnv=${dname}_${l4mode}_accept
             local l4afn=${(P)l4afnv}
@@ -21,6 +21,7 @@ wsdialog-prepare() {
                 bindkey -N $l4mname
             fi
             bindkey -N $l4mname
+            echo WSDIALOG_PREPARE: create l4mode: \"$l4mode\" > $debugfile
             zle -N "${dfn}-rml4"
             bindkey -M $l4mname "^U" "${dfn}-rml4"
         done
@@ -60,23 +61,27 @@ wsdialog-unsetvars() {
 }
 
 # display line4 (replacing the old one if needed) and enter l4 mode
-wsdialog-l4mode() {
+wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
     local end=$(( ${#BUFFER} - $wsdialog_end ))
+    echo WSDIALOG_L4RUN: dialog=$dialog l4mode=$l4mode end=$end > $debugfile
 
     # remove old line4 if needed
-    $BUFFER[wsdialog_line4_start,end]=""
+    BUFFER[wsdialog_line4_start+1,end]=""
 
     # display line4 and move cursor
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
     local l4rt=${(P)l4rtv}
     ws-insert-formatted-at $wsdialog_line4_start $l4rt
- 
+    local l4len=${#ws_pft}
+    CURSOR=$((wsdialog_line4_start + l4len))
+    echo WSDIALOG_L4RUN: inserting at $wsdialog_line4_start \"$l4rt\" > $debugfile
+    
     # enter l4mode
     local l4afnvar=wsdialog_${dialog}_${l4mode}_accept
     local l4acceptfn=${(P)l4afnvar}
-    local l4mname=wsdialog_${dname}_${l4mode}_l4
+    local l4mname=wsdialog_${dialog}_${l4mode}_l4
     if [[ -n $l4acceptfn ]]; then
         local cols=$(tput cols)
         declare wsline_${l4mname}_maxlen=$(( $cols - ${#line1_txt} - 1))
@@ -155,20 +160,23 @@ wsdialog-run() {
 
     local line1=$msg$'\n'
     local line2=" *RETURN* done | *Backspace* or *^H* erase left"$'\n'
-    local line3="  *^U* cancel  |       *Del* or *^G* erase char"
+    local line3="  *^U* cancel  |       *Del* or *^G* erase char"$'\n'
 
     ws-insert-formatted-at $CURSOR $line1
+    wsdialog_line1_len=${#ws_pft}
     wsdialog_line1_fmt=($ws_pff)
 
-    wsdialog_line2_start=$(( wsdialog_start + ${#ws_pft} ))
+    wsdialog_line2_start=$(( wsdialog_start + wsdialog_line1_len ))
     ws-insert-formatted-at $wsdialog_line2_start $line2
+    wsdialog_line2_len=${#ws_pft}
     wsdialog_line2_fmt=($ws_pff)
 
-    wsdialog_line3_start=$(( wsdialog_line2_start + ${#ws_pft} ))
+    wsdialog_line3_start=$(( wsdialog_line2_start + wsdialog_line2_len ))
     ws-insert-formatted-at $wsdialog_line3_start $line3
+    wsdialog_line3_len=${#ws_pft}
     wsdialog_line3_fmt=($ws_pff)
 
-    wsdialog_line4_start=$(( wsdialog_line3_start + ${#ws_pft} ))
+    wsdialog_line4_start=$(( wsdialog_line3_start + wsdialog_line3_len ))
     wsdialog_prompt_begin=$(( $wsdialog_line2_start - 1 ))
     wsdialog_prompt_end=$(( ${#BUFFER} - $wsdialog_prompt_begin ))
     wsdialog_end=$(( ${#BUFFER} - wsdialog_line4_start ))
@@ -177,18 +185,19 @@ wsdialog-run() {
     # prepare wsline and enter
     local cols=$(tput cols)
     declare wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))
-    wsline-init wsdialog_$dialog wsdialog-hlupd
+    wsline-init wsdialog_$dialog wsdialog-upd
     local mname=wsdialog_$dialog"_line"
     zle -K $mname
 }
 
-wsdialog-hlupd() {
+wsdialog-upd() {
     region_highlight=$wsdialog_init_highlight
     ws-apply-format $wsdialog_start $wsdialog_line1_fmt
-    local l2s=$((wsdialog_line2_start + wsline_len))
-    local l3s=$((wsdialog_line3_start + wsline_len))
-    ws-apply-format $l2s $wsdialog_line2_fmt
-    ws-apply-format $l3s $wsdialog_line3_fmt
+    wsdialog_line2_start=$((wsdialog_start + wsdialog_line1_len + wsline_len))
+    wsdialog_line3_start=$((wsdialog_line2_start + wsdialog_line2_len))
+    wsdialog_line4_start=$((wsdialog_line3_start + wsdialog_line3_len))
+    ws-apply-format $wsdialog_line2_start $wsdialog_line2_fmt
+    ws-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
 }
 
 # remove dialog l4 and restore cursor

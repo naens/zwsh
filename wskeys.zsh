@@ -137,7 +137,7 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/16
+debugfile=/dev/pts/5
 wsdialog_modes[1]="dialogtest"
 
 wsdialog_dialogtest_msg="Test dialog: "
@@ -162,7 +162,7 @@ wsdialog-prepare
 # decide whether display l4 or exit based on $wsdialog_text
 wsdialog_dialogtest-accept() {
     if [[ -z $wsdialog_text ]]; then
-        wsdialog_l4mode=secondl4_msg
+        wsdialog_l4mode=secondl4
     elif [[ ${#wsdialog_text} -lt 3 ]]; then
         wsdialog_l4mode=diall4a
     else
