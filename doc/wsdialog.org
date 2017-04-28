@@ -1,9 +1,56 @@
-#+TITLE: WS Dialog
+#+TITLE: wsdialog
+#+AUTHOR: naens
+#+EMAIL: naens@gmx.com
+
 #+OPTIONS: toc:nil
 
 * Description
-WS-style dialog
+Display a dialog, depending on input display warnings
 
+* Variables
+Parameters:
+ + dialog: dialog name string identifier
+ + line4: identifier of message/warning to be displayed when the
+dialog input cannot be accepted
+
+* User defined variables and functions
+** Dialog functions
+ + ~wsdialog_${dialog}_msg~: prompt message
+ + ~wsdialog_${dialog}_accept~: function called on ~^M~ (accept), sets
+wsdialog_mode to empty if accepted or to a name of a dialog mode
+~$wsdialog_text~ holds the prompt input.  Returns the selected mode in the
+~$wsdialog_l4mode~ variable.
+ + ~wsdialog_${dialog}_restore~: function called after accept/cancel/undo, 
+to restore the state after exiting the dialog
+
+** Line4 functions
+ + ~wsdialog_${dialog}_${line4}_msg~: prompt message
+ + ~wsdialog_${dialog}_${line4}_accept~: when a string line4 mode, function
+called on ~^M~ (accept) which decides what given the input,
+~$wsdialog_line4_text~ holds user input while ~$wsdialog_text~ still holds
+the user input from the dialog prompt.  Returns the selected mode in the
+~$wsdialog_l4mode~ variable (same as the dialog accept function).
+ + ~wsdialog_${dialog]_${line4}_funcs~: associative array of keybindings
+to the functions that are bound to the keybindings
+
+** zle modes defined by zwsh
+ + ~wsdialog_${dialog}_mode~: name of the zle mode
+ + ~wsdialog_${dialog}_${line4}_mode~: name of the zle mode
+
+* Global behaviour rules
+ + ~^M~ is always bound to accept, for dialog modes as well as for line4
+accept modes.
+ + ~^U~ is the default cancel key, for the dialog modes it removes the
+dialog and restores the state before the dialog, and for line4 modes it
+removes the line4 and returns to the prompt in order to restore the state
+before ~^M~ was pressed.
+These rules do not have to be followed strictly, for example if the state
+was modified in such a way that it would be a problem to restore it.
+The purpose of the dialogs is to get the string from the prompt, therefore
+the user do not have to know whether it was exited through accept or cancel,
+the most important thing is the string entered by the user.
+
+* The dialog
 #+BEGIN_SRC 
 <message>: <enter text>
  *RETURN* done | *Backspace* or *^H* erase left
@@ -11,80 +58,5 @@ WS-style dialog
 <Line4>
 #+END_SRC
 
-** Main Mode
- * On init: display first 3 lines
- * On ^U: exit dialog (run restore function)
- * On ^M/Enter: run accept function, run restore function
-
-Accept function: exits or enters one of the Line4 modes, based on the
-input.
-
-** Line4 modes
-Line4 modes are used if the input cannot be accepted.  They dislay an
-error message and wait for input 
- * ^U/: exit Line4 mode, hide Line4, return to prompt
- * Other keys can be used to run a custom function
- * Or can be set to use text input + ^M/Enter => accept function
-
-** Example: block save dialog
- * message= =Write to file=
- * accept function: try to save a string as a file, if file exists,
-   then enter /Line4-exists/ mode, if write error, enter
-   /Line4-write-error/ mode.
-
-*** Line4-exists mode
- * message: =#That file already exists.#  Overwrite (Y/N)?= [fn:1]
- * y/Y: same as the main accept function
- * n/N: same as ^U (delete Line4, return to prompt)
-
-*** Line4-write-error mode
- * message: =#Error writing file <fn>.# Press Enter to continue.=
- * ^M/Enter/^U: delete Line4, return to prompt
-
-** Interface
-Every dialog is a mode and every Line4 of a dialog is a mode.  Every
-dialog has a string identifier, which is used to identify the dialog
-mode: ~wsdialog_<dialog-id>~ (further: ~<DID>~).  All the ~<DID>~ must
-be strored in the ~wsdialog_modes~ array.
-
-Every Line4 mode of a dialog is identified as ~<DID>_<id>~ (further:
-~<l4id>~).  All the ~<l4id>~ must be stored in a ~<DID>_modes~ array.
-
-~<DID>~ and ~<l4id>~ must be non-null strings.
-
-*** Message
-~<DID>_msg~ variable
-
-*** Line4 modes
- * message: ~<l4id>_msg~ variables
- * enter string and ^M/Enter: accept function:
-   ~<l4id>_accept~ variable contains accept function name.
-   If defined, string mode, otherwise read key mode.
- * single key press corresponding different functions:
-stored in an associative array, ~<l4id>_fn~ where the key is the
-key sequence or combination to be used with ~bindkey~ for function
-identification, and the value is the function name.
-
-** Configuration
-*** Create a dialog
- * ~<DID>~ is the name of the dialog
- * add dialog to ~wsdialog_modes~ array
- * ~<DID>_msg~ is the message
- * ~<DID>_accept~ is the accept function
- * ~<DID>_restore~ is the restore function, called after dialog has
-   finished, on success or on cancel
-
-*** Define Line4 modes
-For each Line4
- * choose a name: ~<DID>_<name>~ is the Line4 identifier ~<l4id>~
- * Line4 modes can be of two different types, determined by whether
-    the ~<l4id>_accept~ function is defined or not:
-    - if it is an /accept/ type Line4, define an accept function and
-    store it in ~<l4id>_accept~
-    - if it is a /key/ type Line4, define for each key sequence
-    ~<key>~ a function ~<func>~ and store them in th ~<l4id>_fns~ array
-    as key-value pairs
-
-* Footnotes
-
-[fn:1] =#<string>#= means that the string format is *standout*.
+The dialog as well as the messages defined by the user can contain
+formatting defined by ~*bold text*~, ~#standout text#~, ~_underline text_~.
