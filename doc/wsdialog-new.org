@@ -1,0 +1,27 @@
+#+TITLE: wsdialog
+
+* Description
+Display a dialog, depending on input display warnings
+
+* Variables
+where:
+ + dialog: dialog name string identifier
+ + line4: identifier of message/warning to be displayed when the
+dialog input cannot be accepted
+
+wsdialog_${dialog}_mode
+wsdialog_${dialog}_msg
+wsdialog_${dialog}_accept: sets wsdialog_mode to empty if accepted
+  or to a name of a dialog mode
+wsdialog_${dialog}_restore: called to restore the state after exiting
+  the dialog
+wsdialog_${dialog}_${line4}_mode
+wsdialog_${dialog}_${line4}_msg
+wsdialog_${dialog}_${line4}_accept: when a string line4 mode, decide
+  what to do with the input
+wsdialog_${dialog]_${line4}_funcs: associative array of keybindings
+  to the function that must be called fot these keybindings
+When these functions are ready, they must call
+wsdialog_${dialog}_${line4}_exit, which removes the message/warning
+and returns the cursor to where it was on the dialog prompt when
+~^M~ was pressed.
