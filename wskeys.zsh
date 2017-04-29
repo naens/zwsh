@@ -138,7 +138,6 @@ bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
 debugfile=/dev/null
-wsdialog_modes[1]="dialogtest"
 
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="diall4a"
@@ -157,7 +156,7 @@ wsdialog_dialogtest_secondl4_funcs["n"]="wsdialog-l4b-no"
 wsdialog_dialogtest_secondl4_funcs["N"]="wsdialog-l4b-no"
 wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
 
-wsdialog-prepare
+wsdialog-add dialogtest
 
 # decide whether display l4 or exit based on $wsdialog_text
 wsdialog_dialogtest-accept() {

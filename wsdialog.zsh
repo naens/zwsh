@@ -1,36 +1,35 @@
 # prepare dialogs
-wsdialog-prepare() {
-    for dialog in ${wsdialog_modes[@]}; do
-        local dname="wsdialog_"$dialog
-        local dfn="wsdialog_"$dialog
-        local mname=$dname"_line"
-        bindkey -N $mname wsline
-#        zle -N ${dfn}"-acceptfn"
-#        bindkey -M $mname "^M" ${dfn}-acceptfn
-#        zle -N ${dfn}-restore
-#        bindkey -M $mname "^U" ${dfn}-restore
-        local modesvar=$dname"_modes"
-        local modes=(${(P)modesvar})
-        for l4mode in $modes; do
-            local l4afnv=${dname}_${l4mode}_accept
-            local l4afn=${(P)l4afnv}
-            local l4mname=${dname}_${l4mode}_l4
-            if [[ -n $l4afn ]]; then
-                bindkey -N $l4mname wsline
-            else
-                bindkey -N $l4mname
-            fi
+wsdialog-add() {
+    local dialog=$1
+    local dname="wsdialog_"$dialog
+    local dfn="wsdialog_"$dialog
+    local mname=$dname"_line"
+    bindkey -N $mname wsline
+#   zle -N ${dfn}"-acceptfn"
+#   bindkey -M $mname "^M" ${dfn}-acceptfn
+#   zle -N ${dfn}-restore
+#   bindkey -M $mname "^U" ${dfn}-restore
+    local modesvar=$dname"_modes"
+    local modes=(${(P)modesvar})
+    for l4mode in $modes; do
+        local l4afnv=${dname}_${l4mode}_accept
+        local l4afn=${(P)l4afnv}
+        local l4mname=${dname}_${l4mode}_l4
+        if [[ -n $l4afn ]]; then
+            bindkey -N $l4mname wsline
+        else
             bindkey -N $l4mname
-            echo WSDIALOG_PREPARE: create l4mode: \"$l4mode\" > $debugfile
-            zle -N "${dfn}-rml4"
-            bindkey -M $l4mname "^U" "${dfn}-rml4"
-        done
-        eval "${dfn}-run() { wsdialog-run $dialog }"
-        eval "${dfn}-rml4() { wsdialog-rml4 $dialog }"
-        eval "${dfn}-acceptfn() { wsdialog-acceptfn $dialog }"
-        eval "${dfn}-cancelfn() { wsdialog-cancelfn $dialog }"
-        wsline-prepare $dname
+        fi
+        bindkey -N $l4mname
+        echo WSDIALOG_PREPARE: create l4mode: \"$l4mode\" > $debugfile
+        zle -N "${dfn}-rml4"
+        bindkey -M $l4mname "^U" "${dfn}-rml4"
     done
+    eval "${dfn}-run() { wsdialog-run $dialog }"
+    eval "${dfn}-rml4() { wsdialog-rml4 $dialog }"
+    eval "${dfn}-acceptfn() { wsdialog-acceptfn $dialog }"
+    eval "${dfn}-cancelfn() { wsdialog-cancelfn $dialog }"
+    wsline-prepare $dname
 }
 
 
