@@ -5,10 +5,7 @@ wsdialog-add() {
     local dfn="wsdialog_"$dialog
     local mname=$dname"_line"
     bindkey -N $mname wsline
-#   zle -N ${dfn}"-acceptfn"
-#   bindkey -M $mname "^M" ${dfn}-acceptfn
-#   zle -N ${dfn}-restore
-#   bindkey -M $mname "^U" ${dfn}-restore
+    echo WSDIALOG_ADD: \"$dialog\" > $debugfile
     local modesvar=$dname"_modes"
     local modes=(${(P)modesvar})
     for l4mode in $modes; do
@@ -17,11 +14,11 @@ wsdialog-add() {
         local l4mname=${dname}_${l4mode}_l4
         if [[ -n $l4afn ]]; then
             bindkey -N $l4mname wsline
+            echo WSDIALOG_ADD: create l4mode \(wsline\): \"$l4mname\" > $debugfile
         else
             bindkey -N $l4mname
+            echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
         fi
-        bindkey -N $l4mname
-        echo WSDIALOG_PREPARE: create l4mode: \"$l4mode\" > $debugfile
         zle -N "${dfn}-rml4"
         bindkey -M $l4mname "^U" "${dfn}-rml4"
     done
@@ -83,8 +80,9 @@ wsdialog-l4run() {
     local l4mname=wsdialog_${dialog}_${l4mode}_l4
     if [[ -n $l4acceptfn ]]; then
         local cols=$(tput cols)
-        declare wsline_${l4mname}_maxlen=$(( $cols - ${#line1_txt} - 1))
+        eval wsline_${l4mname}_maxlen=$((cols - l4len - 1))
         wsline-init $l4mname
+#        echo cols=$cols wsline_${l4mname}_maxlen=$((cols - l4len - 1)) > $debugfile
     fi
     zle -K $l4mname
 }
@@ -100,11 +98,6 @@ wsdialog-acceptfn() {
     $do_accept     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
         wsdialog-l4run $dialog $wsdialog_l4mode
-        # chose mode, enter l4mode
-        echo abcd > /dev/null
-
-        #TODO line4 mode: exists "accept" => input l4mode
-        #                 otherwise, readkey mode
     else    
         wsline-finalize $dialog
 

@@ -26,8 +26,8 @@ wsline-init() {
     declare wsline_${name}_delpoint=$delpoint
     wsline-getvars $name
     wsline-update
-#    echo wsline: update=$update begin=$begin end=$end v=$v "#${(P)v}#" > $debugfile
-#    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > $debugfile
+    echo wsline: update=$update begin=$begin end=$end v=$v > $debugfile
+    echo wsline: name=$name delpoint=$delpoint maxlen=$maxlen > $debugfile
 }
 
 wsline-accept() {
@@ -227,8 +227,9 @@ bindkey -M wsline "^H" wsline-backdelchar
 bindkey -M wsline "^?" wsline-backdelchar
 wsline-backdelchar() {
     if [[ $CURSOR -gt $wsline_begin ]]; then
+        local curs=$CURSOR
 	BUFFER[$CURSOR]=""
-	CURSOR=$(( $CURSOR - 1 ))
+	CURSOR=$(( $curs - 1 ))
     fi
     wsline-update
 }
