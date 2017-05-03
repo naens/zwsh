@@ -14,16 +14,16 @@ wsline-init() {
     local end=$(( ${#BUFFER} - $CURSOR ))
     local v=wsline_${name}_maxlen
     local maxlen=${(P)v}
-    declare wsline_${name}_update=$update
-    declare wsline_${name}_begin=$begin
-    declare wsline_${name}_end=$end
-    declare wsline_${name}_maxlen=$maxlen
+    eval wsline_${name}_update=$update
+    eval wsline_${name}_begin=$begin
+    eval wsline_${name}_end=$end
+    eval wsline_${name}_maxlen=$maxlen
     if [[ $maxlen -ge 1 ]]; then
         local delpoint=$(( $begin + $maxlen - 1 ))
     else
 	local delpoint=$begin
     fi
-    declare wsline_${name}_delpoint=$delpoint
+    eval wsline_${name}_delpoint=$delpoint
     wsline-getvars $name
     wsline-update
     echo wsline: update=$update begin=$begin end=$end v=$v > $debugfile
@@ -87,17 +87,20 @@ wsline-getvars() {
     wsline_delpoint=${(P)v}
     v=wsline_${name}_maxlen
     wsline_maxlen=${(P)v}
+    echo WSLINE_GETVARS: begin=$wsline_begin end=$wsline_end len=$wsline_len text=$wsline_text maxlen=$wsline_maxlen > $debugfile
 }
 
 # TODO: call when leaving to other wsline without closing
 wsline-setvars() {
     local name=$1
-    declare wsline_${name}_update=$wsline_update
-    declare wsline_${name}_begin=$wsline_begin
-    declare wsline_${name}_end=$wsline_end
-    declare wsline_${name}_len=$wsline_len
+    eval wsline_${name}_update=$wsline_update
+    eval wsline_${name}_begin=$wsline_begin
+    eval wsline_${name}_end=$wsline_end
+    eval wsline_${name}_len=$wsline_len
     eval wsline_${name}_text=\'$wsline_text\'
-    declare wsline_${name}_delpoint=$wsline_delpoint
+    eval wsline_${name}_delpoint=$wsline_delpoint
+    eval wsline_${name}_maxlen=$wsline_maxlen
+    echo WSLINE_SETVARS: begin=$wsline_begin end=$wsline_end len=$wsline_len text=$wsline_text maxlen=$wsline_maxlen > $debugfile
 }
 
 
@@ -114,8 +117,8 @@ bindkey -M wsline -R "!"-"~" wsline-self-insert
 bindkey -M wsline " " wsline-self-insert
 # insertions
 wsline-self-insert() {
-#    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > $debugfile
-#    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> $debugfile
+    echo wsline-self-insert: update=$wsline_update begin=$wsline_begin end=$wsline_end > $debugfile
+    echo wsline-self-insert: delpoint=$wsline_delpoint maxlen=$wsline_maxlen> $debugfile
     if [[ wsline_maxlen -lt 1 ]]; then
 	return
     fi

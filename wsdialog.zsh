@@ -1,4 +1,4 @@
-# prepare dialogs
+# prepare dialogsc
 wsdialog-add() {
     local dialog=$1
     local dname="wsdialog_"$dialog
@@ -63,6 +63,13 @@ wsdialog-l4run() {
     local end=$(( ${#BUFFER} - $wsdialog_end ))
     echo WSDIALOG_L4RUN: dialog=$dialog l4mode=$l4mode end=$end > $debugfile
 
+    # if no line4 yet, save cursor and highlight
+    local dialog_mode=wsdialog_${dialog}_line
+    if [[ "$KEYMAP" == "$dialog_mode" ]]; then
+        wsdialog_prel4save_cursor=$CURSOR
+        wsdialog_prel4save_highlight=$region_highlight
+    fi
+
     # remove old line4 if needed
     BUFFER[wsdialog_line4_start+1,end]=""
 
@@ -73,6 +80,9 @@ wsdialog-l4run() {
     local l4len=${#ws_pft}
     CURSOR=$((wsdialog_line4_start + l4len))
     echo WSDIALOG_L4RUN: inserting at $wsdialog_line4_start \"$l4rt\" > $debugfile
+
+    # save dialog line4
+    wsline-setvars wsdialog_${dialog}
     
     # enter l4mode
     local l4afnvar=wsdialog_${dialog}_${l4mode}_accept
@@ -84,6 +94,7 @@ wsdialog-l4run() {
         wsline-init $l4mname
 #        echo cols=$cols wsline_${l4mname}_maxlen=$((cols - l4len - 1)) > $debugfile
     fi
+    echo WSDIALOG_L4RUN: enter \"$l4mname\" mode > $debugfile
     zle -K $l4mname
 }
 
@@ -179,6 +190,7 @@ wsdialog-run() {
     declare wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))
     wsline-init wsdialog_$dialog wsdialog-upd
     local mname=wsdialog_$dialog"_line"
+    echo WSDIALOG_RUN: enter \"$mname\" mode > $debugfile
     zle -K $mname
 }
 
@@ -195,4 +207,22 @@ wsdialog-upd() {
 # remove dialog l4 and restore cursor
 wsdialog-rml4() {
     local dialog=$1
+    echo WSDIALOG_RML4: dialog=\"$dialog\" > $debugfile
+
+    # check
+    local end=$(( ${#BUFFER} - $wsdialog_end ))
+    echo WSDIALOG_RML4: l4mode=$l4mode end=$end > $debugfile
+
+    # remove old line4
+    BUFFER[wsdialog_line4_start+1,end]=""
+
+    # restort cursor and highlight
+    CURSOR=$wsdialog_prel4save_cursor
+    region_highligh=$twsdialog_prel4save_highlight
+
+    #restore dialog mode
+    local dialog_mode=wsdialog_${dialog}_line
+    wsline-getvars wsdialog_${dialog}
+    echo WSDIALOG_RUN: enter \"$dialog_mode\" mode > $debugfile
+    zle -K $dialog_mode
 }

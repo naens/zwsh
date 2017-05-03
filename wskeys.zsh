@@ -137,7 +137,7 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/3
+debugfile=/dev/pts/2
 
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="diall4a"
