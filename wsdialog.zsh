@@ -1,4 +1,4 @@
-# prepare dialogsc
+# prepare dialogs
 wsdialog-add() {
     local dialog=$1
     local dname="wsdialog_"$dialog
@@ -9,16 +9,10 @@ wsdialog-add() {
     local modesvar=$dname"_modes"
     local modes=(${(P)modesvar})
     for l4mode in $modes; do
-        local l4afnv=${dname}_${l4mode}_accept
-        local l4afn=${(P)l4afnv}
         local l4mname=${dname}_${l4mode}_l4
-        if [[ -n $l4afn ]]; then
-            bindkey -N $l4mname wsline
-            echo WSDIALOG_ADD: create l4mode \(wsline\): \"$l4mname\" > $debugfile
-        else
-            bindkey -N $l4mname
-            echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
-        fi
+        bindkey -N $l4mname
+        echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
+        # TODO: define key bindings
         zle -N "${dfn}-rml4"
         bindkey -M $l4mname "^U" "${dfn}-rml4"
     done
@@ -28,7 +22,6 @@ wsdialog-add() {
     eval "${dfn}-cancelfn() { wsdialog-cancelfn $dialog }"
     wsline-prepare $dname
 }
-
 
 # removes line 1-3 and line4 if present
 wsdialog-close() {
@@ -85,15 +78,7 @@ wsdialog-l4run() {
     wsline-setvars wsdialog_${dialog}
     
     # enter l4mode
-    local l4afnvar=wsdialog_${dialog}_${l4mode}_accept
-    local l4acceptfn=${(P)l4afnvar}
     local l4mname=wsdialog_${dialog}_${l4mode}_l4
-    if [[ -n $l4acceptfn ]]; then
-        local cols=$(tput cols)
-        eval wsline_${l4mname}_maxlen=$((cols - l4len - 1))
-        wsline-init $l4mname
-#        echo cols=$cols wsline_${l4mname}_maxlen=$((cols - l4len - 1)) > $debugfile
-    fi
     echo WSDIALOG_L4RUN: enter \"$l4mname\" mode > $debugfile
     zle -K $l4mname
 }
@@ -187,7 +172,7 @@ wsdialog-run() {
 
     # prepare wsline and enter
     local cols=$(tput cols)
-    declare wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))
+    eval "wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))"
     wsline-init wsdialog_$dialog wsdialog-upd
     local mname=wsdialog_$dialog"_line"
     echo WSDIALOG_RUN: enter \"$mname\" mode > $debugfile
@@ -225,4 +210,7 @@ wsdialog-rml4() {
     wsline-getvars wsdialog_${dialog}
     echo WSDIALOG_RUN: enter \"$dialog_mode\" mode > $debugfile
     zle -K $dialog_mode
+
+    # remove line4 marker
+    unset wsdialog_l4mode
 }

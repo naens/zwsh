@@ -137,33 +137,39 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/2
+debugfile=/dev/pts/1
+if [[ ! -f $debugfile ]]; then
+    debugfile=/dev/null
+fi
 
+# dialog
 wsdialog_dialogtest_msg="Test dialog: "
-wsdialog_dialogtest_modes[1]="diall4a"
-wsdialog_dialogtest_modes[2]="secondl4"
+wsdialog_dialogtest_modes[1]="l4empty"
+wsdialog_dialogtest_modes[2]="l4short"
 wsdialog_dialogtest_accept="wsdialog_dialogtest-accept"
 wsdialog_dialogtest_restore="wsdialog_dialogtest-restore"
 
-wsdialog_dialogtest_diall4a_msg="#The string is short!# *Type* something... "
-wsdialog_dialogtest_diall4a_accept="wsdialog-l4a-accept"
+# l4short
+wsdialog_dialogtest_l4short_msg="#The string is short!# Accapt anyway? *Y*es *N*o"
+wsdialog_dialogtest_empty_msg="The string should not be #empty#..."
+declare -A wsdialog_dialogtest_l4short_funcs
+wsdialog_dialogtest_l4short_funcs["y"]="l4short-yes"
+wsdialog_dialogtest_l4short_funcs["Y"]="l4short-yes"
+wsdialog_dialogtest_l4short_funcs["n"]="l4short-no"
+wsdialog_dialogtest_l4short_funcs["N"]="l4short-no"
 
-wsdialog_dialogtest_secondl4_msg="The string should not be #empty#..."
-declare -A wsdialog_dialogtest_secondl4_funcs
-wsdialog_dialogtest_secondl4_funcs["y"]="wsdialog-l4b-yes"
-wsdialog_dialogtest_secondl4_funcs["Y"]="wsdialog-l4b-yes"
-wsdialog_dialogtest_secondl4_funcs["n"]="wsdialog-l4b-no"
-wsdialog_dialogtest_secondl4_funcs["N"]="wsdialog-l4b-no"
-wsdialog_dialogtest_secondl4_funcs["^M"]="wsdialog-l4b-cm"
+# l4empty (only show message, without other functionality)
+wsdialog_dialogtest_l4empty_msg="The string should not be #empty#..."
 
+# add dialog
 wsdialog-add dialogtest
 
 # decide whether display l4 or exit based on $wsdialog_text
 wsdialog_dialogtest-accept() {
     if [[ -z $wsdialog_text ]]; then
-        wsdialog_l4mode=secondl4
-    elif [[ ${#wsdialog_text} -lt 3 ]]; then
-        wsdialog_l4mode=diall4a
+        wsdialog_l4mode=l4empty
+    elif [[ ${#wsdialog_text} -lt 4 ]]; then
+        wsdialog_l4mode=l4short
     else
         unset wsdialog_l4mode
     fi
@@ -178,25 +184,12 @@ wsdialog_dialogtest-restore() {
     fi
 }
 
-# decide another l4 or return to prompt based on $wsdialog_text
-wsdialog-l4a-accept() {
-    if [[ -z $wsdialog_text ]]; then
-        wsdialog_l4mode=secondl4_msg
-    else
-        unset wsdialog_l4mode
-    fi
-}
-
 wsdialog-l4b-yes() {
     zle -M "dialogtest (b): yes"
 }
 
 wsdialog-l4b-no() {
     zle -M "dialogtest (b): no"
-}
-
-wsdialog-l4b-cm() {
-    zle -M "dialogtest (b): ok"
 }
 
 bindkey -M zsh-ws "^Ql" test-wsdialog
