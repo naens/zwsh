@@ -25,21 +25,16 @@ to restore the state after exiting the dialog
 
 ** Line4 functions
  + ~wsdialog_${dialog}_${line4}_msg~: prompt message
- + ~wsdialog_${dialog}_${line4}_accept~: when a string line4 mode, function
-called on ~^M~ (accept) which decides what given the input,
-~$wsdialog_line4_text~ holds user input while ~$wsdialog_text~ still holds
-the user input from the dialog prompt.  Returns the selected mode in the
-~$wsdialog_l4mode~ variable (same as the dialog accept function).
  + ~wsdialog_${dialog]_${line4}_funcs~: associative array of keybindings
-to the functions that are bound to the keybindings
+to the functions that are bound to the keybindings, must be declared with
+~declare -A <funcs array>~
 
 ** zle modes defined by zwsh
  + ~wsdialog_${dialog}_mode~: name of the zle mode
  + ~wsdialog_${dialog}_${line4}_mode~: name of the zle mode
 
 * Global behaviour rules
- + ~^M~ is always bound to accept, for dialog modes as well as for line4
-accept modes.
+ + ~^M~ is always bound to accept
  + ~^U~ is the default cancel key, for the dialog modes it removes the
 dialog and restores the state before the dialog, and for line4 modes it
 removes the line4 and returns to the prompt in order to restore the state
@@ -49,6 +44,10 @@ was modified in such a way that it would be a problem to restore it.
 The purpose of the dialogs is to get the string from the prompt, therefore
 the user do not have to know whether it was exited through accept or cancel,
 the most important thing is the string entered by the user.
+
+* Usage
+ + Declare the necessary variables
+ + Call wsdialog-add $dialog, where $dialog is the name of the dialog
 
 * The dialog
 #+BEGIN_SRC 
