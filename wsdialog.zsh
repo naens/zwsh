@@ -1,26 +1,37 @@
 # prepare dialogs
 wsdialog-add() {
     local dialog=$1
-    local dname="wsdialog_"$dialog
-    local dfn="wsdialog_"$dialog
-    local mname=$dname"_line"
+    local mname=wsdialog_${dialog}_line
     bindkey -N $mname wsline
     echo WSDIALOG_ADD: \"$dialog\" > $debugfile
-    local modesvar=$dname"_modes"
+    local modesvar=wsdialog_${dialog}_modes
     local modes=(${(P)modesvar})
     for l4mode in $modes; do
-        local l4mname=${dname}_${l4mode}_l4
+        local l4mname=wsdialog_${dialog}_${l4mode}_l4
         bindkey -N $l4mname
         echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
-        # TODO: define key bindings
-        zle -N "${dfn}-rml4"
-        bindkey -M $l4mname "^U" "${dfn}-rml4"
+
+        # bind cancel line4 function
+        zle -N wsdialog_${dialog}-rml4
+        bindkey -M $l4mname "^U" "wsdialog_${dialog}-rml4"
+
+        # bind user defined keys
+        local funcsvar=wsdialog_${dialog}_${l4mode}_funcs
+        declare -A funcs
+        funcs=${(@Pkv)funcsvar}
+        for k in ${(k)funcs}; do
+            func=$funcs[$k]
+            echo WSDIALOG_ADD: k=$k func=$func > $debugfile
+            zle -N $func
+            bindkey -M $l4mname $k $func
+            echo WSDIALOG_ADD: bindkey -M $l4mname $k $func > $debugfile
+        done
     done
-    eval "${dfn}-run() { wsdialog-run $dialog }"
-    eval "${dfn}-rml4() { wsdialog-rml4 $dialog }"
-    eval "${dfn}-acceptfn() { wsdialog-acceptfn $dialog }"
-    eval "${dfn}-cancelfn() { wsdialog-cancelfn $dialog }"
-    wsline-prepare $dname
+    eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
+    eval "wsdialog_${dialog}-rml4() { wsdialog-rml4 $dialog }"
+    eval "wsdialog_${dialog}-acceptfn() { wsdialog-acceptfn $dialog }"
+    eval "wsdialog_${dialog}-cancelfn() { wsdialog-cancelfn $dialog }"
+    wsline-prepare wsdialog_${dialog}
 }
 
 # removes line 1-3 and line4 if present
