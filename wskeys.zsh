@@ -141,6 +141,7 @@ debugfile=/dev/pts/1
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
+debugfile=/dev/null
 
 # dialog
 wsdialog_dialogtest_msg="Test dialog: "
