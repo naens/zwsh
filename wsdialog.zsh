@@ -8,7 +8,7 @@ wsdialog-add() {
     local modes=(${(P)modesvar})
     for l4mode in $modes; do
         local l4mname=wsdialog_${dialog}_${l4mode}_l4
-        bindkey -N $l4mname
+        bindkey -N "$l4mname"
         echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
 
         # bind cancel line4 function
@@ -21,10 +21,9 @@ wsdialog-add() {
         funcs=${(@Pkv)funcsvar}
         for k in ${(k)funcs}; do
             func=$funcs[$k]
-            echo WSDIALOG_ADD: k=$k func=$func > $debugfile
-            zle -N $func
-            bindkey -M $l4mname $k $func
-            echo WSDIALOG_ADD: bindkey -M $l4mname $k $func > $debugfile
+            zle -N "$func"
+            bindkey -M "$l4mname" "$k" "$func"
+            echo WSDIALOG_ADD: k=$k func=$func "##" bindkey -M $l4mname $k $func > $debugfile
         done
     done
     eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
@@ -65,7 +64,7 @@ wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
     local end=$(( ${#BUFFER} - $wsdialog_end ))
-    echo WSDIALOG_L4RUN: dialog=$dialog l4mode=$l4mode end=$end > $debugfile
+#    echo WSDIALOG_L4RUN: dialog=$dialog l4mode=$l4mode end=$end > $debugfile
 
     # if no line4 yet, save cursor and highlight
     local dialog_mode=wsdialog_${dialog}_line
@@ -83,7 +82,7 @@ wsdialog-l4run() {
     ws-insert-formatted-at $wsdialog_line4_start $l4rt
     local l4len=${#ws_pft}
     CURSOR=$((wsdialog_line4_start + l4len))
-    echo WSDIALOG_L4RUN: inserting at $wsdialog_line4_start \"$l4rt\" > $debugfile
+#    echo WSDIALOG_L4RUN: inserting at $wsdialog_line4_start \"$l4rt\" > $debugfile
 
     # save dialog line4
     wsline-setvars wsdialog_${dialog}
@@ -91,7 +90,7 @@ wsdialog-l4run() {
     # enter l4mode
     local l4mname=wsdialog_${dialog}_${l4mode}_l4
     echo WSDIALOG_L4RUN: enter \"$l4mname\" mode > $debugfile
-    zle -K $l4mname
+    zle -K "$l4mname"
 }
 
 # ask caller what to do

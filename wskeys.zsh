@@ -154,12 +154,9 @@ wsdialog_dialogtest_l4short_msg="#The string is short!# Accept anyway? *Y*es *N*
 wsdialog_dialogtest_empty_msg="The string should not be #empty#..."
 declare -A wsdialog_dialogtest_l4short_funcs
 # y=accept short value; n=cancel, close dialog; e=continue editing (same as ^U)
-wsdialog_dialogtest_l4short_funcs["y"]="l4short-yes"
-wsdialog_dialogtest_l4short_funcs["Y"]="l4short-yes"
-wsdialog_dialogtest_l4short_funcs["n"]="l4short-no"
-wsdialog_dialogtest_l4short_funcs["N"]="l4short-no"
-wsdialog_dialogtest_l4short_funcs["e"]="l4short-edit"
-wsdialog_dialogtest_l4short_funcs["E"]="l4short-edit"
+wsdialog_dialogtest_l4short_funcs[y]="l4short-yes"
+wsdialog_dialogtest_l4short_funcs[n]="l4short-no"
+wsdialog_dialogtest_l4short_funcs[e]="l4short-edit"
 
 
 # l4empty (only show message, without other functionality)
@@ -191,14 +188,19 @@ wsdialog_dialogtest-restore() {
 l4short-yes() {
     echo YES > $debugfile
     zle -M "dialogtest (short): yes"
+    # TODO: leave returning value
 }
 
 l4short-no() {
+    echo NO > $debugfile
     zle -M "dialogtest (short): no"
+    # TODO: leave returning no value (same as ^U/Cancel)
 }
 
 l4short-edit() {
+    echo EDIT > $debugfile
     zle -M "dialogtest (short): edit"
+    # TODO: remove Line4 and continue editing
 }
 bindkey -M zsh-ws "^Ql" test-wsdialog
 zle -N test-wsdialog
