@@ -250,12 +250,39 @@ bindkey -M wsline "^T" wsline-delword-right
 wsline-delword-right() {
     local end=$(( ${#BUFFER} - $wsline_end + 1 ))
     local endsaved=$BUFFER[$end,${#BUFFER}]
-    local len1=${#BUFFER}
     zle kill-word
-    local len2=${#BUFFER}
     local restlen=$(( ${#BUFFER} - $CURSOR ))
     if [[ $restlen -lt $wsline_end ]]; then
 	RBUFFER=$endsaved
+    fi
+    wsline-update
+}
+
+zle -N wsline-delword-left
+bindkey -M wsline "^[h" wsline-delword-left
+bindkey -M wsline "^[H" wsline-delword-left
+wsline-delword-left() {
+    local begin=$BUFFER[1,$wsline_begin]
+    zle backward-kill-word
+    if [[ $CURSOR -lt $wsline_begin ]]; then
+        LBUFFER=$begin
+    fi
+}
+
+zle -N wsline-delword
+bindkey -M wsline "^[y" wsline-delword
+bindkey -M wsline "^[Y" wsline-delword
+wsline-delword() {
+    local begin=$BUFFER[1,$wsline_begin]
+    local end=$(( ${#BUFFER} - $wsline_end + 1 ))
+    local endsaved=$BUFFER[$end,${#BUFFER}]
+    delword
+    local restlen=$(( ${#BUFFER} - $CURSOR ))
+    if [[ $restlen -lt $wsline_end ]]; then
+	RBUFFER=$endsaved
+    fi
+    if [[ $CURSOR -lt $wsline_begin ]]; then
+        LBUFFER=$begin
     fi
     wsline-update
 }
