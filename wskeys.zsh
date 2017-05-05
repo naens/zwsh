@@ -89,10 +89,9 @@ bindkey -M zsh-ws "^[h" backward-kill-word
 bindkey -M zsh-ws "^[H" backward-kill-word
 bindkey -M zsh-ws "^[y" delword
 bindkey -M zsh-ws "^[Y" delword
-bindkey -M zsh-ws "^Qg" kill-line
-bindkey -M zsh-ws "^QG" kill-line
-bindkey -M zsh-ws "^Qh" backward-kill-line
-bindkey -M zsh-ws "^QH" backward-kill-line
+bindkey -M zsh-ws "^Qy" kill-line
+bindkey -M zsh-ws "^QY" kill-line
+bindkey -M zsh-ws "^Q^H" backward-kill-line
 
 zle -N delword
 delword() {
@@ -137,7 +136,7 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/1
+debugfile=/dev/pts/2
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
@@ -188,21 +187,19 @@ wsdialog_dialogtest-restore() {
 
 l4short-yes() {
     echo YES > $debugfile
-    zle -M "dialogtest (short): yes"
-    # TODO: leave returning value
+    wsdialog_l4mode="<accept>"
 }
 
 l4short-no() {
     echo NO > $debugfile
-    zle -M "dialogtest (short): no"
-    # TODO: leave returning no value (same as ^U/Cancel)
+    wsdialog_l4mode="<cancel>"
 }
 
 l4short-edit() {
     echo EDIT > $debugfile
-    zle -M "dialogtest (short): edit"
-    # TODO: remove Line4 and continue editing
+    unset wsdialog_l4mode
 }
+
 bindkey -M zsh-ws "^Ql" test-wsdialog
 zle -N test-wsdialog
 

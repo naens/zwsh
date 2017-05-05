@@ -21,9 +21,11 @@ wsdialog-add() {
         funcs=${(@Pkv)funcsvar}
         for k in ${(k)funcs}; do
             func=$funcs[$k]
-            zle -N "$func"
-            bindkey -M "$l4mname" "$k" "$func"
-            echo WSDIALOG_ADD: k=$k func=$func "##" bindkey -M $l4mname $k $func > $debugfile
+            local funname=wsdialog_${dialog}_${l4mode}_${func}
+            zle -N $funname
+            bindkey -M $l4mname $k $funname
+            eval "$funname() { wsdialog-l4keyfn $dialog $func }"
+            echo WSDIALOG_ADD: bind $funname to $k "#$func#" > $debugfile
         done
     done
     eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
@@ -33,13 +35,50 @@ wsdialog-add() {
     wsline-prepare wsdialog_${dialog}
 }
 
+wsdialog-l4keyfn() {
+    local dialog=$1
+    local l4keyfn=$2
+
+    $l4keyfn    # defines $wsdialog_l4mode
+    echo WSDIALOG_L4KEYFN: dialog=$dialog l4keyfn=$l4keyfn m=$wsdialog_l4mode > $debugfile
+    if [[ -z "$wsdialog_l4mode" ]]; then
+        wsdialog-rml4 $dialog
+    elif [[ "$wsdialog_l4mode" == "<accept>" ]]; then
+        wsdialog-close $dialog
+    elif [[ "$wsdialog_l4mode" == "<cancel>" ]]; then
+        unset wsdialog_text
+        wsdialog-close $dialog
+    else
+        wsdialog-rml4 $dialog
+        wsdialog-l4run $dialog $wsdialog_l4mode
+    fi
+}
+
 # removes line 1-3 and line4 if present
-wsdialog-close() {
+wsdialog-del() {
     local bufsz=${#BUFFER}
     local end=$((bufsz - wsdialog_end + 1))
     local str1=$BUFFER[1,wsdialog_start-1]
     local str2=$BUFFER[end,bufsz]
     BUFFER=$str1$str2
+}
+
+# exit dialog and restore variables
+wsdialog-close() {
+    local dialog=$1
+    local do_restore=wsdialog_${dialog}-restore
+    wsline-finalize $dialog
+
+    #restore text, cursor and region_highlight
+    wsdialog-del
+    CURSOR=wsdialog_savecurs
+    region_highlight=$wsdialog_init_highlight
+
+    zle -K $wsdialog_savemode
+    $do_restore
+
+    # unset variables
+    wsdialog-unsetvars
 }
 
 wsdialog-unsetvars() {
@@ -59,22 +98,14 @@ wsdialog-unsetvars() {
     unset wsdialog_savemode
 }
 
-# display line4 (replacing the old one if needed) and enter l4 mode
+# display line4 and enter l4 mode
 wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
     local end=$(( ${#BUFFER} - $wsdialog_end ))
-#    echo WSDIALOG_L4RUN: dialog=$dialog l4mode=$l4mode end=$end > $debugfile
 
-    # if no line4 yet, save cursor and highlight
-    local dialog_mode=wsdialog_${dialog}_line
-    if [[ "$KEYMAP" == "$dialog_mode" ]]; then
-        wsdialog_prel4save_cursor=$CURSOR
-        wsdialog_prel4save_highlight=$region_highlight
-    fi
-
-    # remove old line4 if needed
-    BUFFER[wsdialog_line4_start+1,end]=""
+    wsdialog_prel4save_cursor=$CURSOR
+    wsdialog_prel4save_highlight=$region_highlight
 
     # display line4 and move cursor
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
@@ -82,14 +113,12 @@ wsdialog-l4run() {
     ws-insert-formatted-at $wsdialog_line4_start $l4rt
     local l4len=${#ws_pft}
     CURSOR=$((wsdialog_line4_start + l4len))
-#    echo WSDIALOG_L4RUN: inserting at $wsdialog_line4_start \"$l4rt\" > $debugfile
 
-    # save dialog line4
+    # save wsline variables
     wsline-setvars wsdialog_${dialog}
     
     # enter l4mode
     local l4mname=wsdialog_${dialog}_${l4mode}_l4
-    echo WSDIALOG_L4RUN: enter \"$l4mname\" mode > $debugfile
     zle -K "$l4mname"
 }
 
@@ -97,47 +126,22 @@ wsdialog-l4run() {
 wsdialog-acceptfn() {
     local dialog=$1
     local do_accept=wsdialog_${dialog}-accept
-    local do_restore=wsdialog_${dialog}-restore
     local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
-    echo "WSDIALOG_ACCEPTFN" var=$textvar text=\"$wsdialog_text\"> $debugfile
     $do_accept     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
         wsdialog-l4run $dialog $wsdialog_l4mode
-    else    
-        wsline-finalize $dialog
-
-        #restore text, cursor and region_highlight
-        wsdialog-close
-        CURSOR=wsdialog_savecurs
-        region_highlight=$wsdialog_init_highlight
-
-        zle -K $wsdialog_savemode
-        $do_restore
-
-        # unset variables
-        wsdialog-unsetvars
+    else
+        wsdialog-close $dialog
     fi
 }
 
 # close everything and call restore
 wsdialog-cancelfn() {
     local dialog=$1
-    local do_restore=wsdialog_${dialog}-restore
 
     unset wsdialog_text
-    wsline-finalize $dialog
-
-    #restore text, cursor and region_highlight
-    wsdialog-close
-    CURSOR=wsdialog_savecurs
-    region_highlight=$wsdialog_init_highlight
-
-    zle -K $wsdialog_savemode
-    $do_restore
-
-    # unset variables
-    wsdialog-unsetvars
+    wsdialog-close $dialog
 }
 
 # !!!cursor & highlight state save/restore by caller!!!
