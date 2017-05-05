@@ -48,6 +48,14 @@ the most important thing is the string entered by the user.
 * Usage
  + Declare the necessary variables
  + Call wsdialog-add $dialog, where $dialog is the name of the dialog
+ + When in a line4 event function: define ~$wsdialog_l4mode~ in order to
+ tell what should be done after this event.  The value can be either the
+ name of another line4 mode, or a constant:
+    - ~"<accept>"~: accepts the prompt value and exit dialog
+    - ~"<cancel>"~: exit dialog with empty result (same as ~^U~ in dialog
+      mode)
+ It also can be undefined, in which case the line4 is removed and the cursor
+is moved to the position where it was before entering line4 mode.
 
 * The dialog
 #+BEGIN_SRC 
