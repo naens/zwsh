@@ -136,31 +136,32 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/2
+debugfile=/dev/pts/3
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
-debugfile=/dev/null
+#debugfile=/dev/null
 
 # dialog
 wsdialog_dialogtest_msg="Test dialog: "
 wsdialog_dialogtest_modes[1]="l4empty"
 wsdialog_dialogtest_modes[2]="l4short"
+wsdialog_dialogtest_modes[3]="l4zero"
 wsdialog_dialogtest_accept="wsdialog_dialogtest-accept"
 wsdialog_dialogtest_restore="wsdialog_dialogtest-restore"
 
+# l4empty (only show message, without other functionality)
+wsdialog_dialogtest_l4empty_msg="The string should not be #empty#..."
+
 # l4short
 wsdialog_dialogtest_l4short_msg="#The string is short!# Accept anyway? *Y*es *N*o *E*dit"
-wsdialog_dialogtest_empty_msg="The string should not be #empty#..."
 declare -A wsdialog_dialogtest_l4short_funcs
-# y=accept short value; n=cancel, close dialog; e=continue editing (same as ^U)
 wsdialog_dialogtest_l4short_funcs[y]="l4short-yes"
 wsdialog_dialogtest_l4short_funcs[n]="l4short-no"
 wsdialog_dialogtest_l4short_funcs[e]="l4short-edit"
 
-
-# l4empty (only show message, without other functionality)
-wsdialog_dialogtest_l4empty_msg="The string should not be #empty#..."
+# l4zero
+wsdialog_dialogtest_l4zero_msg="Starts with _zero_???"
 
 # add dialog
 wsdialog-add dialogtest
@@ -171,6 +172,8 @@ wsdialog_dialogtest-accept() {
         wsdialog_l4mode=l4empty
     elif [[ ${#wsdialog_text} -lt 4 ]]; then
         wsdialog_l4mode=l4short
+    elif [[ "$wsdialog_text[1]" == "0" ]]; then
+        wsdialog_l4mode=l4zero
     else
         unset wsdialog_l4mode
     fi
@@ -187,7 +190,11 @@ wsdialog_dialogtest-restore() {
 
 l4short-yes() {
     echo YES > $debugfile
-    wsdialog_l4mode="<accept>"
+    if [[ "$wsdialog_text[1]" == "0" ]]; then
+        wsdialog_l4mode=l4zero
+    else
+        wsdialog_l4mode="<accept>"
+    fi
 }
 
 l4short-no() {
@@ -200,10 +207,9 @@ l4short-edit() {
     unset wsdialog_l4mode
 }
 
-bindkey -M zsh-ws "^Ql" test-wsdialog
-zle -N test-wsdialog
-
-test-wsdialog() {
+bindkey -M zsh-ws "^Ql" wsdialogtest
+zle -N wsdialogtest
+wsdialogtest() {
     wsdialog_dialogtest_msg="msg is: "		
     wsdialog_dialogtest-run
 }

@@ -12,8 +12,9 @@ wsdialog-add() {
         echo WSDIALOG_ADD: create l4mode: \"$l4mname\" > $debugfile
 
         # bind cancel line4 function
-        zle -N wsdialog_${dialog}-rml4
-        bindkey -M $l4mname "^U" "wsdialog_${dialog}-rml4"
+        zle -N wsdialog_${dialog}-ret-dial
+        bindkey -M $l4mname "^U" "wsdialog_${dialog}-ret-dial"
+        bindkey -M $l4mname "^M" "wsdialog_${dialog}-ret-dial"
 
         # bind user defined keys
         local funcsvar=wsdialog_${dialog}_${l4mode}_funcs
@@ -29,7 +30,7 @@ wsdialog-add() {
         done
     done
     eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
-    eval "wsdialog_${dialog}-rml4() { wsdialog-rml4 $dialog }"
+    eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
     eval "wsdialog_${dialog}-acceptfn() { wsdialog-acceptfn $dialog }"
     eval "wsdialog_${dialog}-cancelfn() { wsdialog-cancelfn $dialog }"
     wsline-prepare wsdialog_${dialog}
@@ -42,7 +43,7 @@ wsdialog-l4keyfn() {
     $l4keyfn    # defines $wsdialog_l4mode
     echo WSDIALOG_L4KEYFN: dialog=$dialog l4keyfn=$l4keyfn m=$wsdialog_l4mode > $debugfile
     if [[ -z "$wsdialog_l4mode" ]]; then
-        wsdialog-rml4 $dialog
+        wsdialog-ret-dial $dialog
     elif [[ "$wsdialog_l4mode" == "<accept>" ]]; then
         wsdialog-close $dialog
     elif [[ "$wsdialog_l4mode" == "<cancel>" ]]; then
@@ -50,6 +51,7 @@ wsdialog-l4keyfn() {
         wsdialog-close $dialog
     else
         wsdialog-rml4 $dialog
+        echo WSDIALOG_L4KEYFN: l4mode=$wsdialog_l4mode > $debugfile
         wsdialog-l4run $dialog $wsdialog_l4mode
     fi
 }
@@ -103,9 +105,11 @@ wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
     local end=$(( ${#BUFFER} - $wsdialog_end ))
+    echo WSDIALOG_L4RUN: l4mode=$l4mode > $debugfile
 
     wsdialog_prel4save_cursor=$CURSOR
-    wsdialog_prel4save_highlight=$region_highlight
+    wsdialog_prel4save_highlight=($region_highlight)
+    echo WSDIALOG_L4RUN: save prel4-highlight=$region_highlight > $debugfile
 
     # display line4 and move cursor
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
@@ -203,26 +207,33 @@ wsdialog-upd() {
     ws-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
 }
 
-# remove dialog l4 and restore cursor
+# remove dialog l4
 wsdialog-rml4() {
     local dialog=$1
     echo WSDIALOG_RML4: dialog=\"$dialog\" > $debugfile
 
     # check
     local end=$(( ${#BUFFER} - $wsdialog_end ))
-    echo WSDIALOG_RML4: l4mode=$l4mode end=$end > $debugfile
 
     # remove old line4
     BUFFER[wsdialog_line4_start+1,end]=""
 
-    # restort cursor and highlight
+    # restore region highlight
+    echo WSDIALOG_RML4: prel4-highlight=$wsdialog_prel4save_highlight > $debugfile
+    region_highlight=($wsdialog_prel4save_highlight)
+
+    # restores dialog cursor
     CURSOR=$wsdialog_prel4save_cursor
-    region_highligh=$twsdialog_prel4save_highlight
+}
+
+# remove line4, restore state
+wsdialog-ret-dial() {
+    local dialog=$1
+    wsdialog-rml4 $dialog
 
     #restore dialog mode
     local dialog_mode=wsdialog_${dialog}_line
     wsline-getvars wsdialog_${dialog}
-    echo WSDIALOG_RUN: enter \"$dialog_mode\" mode > $debugfile
     zle -K $dialog_mode
 
     # remove line4 marker
