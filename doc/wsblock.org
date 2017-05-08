@@ -32,3 +32,24 @@ columns instead of inserting
 does not move
  * there is no standout selection if one of the selected lines ends before
 the column of ~<K>~
+
+* Key summary
+** ~^KB~
+ * if block not visible, set ~kb~ at cursor, make block visible
+ * if block visible and
+   - if cursor on ~kb~, unset kb; if no ~kk~, set block to not visible
+   - if cursor not on ~kb~, set ~kb~ to cursor position
+
+** ~^KK~
+ -> functions the same way as ~^KB~, setting and unsetting then ~kk~
+    variable
+
+** ~^KH~
+ * if block not visible and ~kb~ or ~kk~ defined, make the block visible
+ * if block visible, make the block not visible
+
+** Making the block visible
+ * if ~kk > kb~, standout from ~kb~ to ~kk~; for column mode,
+   additional constraint: the columnt of ~kk~ must be greater than the
+   column of ~kb~.
+ * otherwise display ~kb~ as ~<B>~ standout and ~kk~ as ~<K>~ standout

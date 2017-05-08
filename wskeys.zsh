@@ -140,7 +140,7 @@ debugfile=/dev/pts/4
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
-#debugfile=/dev/null
+debugfile=/dev/null
 
 bindkey -M zsh-ws "^Ql" wskwtest
 zle -N wskwtest
