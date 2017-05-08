@@ -142,75 +142,9 @@ if [[ ! -e $debugfile ]]; then
 fi
 #debugfile=/dev/null
 
-# dialog
-wsdialog_dialogtest_msg="Test dialog: "
-wsdialog_dialogtest_modes[1]="l4empty"
-wsdialog_dialogtest_modes[2]="l4short"
-wsdialog_dialogtest_modes[3]="l4zero"
-wsdialog_dialogtest_accept="wsdialog_dialogtest-accept"
-wsdialog_dialogtest_restore="wsdialog_dialogtest-restore"
-
-# l4empty (only show message, without other functionality)
-wsdialog_dialogtest_l4empty_msg="The string should not be #empty#..."
-
-# l4short
-wsdialog_dialogtest_l4short_msg="#The string is short!# Accept anyway? *Y*es *N*o *E*dit"
-declare -A wsdialog_dialogtest_l4short_funcs
-wsdialog_dialogtest_l4short_funcs[y]="l4short-yes"
-wsdialog_dialogtest_l4short_funcs[n]="l4short-no"
-wsdialog_dialogtest_l4short_funcs[e]="l4short-edit"
-
-# l4zero
-wsdialog_dialogtest_l4zero_msg="Starts with _zero_???"
-
-# add dialog
-wsdialog-add dialogtest
-
-# decide whether display l4 or exit based on $wsdialog_text
-wsdialog_dialogtest-accept() {
-    if [[ -z $wsdialog_text ]]; then
-        wsdialog_l4mode=l4empty
-    elif [[ ${#wsdialog_text} -lt 4 ]]; then
-        wsdialog_l4mode=l4short
-    elif [[ "$wsdialog_text[1]" == "0" ]]; then
-        wsdialog_l4mode=l4zero
-    else
-        unset wsdialog_l4mode
-    fi
-}
-
-# function executed on return from dialog, $wsdialog_text holding the result
-wsdialog_dialogtest-restore() {
-    if [[ -n $wsdialog_text ]]; then
-        zle -M "dialogtest: accept: \"$wsdialog_text\""
-    else
-        zle -M "dialogtext: no text in dialog"
-    fi
-}
-
-l4short-yes() {
-    echo YES > $debugfile
-    if [[ "$wsdialog_text[1]" == "0" ]]; then
-        wsdialog_l4mode=l4zero
-    else
-        wsdialog_l4mode="<accept>"
-    fi
-}
-
-l4short-no() {
-    echo NO > $debugfile
-    wsdialog_l4mode="<cancel>"
-}
-
-l4short-edit() {
-    echo EDIT > $debugfile
-    unset wsdialog_l4mode
-}
-
-bindkey -M zsh-ws "^Ql" wsdialogtest
-zle -N wsdialogtest
-wsdialogtest() {
-#    wsdialog_dialogtest-run
+bindkey -M zsh-ws "^Ql" wskwtest
+zle -N wskwtest
+wskwtest() {
     wsblock_text=blabla
     wsdialog_kwdial-run
 }
