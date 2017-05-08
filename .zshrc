@@ -42,6 +42,7 @@ stty intr '^]'
 
 # file for ^KW binding functions and file writing
 . $dir/wskw.zsh
+. $dir/wskw2.zsh
 
 # file for ^KR binding functions and file import
 . $dir/wskr.zsh
