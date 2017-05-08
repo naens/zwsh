@@ -356,7 +356,8 @@ bindkey -M wsblock "^Kw" ws-kw
 bindkey -M wsblock "^KW" ws-kw
 ws-kw() {
     if [[ -n $kk ]]; then
-        ws-kwfn
+#        ws-kwfn
+        wsdialog_kwdial-run
     fi
 }
 
