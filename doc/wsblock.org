@@ -1,0 +1,34 @@
+#+TITLE: Description of block behaviour
+
+* Block display
+ * ~^KH~: switch on or off
+ * off when no ~<B>~ and no ~<K>~
+ * if ~<B>~ and/or ~<K>~ are present, can be on or off
+ * turns automatically on if from the off state ~<B>~ or ~<K>~ are defined
+ * ~<B>~ and ~<K>~ are defined by ~^KB~ and ~^KK~ respectively
+ * when displayed, if ~^KB~ or ~^KK~ are used when the cursor is at ~<B>~ or ~<K>~
+(displayed right after), ~<B>~ or ~<K>~ are removed
+ * if not displayed, they are made visible
+ * ~<B>~ and ~<K>~ are displayed as ~<B>~ and ~<K>~ standout when there is
+only one of them or the position of ~<K>~ is less or equal to the position
+of ~<B>~, otherwise <B> and <K> are not visible and the characters between
+ are made standout
+ * if ~<B>~ and ~<K>~ are on the same position, ~<B>~ is displayed before
+~<K>~
+
+* Editing
+ * The cursor is never on the standout part of ~<B>~ or ~<K>~
+
+* Column mode
+ * ~^KN~ turns on and off column mode (default if off)
+ * in column mode what is selected and what is copied is the rectangle from
+~<B>~ to ~<K>~
+ * in order for the rectangle to appear, the column of ~<K>~ must be greater
+than the column of ~<B>~
+ * ~^KI~ turns on or off the column replace mode (default is off)
+ * when the column replace mode is on, it replaces the content of the
+columns instead of inserting
+ * when inserting text in the selection when in column mode, the selection
+does not move
+ * there is no standout selection if one of the selected lines ends before
+the column of ~<K>~
