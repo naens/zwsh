@@ -136,7 +136,7 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/3
+debugfile=/dev/pts/4
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
@@ -210,6 +210,7 @@ l4short-edit() {
 bindkey -M zsh-ws "^Ql" wsdialogtest
 zle -N wsdialogtest
 wsdialogtest() {
-    wsdialog_dialogtest_msg="msg is: "		
-    wsdialog_dialogtest-run
+#    wsdialog_dialogtest-run
+    wsblock_text=blabla
+    wsdialog_kwdial-run
 }
