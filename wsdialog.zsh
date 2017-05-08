@@ -34,6 +34,7 @@ wsdialog-add() {
     eval "wsdialog_${dialog}-acceptfn() { wsdialog-acceptfn $dialog }"
     eval "wsdialog_${dialog}-cancelfn() { wsdialog-cancelfn $dialog }"
     wsline-prepare wsdialog_${dialog}
+    echo WSDIALOG_ADD: \"${dialog}\" > $debugfile
 }
 
 wsdialog-l4keyfn() {
@@ -68,7 +69,7 @@ wsdialog-del() {
 # exit dialog and restore variables
 wsdialog-close() {
     local dialog=$1
-    local do_restore=wsdialog_${dialog}-restore
+    local do_restore=wsdialog_${dialog}_restore
     wsline-finalize $dialog
 
     #restore text, cursor and region_highlight
@@ -77,7 +78,7 @@ wsdialog-close() {
     region_highlight=$wsdialog_init_highlight
 
     zle -K $wsdialog_savemode
-    $do_restore
+    ${(P)do_restore}
 
     # unset variables
     wsdialog-unsetvars
@@ -129,10 +130,10 @@ wsdialog-l4run() {
 # ask caller what to do
 wsdialog-acceptfn() {
     local dialog=$1
-    local do_accept=wsdialog_${dialog}-accept
+    local do_accept=wsdialog_${dialog}_accept
     local textvar=wsline_wsdialog_${dialog}_text
     wsdialog_text="${(P)textvar}"
-    $do_accept     # defines $wsdialog_l4mode
+    ${(P)do_accept}     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
         wsdialog-l4run $dialog $wsdialog_l4mode
     else
