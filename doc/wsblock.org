@@ -32,6 +32,8 @@ columns instead of inserting
 does not move
  * there is no standout selection if one of the selected lines ends before
 the column of ~<K>~
+ * The rules of moving ~<B>~ and ~<K>~ in column mode are the same as in
+normal mode
 
 * Key summary
 ** ~^KB~
