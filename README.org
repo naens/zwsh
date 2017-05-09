@@ -1,7 +1,7 @@
-# zwsh
-A Zpm3/Wordstar mode/theme for zsh
+#+TITLE: zwsh
+#+SUBTITLE: A Zpm3/Wordstar mode/theme for zsh
 
-## TODO
+* TODO
 + wsline: scroll horizontal
 + wsline: block: copy, move, paste
 + (!) wsedit: review, simplify
