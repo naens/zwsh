@@ -67,12 +67,7 @@ zle -N ws-kr
 bindkey -M zsh-ws "^Kr" ws-kr
 bindkey -M zsh-ws "^KR" ws-kr
 ws-kr() {
-    ws-krfn
-    wskr_insert="wskr-insert"
-}
-wskr-insert() {
-    LBUFFER+=$wskr_text
-    unset wskr_text
+    wsdialog_krdial-run
 }
 
 # TODO: remove standout OR integrate with blocks
