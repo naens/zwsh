@@ -1,11 +1,12 @@
 #+TITLE: zwsh
-#+SUBTITLE: A Zpm3/Wordstar mode/theme for zsh
+A Zpm3/Wordstar mode/theme for zsh
 
-* TODO
+* todo's
 + wsline: scroll horizontal
 + wsline: block: copy, move, paste
 + (!) wsedit: review, simplify
 + (!) wsblock: rewrite: remove wseditblock -> same module
++ wsblock: add column selection mode
 + (!) review key consistency
 + (!) wsedit: add enter/exit functions (that use wsdialog)
 + add edit fullscreen mode: when big file -> vertical scroll
