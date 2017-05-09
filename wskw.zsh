@@ -28,13 +28,11 @@ kw-accept() {
         wsdialog_l4mode=badfn
     elif [[ -e "$wsdialog_text" ]]; then
         wsdialog_l4mode=fexists
+    elif kw-save "$wsdialog_text" "$wsblock_text"; then
+        unset wsdialog_l4mode
     else
-        if kw-save "$wsdialog_text" "$wsblock_text"; then
-            unset wsdialog_l4mode
-        else
-            make-ewrite-msg
-            wsdialog_l4mode=ewrite
-        fi
+        make-ewrite-msg
+        wsdialog_l4mode=ewrite
     fi
 }
 
