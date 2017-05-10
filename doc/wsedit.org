@@ -5,7 +5,7 @@
   program, but it is possible to switch to the main mode in order to
   execute it.
 
-* Ways to get into /editor mode/
+* Ways to get into editor mode
   There are several ways to get into *editor mode*:
  * switch to it using keybindings
  * save the command as a file, which automatically puts into the
@@ -13,10 +13,10 @@
  * open a file (the current command is then lost / appended to
    history?)
 
-* Ways to get out of /editor mode/
+* Ways to get out of editor mode
   By using a special keybinding
 
-* Differences between main mode and the /editor mode/
+* Differences between main mode and the editor mode
  * ~^M~ / ~Enter~ split lines without executing
  * ~^N~ acts the same way, except that it leaves the cursor on the
    previous line (?inconsistency with the main mode?)
@@ -29,7 +29,7 @@
  * ?make the editor fullscreen?
  * ?implement scroll functions/keybindings?
 
-* Key bindings for /editor mode/
+* Key bindings for editor mode
 ** main mode key bindings
  * Switch to *editor mode* and open a file: ~^KE~
  * Switch to *editor mode*: ~^KD~
