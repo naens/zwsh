@@ -7,6 +7,12 @@ A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
  - edit multiline commands,
  - import and export from and to files.
 
+* Other doc files
+ + [[doc/wsblock.org][wsblock]]
+ + [[doc/wsdialog.org][wsdialog]]
+ + [[doc/wsedit.org][wsedit]]
+ + [[doc/wsfind.org][wsfind]]
+
 ========
 
 * To do plan
