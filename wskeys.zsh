@@ -99,9 +99,9 @@ delword() {
 }
 
 # Block Keys
-zle -N ws-kb
-bindkey -M zsh-ws "^Kb" ws-kb
-bindkey -M zsh-ws "^KB" ws-kb
+#zle -N ws-kb
+#bindkey -M zsh-ws "^Kb" ws-kb
+#bindkey -M zsh-ws "^KB" ws-kb
 
 zle -N ws-insert-saved
 bindkey -M zsh-ws "^Kc" ws-insert-saved

@@ -244,9 +244,9 @@ wsedit-exit() {
 
 
 # Block functions
-zle -N wseditblock-kb
-bindkey -M wsedit "^Kb" wseditblock-kb
-bindkey -M wsedit "^KB" wseditblock-kb
+#zle -N wseditblock-kb
+#bindkey -M wsedit "^Kb" wseditblock-kb
+#bindkey -M wsedit "^KB" wseditblock-kb
 
 # TODO: * file import/export functions
 # TODO: * dialog=new screen!!! => save-and-replace buffer
