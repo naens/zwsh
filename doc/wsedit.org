@@ -5,7 +5,7 @@
   program, but it is possible to switch to the main mode in order to
   execute it.
 
-* Ways to get into /editor mode/
+* Ways to get into editor mode
   There are several ways to get into *editor mode*:
  * switch to it using keybindings
  * save the command as a file, which automatically puts into the
@@ -13,7 +13,7 @@
  * open a file (the current command is then lost / appended to
    history?)
 
-* Ways to get out of /editor mode/
+* Ways to get out of editor mode
   By using a special keybinding
 
 * Differences between main mode and the /editor mode/
