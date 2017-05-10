@@ -102,9 +102,9 @@ wsedit-newline() {
     wsedit-header
 }
 
-zle -N wsedit-slpitline
+zle -N wsedit-splitline
 bindkey -M wsedit "^N" wsedit-splitline
-wsedit-sliptline() {
+wsedit-splitline() {
     local curs=$CURSOR
     LBUFFER+=$'\n'
     CURSOR=$curs
