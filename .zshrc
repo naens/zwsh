@@ -52,9 +52,6 @@ stty intr '^]'
 # ws editor mode
 . $dir/wsedit.zsh
 
-# ws edit-block mode
-. $dir/wseditblock.zsh
-
 # prompt functions
 function collapse_pwd
 {
