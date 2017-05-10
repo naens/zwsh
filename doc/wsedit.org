@@ -46,7 +46,6 @@
  * Exit *editor mode* (do not save), with file contents as buffer: ~^KD~
 
 * WS document screen examples
-** non-document example
 #+BEGIN_SRC 
    I:EXAMPLE.TXT       L00001  C01 Insert                                       
 Mo Layn Dodo Ko lo po?                                                         <
@@ -58,29 +57,10 @@ fkkflj                                                                         ^
                                                                                ^
 #+END_SRC
 
-** Properties
+Properties
  * TAB/^I inserts TAB (size=8)
  * Line non-empty: last char='<', line empty or last: last char='^' too long='+'
  * Header shows file name / location, line, column, insert/overwrite mode
  * When in overwrite mode, "Insert" disappears.
 
-** document example
-#+BEGIN_SRC 
-   I:EXAMPLE.TXT       P01 L03 C01 Insert Align                                 
-L----!----!----!----!----!----!----!----!----!----!----!--------R
-Mo Layn Dodo Ko lo po?                                                         <
-Somi  goa  prepuddla.  Suso  kosho be?  UUiipwz  koKO?  KkdieQ  !              <
-Sizieidifi....                                                                 <
-                                                                               <
-fkkflj                                                                         ^
-                                                                               ^
-                                                                               ^
-#+END_SRC
-
-*** Properties
- * TAB/^I inserts 5 spaces, until the next '!'
- * L: col 1, !: cols 6,11,16...56 R:65
- * Line non-empty: last char='<', line empty or last: last char='^'
- * Header shows file name / location, page, line, column, insert/overwrite mode
- * When in overwrite mode, "Insert" disappears.
 
