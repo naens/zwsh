@@ -32,9 +32,7 @@ Without implementing wsblock keybindings, finish wsedit mode:
  + review wsblock specifications, redefine behaviour, parameters, variables...
  + implement marks: places that move with the text: track position, column,
 *** line (also for wsline)
- + reimplement block functionality, on wsline, substitute CR's and LF's with
-*** a normal character, like space or a special substitution character
-(in order to restore space if copying to edit or normal mode)
+ + reimplement block functionality, on wsline, substitute CR's and LF's with a normal character, like space or a special substitution character (in order to restore space if copying to edit or normal mode)
  + test on normal, edit and wsline modes
  + add column selection
 
