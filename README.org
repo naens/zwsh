@@ -13,7 +13,7 @@ A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
  + [[doc/wsedit.org][wsedit]]
  + [[doc/wsfind.org][wsfind]]
 
-========
+---------
 
 * To do plan
 
