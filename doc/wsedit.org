@@ -35,7 +35,7 @@
  * Switch to *editor mode*: ~^KD~
  * Switch to *editor mode* saving buffer as file: ~^KS~
 
-**  /editor mode/ key bindings
+**  editor mode key bindings
  * Open a file: ~^KE~
  * Save the current file: ~^KS~
  * Save a copy of the current file: ~^KO~
