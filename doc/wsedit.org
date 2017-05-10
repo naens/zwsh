@@ -1,7 +1,7 @@
 #+TITLE: Editor mode
 * Introduction
   If a command is complex, it may be easier to edit it in the *editor
-  mode*.  The main difference is that Enter/^M no longer executes the
+  mode*.  The main difference is that ~Enter~ / ~^M~ no longer executes the
   program, but it is possible to switch to the main mode in order to
   execute it.
 
@@ -17,8 +17,8 @@
   By using a special keybinding
 
 * Differences between main mode and the /editor mode/
- * ^M/Enter split lines without executing
- * ^N atcs the same way, except that it leaves the cursor on the
+ * ~^M~ / ~Enter~ split lines without executing
+ * ~^N~ acts the same way, except that it leaves the cursor on the
    previous line (?inconsistency with the main mode?)
  * No history commands
  * Search & replace commands
@@ -59,7 +59,7 @@ fkkflj                                                                         ^
 #+END_SRC
 
 ** Properties
- * TAB/^I inserts \t (size=8)
+ * TAB/^I inserts TAB (size=8)
  * Line non-empty: last char='<', line empty or last: last char='^' too long='+'
  * Header shows file name / location, line, column, insert/overwrite mode
  * When in overwrite mode, "Insert" disappears.
