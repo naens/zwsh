@@ -1,0 +1,119 @@
+* Wordstar Keys
+** Cursor
+*** Position
+~^E~: up ~^X~: down ~^S~: left ~^D~: right                       
+~^QS~: start-line ~^QD~: end-line
+~^QE~: start-screen ~^QX~: end-screen
+~^R~: up-screen ~^C~: down-screen
+~^QR~: start-doc ~^QC~: end-doc
+~^QB~: start-block ~^QK~: end-block
+*** Words
+~^A~: word-left ~^F~: word-right
+
+*** Paragraphs
+~^B~: align
+
+** Insert
+~^N~: split-line(new-line-after-point)
+
+** Scroll
+~^W~: up ~^Z~: down
+
+** Delete
+~^G~: char-right ~^H~: char-left ~^Y~: line ~^T~: word-right
+~^QY~: line-right ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
+*** Additional delete keys
+~^[H~: word-left ~^[Y~: whole-word
+
+** Select-Copy
+~^KB~: mark-begin ~^KK~: mark-end
+~^KC~: copy ~^KV~: move ~^KY~: delete
+
+*** Table
+| key   | action                                                            |
+|-------+-------------------------------------------------------------------|
+| ~^KB~ | remember begin-point                                              |
+| ~^KK~ | select begin-point -> current                                     |
+| ~^KC~ | insert selected text at point, selection to new (ws keeps to old) |
+| ~^KV~ | insert selected text at point (+select), deleting original        |
+| ~^KY~ | delete selection                                                  |
+| ~^KW~ | write selection to file (dialog)                                  |
+|-------+-------------------------------------------------------------------|
+
+** Undo
+~^U~: undo ^6=redo
+
+** Files
+~^KS~: save ~^KD~: save-close ~^KX~: save-exit
+
+** Find
+*** find text
+Key: ~^QF~
+Shows dialog:
+#+BEGIN
+   Find what? <cursor>
+ *RETURN* done | *Backspace* or *^H* erase left
+  *^U* cancel  |             *Del* erase char
+#+END
+bold: "RETURN", "Backspace", "~^H~", "~^U~", "Del"
+
+On enter empty: return
+On enter text: options
+
+If could not find, display:
+#+BEGIN
+Could not find:  <string>
+
+Press Esc to continue.
+#+END
+bold: "Press Esc to continue."
+
+If found: cursor on first character of the first occurrence of string
+in text after cursor position while performing the search.
+
+On ~^L~: repeat search further.
+
+After the last search, if ~^L~ is pressed, message showed:
+#+BEGIN
+End of search for:  <string>
+
+Press Esc to continue.
+#+END
+bold: "Press Esc to continue."
+
+~^L~ performs search without dialog.  If cursor at the beginning, finds
+first occurrence.  If at the end of document, does nothing.  If
+between the end of document and the last position, displays the error
+message.
+
+*** find/replace
+Key: ~^QA~
+Dialog:
+#+BEGIN
+   Find what? <cursor>
+ *RETURN* done | *Backspace* or *^H* erase left
+  *^U* cancel  |             *Del* erase char
+#+END
+
+If string is empty, returns without asking/displaying anything.
+
+After string input, L4 becomes:
+#+BEGIN
+Replace with? <cursor>
+#+END
+
+Replace string can be empty.
+
+Finds string, displays on right top corner "Replace Y/N".  If y
+pressed, replaces.  Otherwise, does not.
+
+~^L~ does the same search without string dialog, but with y/n dialog.
+
+For the first search, if string can not be found, returns without
+displaying and asking anything.  For ~^L~ search, displays same as for
+find with ~^QF~.
+
+** Other
+~^KQ~: quit
+
+

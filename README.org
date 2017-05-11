@@ -12,6 +12,7 @@ A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
  + [[doc/wsdialog.org][wsdialog]]
  + [[doc/wsedit.org][wsedit]]
  + [[doc/wsfind.org][wsfind]]
+ + [[doc/wskeys.org][key description]]
 
 ---------
 
