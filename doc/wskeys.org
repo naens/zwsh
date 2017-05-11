@@ -78,11 +78,11 @@ in text after cursor position while performing the search.
 On ~^L~: repeat search further.
 
 After the last search, if ~^L~ is pressed, message showed:
-#+BEGIN
+#+BEGIN_SRC
 End of search for:  <string>
 
 Press Esc to continue.
-#+END
+#+END_SRC
 bold: "Press Esc to continue."
 
 ~^L~ performs search without dialog.  If cursor at the beginning, finds
@@ -93,11 +93,11 @@ message.
 *** find/replace
 Key: ~^QA~
 Dialog:
-#+BEGIN
+#+BEGIN_SRC
    Find what? <cursor>
  *RETURN* done | *Backspace* or *^H* erase left
   *^U* cancel  |             *Del* erase char
-#+END
+#+END_SRC
 
 If string is empty, returns without asking/displaying anything.
 
