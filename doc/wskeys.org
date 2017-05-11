@@ -41,7 +41,7 @@
 |-------+-------------------------------------------------------------------|
 
 ** Undo
-~^U~: undo ^6=redo
+~^U~: undo ~^6~: redo
 
 ** Column mode
 ~^KN~: enter exit column mode
