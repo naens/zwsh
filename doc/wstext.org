@@ -34,7 +34,7 @@ Delete and insert functions modify the original text.
 
 * More Information
 The keybindings will work on the text in the variable whose name is in
-~$ws_textvar~.  It can change, for example, when switching from main
+~$wstext_textvar~.  It can change, for example, when switching from main
 mode to wsline mode.  Modes can redefine or hide some keybindings or
 functions.  After text modification a function, whose name is in
-~$ws_updfnvar~ will be called.
+~$wstext_updfnvar~ will be called.
