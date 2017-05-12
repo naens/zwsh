@@ -28,5 +28,6 @@ Functions:
  + get position of a line (line: position)
  + get length of a line (line: length)
  + get line of a position (position: line)
+ + insert (position string: position)
 
-Delete functions modify the original text.
+Delete and insert functions modify the original text.
