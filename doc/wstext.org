@@ -1,0 +1,26 @@
+#+TITLE: wstext module
+
+* Description
+Text editing functions on a string variable.  This way the text does
+not have to be corrected if something is deleted what should not have
+been deleted and every cursor movement does not have to ask for
+permission before moving.
+
+Another advantage is that wsline, wsedit, main will not have to defin
+their own methods and wsline scroll would be easier to implement, as
+well as fullscreen scroll.  An important advantage is that it won't be
+difficult to add right border line markers in wsedit modes.
+
+* Functions in the module
+Functions:
+ + next / previous word (text cursor: position)
+ + next / previous sentence (text cursor: position)
+ + delete character left / right (text cursor: position)
+ + delete word left / right / whole (text cursor: position)
+ + delete line left / right / whole (text cursor: position)
+ + delete sentence left / right / whole (text cursor: position)
+ + get position of a line (line: position)
+ + get length of a line (line: length)
+ + get line of a position (position: line)
+
+Delete functions modify the original text.
