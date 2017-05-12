@@ -43,14 +43,12 @@ wstext_textvar=ws_text
 wstext_updfnvar=ws-updfn
 
 ws-updfn() {
-    BUFFER=$ws_text
+    ws_text="$BUFFER"
 }
 
 zle -N ws-word-left
 bindkey -M zsh-ws "^A" ws-word-left
 ws-word-left() {
-    #TODO: temporary: all edit must be done in ws_text and only then be transferred to buffer
-    ws_text="$BUFFER"
     wstext-prev-word $CURSOR "$ws_text"
     CURSOR=$wstext_pos
 }
@@ -58,7 +56,6 @@ ws-word-left() {
 zle -N ws-word-right
 bindkey -M zsh-ws "^F" ws-word-right
 ws-word-right() {
-    ws_text="$BUFFER"   # TODO: temporary
     wstext-next-word $CURSOR "$ws_text"
     CURSOR=$wstext_pos
 }
@@ -178,5 +175,6 @@ zle-line-pre-redraw () {
 }
 
 main-pre-redraw() {
+    ws-updfn # temporary
     echo MAIN buffer="$BUFFER" > $debugfile
 }
