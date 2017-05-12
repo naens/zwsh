@@ -34,6 +34,10 @@ does not move
 the column of ~<K>~
  * The rules of moving ~<B>~ and ~<K>~ in column mode are the same as in
 normal mode
+ * Regarding the selection of tabs in column mode:
+   - if there are tabs, they are counted as 8 characters
+   - a tab can be only either selected or not selected
+   - partial tabs are selected on the left and not selected on the right
 
 * Key summary
 ** ~^KB~
