@@ -35,8 +35,21 @@ bindkey -M zsh-ws "^Qs" beginning-of-line
 bindkey -M zsh-ws "^QS" beginning-of-line
 bindkey -M zsh-ws "^Qd" end-of-line
 bindkey -M zsh-ws "^QD" end-of-line
-bindkey -M zsh-ws "^A" backward-word
-bindkey -M zsh-ws "^F" forward-word
+#bindkey -M zsh-ws "^A" backward-word
+#bindkey -M zsh-ws "^F" forward-word
+zle -N ws-word-left
+bindkey -M zsh-ws "^A" ws-word-left
+ws-word-left() {
+    wstext-prev-word $CURSOR "$BUFFER"
+    CURSOR=$wstext_pos
+}
+    
+zle -N ws-word-right
+bindkey -M zsh-ws "^F" ws-word-right
+ws-word-right() {
+    wstext-next-word $CURSOR "$BUFFER"
+    CURSOR=$wstext_pos
+}
 
 zle -N ws-start-doc
 bindkey -M zsh-ws "^R" ws-start-doc

@@ -5,7 +5,7 @@ wstext-next-word() {
     local max=${#text}
 
     # skip word or end of text
-    local i=$pos
+    local i=$((pos+1))
     while [[ "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
         i=$((i+1))
     done
@@ -14,7 +14,7 @@ wstext-next-word() {
     while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
         i=$((i+1))
     done
-    wstext_pos=$i
+    wstext_pos=$((i-1))
 }
 
 wstext-prev-word() {
