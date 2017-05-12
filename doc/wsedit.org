@@ -77,3 +77,30 @@ Properties
  * When in overwrite mode, "Insert" disappears.
 
 
+* About the implementation
+In both fullscreen and normal edit modes there is a header row.  There is
+never a footer row.  In both modes the text being edited is in the
+~$ws_text~ variable, that must be always up to date with the screen
+contents.  All editing functions work in the first place on the ~$ws_text~
+variable.  The ~$BUFFER~ variable contains the header and the visible part
+of the text, as well as some empty lines in order to completely fill the
+screen when in fullscreen mode.
+
+Some points about the editor behaviour regarding the end of line:
+ * Empty lines are ended in ~^~ as opposed to ~<~ or ~+~ when the line
+   contains some text.
+ * Functions that delete not selected text beyond the screen (delete word,
+   line...) have to be rewritten.
+ * The location of end-of-line symbols is on the col 80, when aligning
+   paragraphs, the last character is on col 65.
+ * Lines inside the paragraphs are not marked with an end-of-line symbol:
+   only the last and empty lines are.
+ * In blocks lines, containing ~<B>~ and ~<K>~ are marked with ~B~ and ~K~
+   respectively.
+ * In column mode, empty lines are marked with ~B~ and non-empty the lines
+   are marked only with ~K~.
+ * ~B~ and ~K~ have priority over other end-of-line characters and ~K~ has
+   priority over ~B~.
+ * ~B~ and ~K~ appear only when trere is a selected text, when there is only
+   ~<B>~ and / or ~<K>~, the default characters are displayes in the last
+   column.
