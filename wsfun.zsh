@@ -1,6 +1,16 @@
 # file contains global variables and functions that can be used anywhere
 ws_echo=$(sh -c 'which echo')
 
+not() {
+    if "$1"; then
+        echo false
+    else
+        echo true
+    fi
+}
+
+skip() {}
+
 ws-do-bold() {
     i=$(( ${#region_highlight} + 1 ))
     base=$1
@@ -20,6 +30,7 @@ ws-do-bold() {
     done
 }
 
+# get position in $ws_row and in $ws_col
 ws-pos() {
     local from
     local to
@@ -54,6 +65,12 @@ ws-pos() {
             fi
         done
     fi
+}
+
+# get screen dimensions in $ws_rows and $ws_cols
+ws-size() {
+    ws_rows=$(tput lines)
+    ws_cols=$(tupt cols)
 }
 
 
@@ -145,3 +162,4 @@ ws-insert-formatted-at() {
     ws-apply-format $pos $ws_pff
 #    echo "pos=$pos ws_pft=#$ws_pft# ws_pff=#$ws_pff#" > $debugfile
 }
+
