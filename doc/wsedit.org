@@ -16,30 +16,43 @@
 * Ways to get out of editor mode
   By using a special keybinding
 
+* Two versions of edit mode: minimal and fullscreen
+ * full screen is automatically activated on entering edit mode, open file,
+ insert text, edit if there is more lines than possible in edit mode (not
+outside)
+ * Key sequence to enter or exit fullscreen mode: ~^KF~ (can not exit if
+   file too big, but possible exit *edit mode* and enter normal mode)
+ * when in fullscreen mode, additional functionality can be used:
+   - ~^W~: scroll one line up
+   - ~^Z~: scroll one line down
+
 * Differences between main mode and the editor mode
  * ~^M~ / ~Enter~ split lines without executing
  * ~^N~ acts the same way, except that it leaves the cursor on the
    previous line (?inconsistency with the main mode?)
  * No history commands
- * Search & replace commands
+ * ~^QF~ and ~^QA~: Search & replace commands: search in text instead of
+ history
  * In order to tell the difference between two modes, a status bar at
    the top (? or bottom/end) of file is inserted
  * Open/Save/Write-block/Insert-from-file dialogs are on seperate
    screen (?if full screen?)
  * ?make the editor fullscreen?
  * ?implement scroll functions/keybindings?
+ * ~^QE~ and ~^QX~: move cursor to the beginning or the end of the screen
 
 * Key bindings for editor mode
 ** main mode key bindings
  * Switch to *editor mode* and open a file: ~^KE~
  * Switch to *editor mode*: ~^KD~
  * Switch to *editor mode* saving buffer as file: ~^KS~
+ * (?) ~^KX~: save buffer contents as file without entering edit mode
 
 **  editor mode key bindings
  * Open a file: ~^KE~
  * Save the current file: ~^KS~
  * Save a copy of the current file: ~^KO~
- * Close the currenpt file and save: ~^KX~
+ * Close the current file and save: ~^KX~
    Exit *editor mode*, buffer empty
  * Close the current file without saving: ~^KQ~
    Exit *editor mode*, buffer empty
