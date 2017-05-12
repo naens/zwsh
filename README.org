@@ -13,6 +13,7 @@ A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
  + [[doc/wsedit.org][wsedit]]
  + [[doc/wsfind.org][wsfind]]
  + [[doc/wskeys.org][key description]]
+ + [[doc/wstext.org][the concept of separating the text from the screen]]
 
 ---------
 
