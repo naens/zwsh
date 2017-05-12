@@ -37,17 +37,29 @@ bindkey -M zsh-ws "^Qd" end-of-line
 bindkey -M zsh-ws "^QD" end-of-line
 #bindkey -M zsh-ws "^A" backward-word
 #bindkey -M zsh-ws "^F" forward-word
+
+# name of the variable containing the text
+wstext_textvar=ws_text
+wstext_updfnvar=ws-updfn
+
+ws-updfn() {
+    BUFFER=$ws_text
+}
+
 zle -N ws-word-left
 bindkey -M zsh-ws "^A" ws-word-left
 ws-word-left() {
-    wstext-prev-word $CURSOR "$BUFFER"
+    #TODO: temporary: all edit must be done in ws_text and only then be transferred to buffer
+    ws_text="$BUFFER"
+    wstext-prev-word $CURSOR "$ws_text"
     CURSOR=$wstext_pos
 }
     
 zle -N ws-word-right
 bindkey -M zsh-ws "^F" ws-word-right
 ws-word-right() {
-    wstext-next-word $CURSOR "$BUFFER"
+    ws_text="$BUFFER"   # TODO: temporary
+    wstext-next-word $CURSOR "$ws_text"
     CURSOR=$wstext_pos
 }
 

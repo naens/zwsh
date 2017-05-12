@@ -43,6 +43,13 @@ wstext-pos2line() {}
 wstext-next-sentence() {}
 wstext-prev-sentence() {}
 
+wstext-upd() {
+    if typeset -f $wstext_updfnvar > /dev/null; then
+        $wstext_updfnvar
+    fi
+}
+
+
 # Delete character functions
 wstext-del-char-left() {}
 wstext-del-char-right() {}
