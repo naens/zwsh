@@ -25,8 +25,13 @@ stty discard undef # ^O
 stty eof "^\\"
 stty intr '^]'
 
+setopt EXTENDED_GLOB
+
 # global variables and functions
 . $dir/wsfun.zsh
+
+# wstext
+. $dir/wstext.zsh
 
 # line mode
 . $dir/wsline.zsh

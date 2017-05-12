@@ -19,15 +19,22 @@ are supposed to, will also be much easier.
 
 * Functions in the module
 Functions:
- + next / previous word (text cursor: position)
- + next / previous sentence (text cursor: position)
- + delete character left / right (text cursor: position)
- + delete word left / right / whole (text cursor: position)
- + delete line left / right / whole (text cursor: position)
+ + next / previous word (position text: position)
+ + next / previous sentence (position text: position)
+ + delete character left / right (position textvar: position)
+ + delete word left / right / whole (position textvar: position)
+ + delete line left / right / whole (position textvar: position)
  + delete sentence left / right / whole (text cursor: position)
  + get position of a line (line: position)
  + get length of a line (line: length)
  + get line of a position (position: line)
- + insert (position string: position)
+ + insert (position string textvar: position)
 
 Delete and insert functions modify the original text.
+
+* More Information
+The keybindings will work on the text in the variable whose name is in
+~$ws_textvar~.  It can change, for example, when switching from main
+mode to wsline mode.  Modes can redefine or hide some keybindings or
+functions.  After text modification a function, whose name is in
+~$ws_updfnvar~ will be called.
