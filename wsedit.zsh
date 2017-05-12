@@ -1,69 +1,9 @@
 bindkey -N wsedit zsh-ws
 
-# Cursor Keys
-zle -N wsedit-up
-bindkey -M wsedit "^E" wsedit-up
-wsedit-up() {
-    if [[ $ws_row -gt 1 ]]; then
-        zle up-line
-        wsedit-refresh
+wsedit-pre-redraw() {
+    if [[ $CURSOR -le $wsedit_begin ]]; then
+        CURSOR=$wsedit_begin
     fi
-}
-
-zle -N wsedit-down
-bindkey -M wsedit "^X" wsedit-down
-wsedit-down() {
-    zle down-line
-    wsedit-refresh
-}
-
-zle -N wsedit-left
-bindkey -M wsedit "^S" wsedit-left
-wsedit-left() {
-    if [[ $CURSOR -gt $wsedit_begin ]]; then
-        zle backward-char
-        wsedit-refresh
-    fi
-}
-
-zle -N wsedit-right
-bindkey -M wsedit "^D" wsedit-right
-wsedit-right() {
-    zle forward-char
-    wsedit-refresh
-}
-
-zle -N wsedit-line-begin
-bindkey -M wsedit "^Qs" wsedit-line-begin
-bindkey -M wsedit "^QS" wsedit-line-begin
-wsedit-line-begin() {
-    if [[ $CURSOR -gt $wsedit_begin ]]; then
-        zle beginning-of-line
-        wsedit-refresh
-    fi
-}
-
-zle -N wsedit-line-end
-bindkey -M wsedit "^Qd" wsedit-line-end
-bindkey -M wsedit "^QD" wsedit-line-end
-wsedit-line-end() {
-    zle end-of-line
-    wsedit-refresh
-}
-
-zle -N wsedit-doc-begin
-bindkey -M wsedit "^Qr" wsedit-doc-begin
-bindkey -M wsedit "^QR" wsedit-doc-begin
-wsedit-doc-begin() {
-    CURSOR=$wsedit_begin
-    wsedit-refresh
-}
-
-zle -N wsedit-doc-end
-bindkey -M wsedit "^Qc" wsedit-doc-end
-bindkey -M wsedit "^QC" wsedit-doc-end
-wsedit-doc-end() {
-    CURSOR=${#BUFFER}
     wsedit-refresh
 }
 
@@ -77,29 +17,11 @@ bindkey -M wsedit "^QE" undefined-key
 bindkey -M wsedit "^Qx" undefined-key
 bindkey -M wsedit "^QX" undefined-key
 
-zle -N wsedit-word-back
-bindkey -M wsedit "^A" wsedit-word-back
-wsedit-word-back() {
-    zle backward-word
-    if [[ $CURSOR -lt $wsedit_begin ]]; then
-        CURSOR=$wsedit_begin
-    fi
-    wsedit-refresh
-}
-
-zle -N wsedit-word-forward
-bindkey -M wsedit "^F" wsedit-word-forward
-wsedit-word-forward() {
-    zle forward-word
-    wsedit-refresh
-}
-
 # Insert Keys
 zle -N wsedit-newline
 bindkey -M wsedit "^M" wsedit-newline
 wsedit-newline() {
     LBUFFER+=$'\n'
-    wsedit-refresh
 }
 
 zle -N wsedit-splitline
@@ -108,21 +30,12 @@ wsedit-splitline() {
     local curs=$CURSOR
     LBUFFER+=$'\n'
     CURSOR=$curs
-    wsedit-refresh
 }
 
 zle -N wsedit-tab
 bindkey -M wsedit "^I" wsedit-tab
 wsedit-tab() {
     LBUFFER+=$'\t'
-    wsedit-refresh
-}
-
-zle -N wsedit-overwrite
-bindkey -M wsedit "^V" wsedit-overwrite
-wsedit-overwrite() {
-    zle overwrite-mode
-    wsedit-refresh
 }
 
 zle -N wsedit-self-insert
@@ -130,7 +43,6 @@ bindkey -M wsedit -R "!"-"~" wsedit-self-insert
 bindkey -M wsedit " " wsedit-self-insert
 wsedit-self-insert() {
     LBUFFER+=$KEYS
-    wsedit-refresh
 }
 
 # Delete Keys
@@ -138,7 +50,6 @@ zle -N wsedit-delchar
 bindkey -M wsedit "^G" wsedit-delchar
 wsedit-delchar() {
     zle delete-char
-    wsedit-refresh
 }
 
 zle -N wsedit-backdelchar
@@ -147,7 +58,6 @@ bindkey -M wsedit "^?" wsedit-backdelchar
 wsedit-backdelchar() {
     if [[ $CURSOR -gt $wsedit_begin ]]; then
         zle backward-delete-char
-        wsedit-refresh
     fi
 }
 
@@ -156,7 +66,6 @@ bindkey -M wsedit "^Y" wsedit-delline
 wsedit-delline() {
     if [[ $wsedit_begin -lt ${#BUFFER} ]]; then
         zle kill-whole-line
-        wsedit-refresh
     fi
 }
 
@@ -165,7 +74,6 @@ bindkey -M wsedit "^Q^H" wsedit-back-delline
 wsedit-back-delline() {
     if [[ $CURSOR -gt $wsedit_begin ]]; then
         zle backward-kill-line
-        wsedit-refresh
     fi
 }
 
@@ -186,7 +94,6 @@ ws-edit() {
         skip
     else
         zle -K wsedit
-        wsedit-refresh      # insert header between 0 and $wsedit_begin
     fi
 }
 
@@ -269,8 +176,6 @@ wsedit-fullscreen() {
     # toggle fullscreen mode
     wsedit_fullscreen=$(not $wsedit_fullscreen)
 
-    # redraw everything
-    wsedit-refresh
 }
 
 
@@ -298,7 +203,6 @@ wsedit-kr-insert() {
     CURSOR=$wsedit_savecurs
     LBUFFER+=$wskr_text
     unset wskr_text
-    wsedit-refresh
 }
 
 # TODO: * file functions: ^KE=open, ^KS=save, ^KO=copy

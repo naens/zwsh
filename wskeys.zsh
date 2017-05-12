@@ -143,3 +143,15 @@ wskwtest() {
     wsblock_text=blabla
     wsdialog_kwdial-run
 }
+
+zle -N zle-line-pre-redraw
+zle-line-pre-redraw () {
+    local modefun=$KEYMAP-pre-redraw
+    if typeset -f $modefun > /dev/null; then
+        $modefun
+    fi
+}
+
+main-pre-redraw() {
+    echo MAIN buffer="$BUFFER" > $debugfile
+}
