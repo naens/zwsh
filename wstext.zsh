@@ -165,7 +165,7 @@ wstext-del-char-left() {
         local textvar="$2"
         local text="${(P)textvar}"
         local end=${#text}
-        eval $textvar=\'$text[1,pos-1]$text[pos+1,end]\'
+        ws-defvar $textvar "$text[1,pos-1]$text[pos+1,end]"
         wstext_pos=$((pos-1))
         wstext-upd
     fi
@@ -177,7 +177,7 @@ wstext-del-char-right() {
     local text="${(P)textvar}"
     local end=${#text}
     if [[ $pos -lt $end ]]; then
-        eval $textvar=\'$text[1,pos]$text[pos+2,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[pos+2,end]"
     fi
     wstext_pos=$((pos))
     wstext-upd
@@ -191,7 +191,7 @@ wstext-del-word-left() {
     wstext-prev-word $pos "$text"
     local from=$wstext_pos
     local end=${#text}
-    eval $textvar=\'$text[1,from]$text[pos+1,end]\'
+    ws-defvar $textvar "$text[1,from]$text[pos+1,end]"
     wstext_pos=$from
     wstext-upd
 }
@@ -211,17 +211,17 @@ wstext-del-word-right() {
     wstext-next-word $pos "$text"
     local to=$wstext_pos
     local end=${#text}
-    echo pos=$pos word_begin=$word_begin > $debugfile
+    ws-debug pos=$pos word_begin=$word_begin
     if [[ $pos -eq $word_begin ]]; then
         wstext-next-printable $word_end "$text"
         local del_end=$wstext_pos
-        eval $textvar=\'$text[1,pos]$text[del_end+1,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[del_end+1,end]"
     elif [[ $pos -lt $word_end ]]; then
-        eval $textvar=\'$text[1,pos]$text[word_end+1,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[word_end+1,end]"
     else
         wstext-next-printable $((pos+1)) "$text"
         local next_printable=$wstext_pos
-        eval $textvar=\'$text[1,pos]$text[next_printable+1,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[next_printable+1,end]"
     fi
     wstext_pos=$pos
     wstext-upd
@@ -242,14 +242,14 @@ wstext-del-word() {
     if [[ $pos -lt $word_end ]]; then
         wstext-next-printable $word_end "$text"
         local del_end=$wstext_pos
-        eval $textvar=\'$text[1,word_begin]$text[del_end+1,end]\'
+        ws-defvar $textvar "$text[1,word_begin]$text[del_end+1,end]"
         wstext_pos=$word_begin
     else
         wstext-prev-printable $pos "$text"
         local prev_printable=$wstext_pos
         wstext-next-printable $((pos+1)) "$text"
         local next_printable=$wstext_pos
-        eval $textvar=\'$text[1,prev_printable]$text[next_printable+1,end]\'
+        ws-defvar $textvar "$text[1,prev_printable]$text[next_printable+1,end]"
         wstext_pos=$prev_printable
     fi
     wstext-upd
@@ -263,7 +263,7 @@ wstext-del-line-left() {
     local end=${#text}
     wstext-line-start $pos "$text"
     local from=$wstext_pos
-    eval $textvar=\'$text[1,from]$text[pos+1,end]\'
+    ws-defvar $textvar "$text[1,from]$text[pos+1,end]"
     wstext_pos=$from
     wstext-upd
 }
@@ -278,9 +278,9 @@ wstext-del-line-right() {
     wstext-line-end $pos "$text"
     local to=$wstext_pos
     if [[ $begin -eq $pos && $to -lt $end ]]; then
-        eval $textvar=\'$text[1,pos]$text[to+2,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[to+2,end]"
     else
-        eval $textvar=\'$text[1,pos]$text[to+1,end]\'
+        ws-defvar $textvar "$text[1,pos]$text[to+1,end]"
     fi
     wstext_pos=$pos
     wstext-upd    
@@ -296,9 +296,9 @@ wstext-del-line() {
     wstext-line-end $pos "$text"
     local to=$wstext_pos
     if [[ $to -lt $end ]]; then
-        eval $textvar=\'$text[1,from]$text[to+2,end]\'
+        ws-defvar $textvar "$text[1,from]$text[to+2,end]"
     else
-        eval $textvar=\'$text[1,from]$text[to+1,end]\'
+        ws-defvar $textvar "$text[1,from]$text[to+1,end]"
     fi
     wstext_pos=$from
     wstext-upd    
@@ -322,11 +322,9 @@ wstext-insert() {
     local text="${(P)textvar}"
     local sz=${#text}
     if [[ $pos -eq 0 ]]; then
-        eval $textvar=\'${str:gs/\'/\'\"\'\"\'}${text:gs/\'/\'\"\'\"\'}\'
+        ws-defvar $textvar "$str$text"
     else
-        local b="$text[1,pos]"
-        local e="$text[pos+1,${#text}]"
-        eval $textvar=\'${b:gs/\'/\'\"\'\"\'}${str:gs/\'/\'\"\'\"\'}${e:gs/\'/\'\"\'\"\'}\'
+        ws-defvar $textvar "$text[1,pos]$str$text[pos+1,${#text}]"
     fi
     wstext_pos=$((pos + ${#str}))
     wstext-upd
