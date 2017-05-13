@@ -162,4 +162,3 @@ ws-insert-formatted-at() {
     ws-apply-format $pos $ws_pff
 #    echo "pos=$pos ws_pft=#$ws_pft# ws_pff=#$ws_pff#" > $debugfile
 }
-

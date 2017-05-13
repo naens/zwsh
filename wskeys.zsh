@@ -61,6 +61,22 @@ ws-word-right() {
     CURSOR=$wstext_pos
 }
 
+zle -N ws-end-word
+bindkey -M zsh-ws "^[e" ws-end-word
+ws-end-word() {
+    wstext-end-word $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-next-printable
+bindkey -M zsh-ws "^[p" ws-next-printable
+ws-next-printable() {
+    echo WS_NEXT_PRINTABLE cursor=$CURSOR > $debugfile
+    wstext-next-printable $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+    echo WS_NEXT_PRINTABLE new=$wstext_pos > $debugfile
+}
+
 zle -N ws-start-doc
 bindkey -M zsh-ws "^R" ws-start-doc
 ws-start-doc() {
@@ -91,7 +107,8 @@ ws-self-insert() {
 zle -N ws-split-line
 bindkey -M zsh-ws "^N" ws-split-line
 ws-split-line() {
-    LBUFFER+=\\$'\n'
+    wstext-insert $CURSOR "\\$'\n'" ws_text
+    CURSOR=$wstext_pos
 }
 
 zle -N ws-kr
@@ -105,16 +122,49 @@ ws-kr() {
 bindkey -M zsh-ws "^[[200~" bracketed-paste
 
 
-# Delete Keys
-bindkey -M zsh-ws "^G" delete-char-or-list
-bindkey -M zsh-ws "^H" backward-delete-char
-bindkey -M zsh-ws "^?" backward-delete-char
+# Delete char
+zle -N ws-del-char-left
+bindkey -M zsh-ws "^H" ws-del-char-left
+bindkey -M zsh-ws "^?" ws-del-char-left
+ws-del-char-left() {
+    wstext-del-char-left $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-del-char-right
+bindkey -M zsh-ws "^G" ws-del-char-right
+ws-del-char-right() {
+    wstext-del-char-right $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+# Delete word
+zle -N ws-del-word-right
+bindkey -M zsh-ws "^T" ws-del-word-right
+ws-del-word-right() {
+    wstext-del-word-right $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-del-word-left
+bindkey -M zsh-ws "^[h" ws-del-word-left
+bindkey -M zsh-ws "^[H" ws-del-word-left
+ws-del-word-left() {
+    wstext-del-word-left $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-del-word
+bindkey -M zsh-ws "^[y" ws-del-word
+bindkey -M zsh-ws "^[Y" ws-del-word
+ws-del-word() {
+    wstext-del-word $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+
+# Delete line
 bindkey -M zsh-ws "^Y" kill-whole-line
-bindkey -M zsh-ws "^T" kill-word
-bindkey -M zsh-ws "^[h" backward-kill-word
-bindkey -M zsh-ws "^[H" backward-kill-word
-bindkey -M zsh-ws "^[y" delword
-bindkey -M zsh-ws "^[Y" delword
 bindkey -M zsh-ws "^Qy" kill-line
 bindkey -M zsh-ws "^QY" kill-line
 bindkey -M zsh-ws "^Q^H" backward-kill-line
