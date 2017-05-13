@@ -58,6 +58,18 @@ wstext-next-printable() {
     wstext_pos=$((i-1))
 }
 
+wstext-prev-printable() {
+    local pos=$1
+    local text="$2"
+    local max=${#text}
+
+    local i=$pos
+    while [[ ! "$text[i]" =~ [[:graph:]] && $i -ge 1 ]]; do
+        i=$((i-1))
+    done
+    wstext_pos=$i
+}
+
 
 # Line functions
 wstext-line-start() {}
@@ -149,22 +161,32 @@ wstext-del-word-right() {
     wstext-upd
 }
 
-# delete whole word if inside a word, otherwise works like del-word-right
+# delete whole word if inside a word and characters and non-printable outside
 wstext-del-word() {
     local pos="$1"
     local textvar="$2"
     local text="${(P)textvar}"
-    
     wstext-prev-word $((pos+1)) "$text"
     local word_begin=$wstext_pos
     wstext-end-word $word_begin "$text"
     local word_end=$wstext_pos
-
-    if [[ $pos -ge $word_begin && $pos -lt $word_end ]]; then
-        wstext-del-word-right $word_begin "$textvar"
+    wstext-next-word $pos "$text"
+    local to=$wstext_pos
+    local end=${#text}
+    if [[ $pos -lt $word_end ]]; then
+        wstext-next-printable $word_end "$text"
+        local del_end=$wstext_pos
+        eval $textvar=\'$text[1,word_begin]$text[del_end+1,end]\'
+        wstext_pos=$word_begin
     else
-        wstext-del-word-right $pos "$textvar"
-    fi    
+        wstext-prev-printable $pos "$text"
+        local prev_printable=$wstext_pos
+        wstext-next-printable $((pos+1)) "$text"
+        local next_printable=$wstext_pos
+        eval $textvar=\'$text[1,prev_printable]$text[next_printable+1,end]\'
+        wstext_pos=$prev_printable
+    fi
+    wstext-upd
 }
 
 # Delete line functions
@@ -182,17 +204,19 @@ wstext-del-paragraph-left() {}
 wstext-del-paragraph-right() {}
 wstext-del-paragraph() {}
 
-# Insert functions: insert text after position
+# Insert functions: insert text after position: !! substitute single quote by "'"...
 wstext-insert() {
-    local pos="$1"
+    local pos=$1
     local str="$2"
     local textvar="$3"
     local text="${(P)textvar}"
     local sz=${#text}
     if [[ $pos -eq 0 ]]; then
-        eval $textvar=\'$str$text\'
+        eval $textvar=\'${str:gs/\'/\'\"\'\"\'}${text:gs/\'/\'\"\'\"\'}\'
     else
-        eval $textvar=\'$text[1,pos]$str$text[pos+1,sz]\'
+        local b="$text[1,pos]"
+        local e="$text[pos+1,${#text}]"
+        eval $textvar=\'${b:gs/\'/\'\"\'\"\'}${str:gs/\'/\'\"\'\"\'}${e:gs/\'/\'\"\'\"\'}\'
     fi
     wstext_pos=$((pos + ${#str}))
     wstext-upd
