@@ -81,10 +81,10 @@ ws-end-word() {
 zle -N ws-next-printable
 bindkey -M zsh-ws "^[p" ws-next-printable
 ws-next-printable() {
-    echo WS_NEXT_PRINTABLE cursor=$CURSOR > $debugfile
+    ws-debug WS_NEXT_PRINTABLE cursor=$CURSOR
     wstext-next-printable $CURSOR "$ws_text"
     CURSOR=$wstext_pos
-    echo WS_NEXT_PRINTABLE new=$wstext_pos > $debugfile
+    ws-debug WS_NEXT_PRINTABLE new=$wstext_pos
 }
 
 zle -N ws-start-doc
@@ -133,7 +133,7 @@ bindkey -M zsh-ws "^[[200~" ws-bracketed-paste
 ws-bracketed-paste() {
     local ws_pasted_text="$zle_bracketed_paste"
     zle bracketed-paste ws_pasted_text
-    echo pasted text is \"$ws_pasted_text\" > $debugfile
+    ws-debug pasted text is \"$ws_pasted_text\"
     wstext-insert $CURSOR $ws_pasted_text ws_text
     CURSOR=$wstext_pos
     #TODO: select (kb-kk), insert into kill ring...
@@ -235,13 +235,6 @@ bindkey -M zsh-ws "^J" run-help
 bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
-# testing dialog
-debugfile=/dev/pts/6
-if [[ ! -e $debugfile ]]; then
-    debugfile=/dev/null
-fi
-debugfile=/dev/null
-
 bindkey -M zsh-ws "^Ql" wskwtest
 zle -N wskwtest
 wskwtest() {
@@ -251,7 +244,7 @@ wskwtest() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw () {
-    echo KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE> $debugfile
+    ws-debug KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun

@@ -190,4 +190,16 @@ ws-find-left() {
         echo $res chr=$text[res]
     fi
 }
-    
+
+ws-defvar() {
+    local varname=$1
+    local text="$2"
+    eval $varname=\'${text:gs/\'/\'\"\'\"\'}\'
+}
+
+# debug
+ws-debug() {
+    local debug_string="$@"
+    local ws_debugfile=/dev/null
+    echo "$debug_string" > $ws_debugfile
+}
