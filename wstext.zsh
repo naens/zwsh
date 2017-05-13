@@ -85,9 +85,10 @@ wstext-insert() {
     local text="${(P)textvar}"
     local sz=${#text}
     if [[ $pos -eq 0 ]]; then
-        $textvar=$str$text
+        eval "$textvar=\"$str$text\""
     else
-        $textvar=$text[1,pos]$str$text[pos+1,sz]
+        eval "$textvar=\"$text[1,pos]$str$text[pos+1,sz]\""
     fi
-    wstext_pos=$((pos + sz))
+    wstext_pos=$((pos + ${#str}))
+    wstext-upd
 }

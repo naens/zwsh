@@ -24,6 +24,7 @@ zle-line-init() {
     unset kr
     unset ws_select
     unset region_highlight
+    unset ws_text
 }
 
 # Cursor Keys
@@ -43,7 +44,7 @@ wstext_textvar=ws_text
 wstext_updfnvar=ws-updfn
 
 ws-updfn() {
-    ws_text="$BUFFER"
+    BUFFER="$ws_text"
 }
 
 zle -N ws-word-left
@@ -79,6 +80,14 @@ bindkey -M zsh-ws "^[" send-break
 #bindkey "^B" TODO: align?
 
 # Insert Keys
+zle -N ws-self-insert
+bindkey -M zsh-ws -R "!"-"~" ws-self-insert
+bindkey -M zsh-ws " " ws-self-insert
+ws-self-insert() {
+    wstext-insert $CURSOR $KEYS ws_text
+    CURSOR=$wstext_pos
+}
+
 zle -N ws-split-line
 bindkey -M zsh-ws "^N" ws-split-line
 ws-split-line() {
@@ -153,11 +162,11 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/4
+debugfile=/dev/pts/12
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
-debugfile=/dev/null
+#debugfile=/dev/null
 
 bindkey -M zsh-ws "^Ql" wskwtest
 zle -N wskwtest
@@ -175,6 +184,6 @@ zle-line-pre-redraw () {
 }
 
 main-pre-redraw() {
-    ws-updfn # temporary
-    echo MAIN buffer="$BUFFER" > $debugfile
+#    ws-updfn # temporary
+#    echo MAIN buffer="$BUFFER" > $debugfile
 }
