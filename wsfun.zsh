@@ -162,3 +162,32 @@ ws-insert-formatted-at() {
     ws-apply-format $pos $ws_pff
 #    echo "pos=$pos ws_pft=#$ws_pft# ws_pff=#$ws_pff#" > $debugfile
 }
+
+ws-find-right() {
+    local pos=$1
+    local pattern="$2"
+    local text="$3"
+    local search_part="$text[pos+1,${#text}]"
+    local rest=${search_part%%$~pattern*}
+    if [[ "$rest" = "$search_part" ]]; then
+        echo -1
+    else
+        local res=$((pos+${#rest}+1))
+        echo $res chr=$text[res]
+    fi
+}
+
+ws-find-left() {
+    local pos=$1
+    local pattern="$2"
+    local text="$3"
+    local search_part="$text[1,pos]"
+    local rest=${search_part%$~pattern*}
+    if [[ "$rest" = "$search_part" ]]; then
+        echo -1
+    else
+        res=$((${#rest}+1))
+        echo $res chr=$text[res]
+    fi
+}
+    
