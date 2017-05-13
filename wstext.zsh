@@ -49,6 +49,9 @@ wstext-upd() {
     fi
 }
 
+# Paragraph functions
+wstext-next-paragraph() {}
+wstext-prev-paragraph() {}
 
 # Delete character functions
 wstext-del-char-left() {}
@@ -68,6 +71,11 @@ wstext-del-line() {}
 wstext-del-sentence-left() {}
 wstext-del-sentence-right() {}
 wstext-del-sentence() {}
+
+# Delete paragraph functions
+wstext-del-paragraph-left() {}
+wstext-del-paragraph-right() {}
+wstext-del-paragraph() {}
 
 # Insert functions: insert text after position
 wstext-insert() {

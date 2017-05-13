@@ -21,10 +21,12 @@ are supposed to, will also be much easier.
 Functions:
  + next / previous word (position text: position)
  + next / previous sentence (position text: position)
+ + next / previous paragraph (position text: postion)
  + delete character left / right (position textvar: position)
  + delete word left / right / whole (position textvar: position)
  + delete line left / right / whole (position textvar: position)
- + delete sentence left / right / whole (text cursor: position)
+ + delete sentence left / right / whole (position textvar: position)
+ + delete paragraph left / right / whole (position textvar: position)
  + get position of a line (line: position)
  + get length of a line (line: length)
  + get line of a position (position: line)
