@@ -7,7 +7,7 @@
 # ^L=repeat previous incremental search
 
 zle -N ws-find
-bindkey -M zsh-ws "^Qf" history-incremental-search-backward
+bindkey -M zsh-ws "^Qf" ws-find
 bindkey -M zsh-ws "^QF" ws-find
 ws-find() {
     ws_search=$LBUFFER
@@ -26,6 +26,14 @@ wsblock-find() {
         hst=$HISTNO
         zle history-incremental-search-backward $ws_search
     fi
+}
+
+bindkey -M isearch -R "!"-"~" self-insert
+bindkey -M isearch " " self-insert
+
+zle -N zle-history-line-set
+zle-history-line-set() {
+    ws_text="$BUFFER"
 }
 
 # main mode find keys
@@ -64,6 +72,7 @@ zle-isearch-exit() {
     fi
     unset hst
 }
+
 
 # default zsh search functions:
 #accept-line-and-down-history

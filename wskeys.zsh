@@ -107,7 +107,7 @@ ws-self-insert() {
 zle -N ws-split-line
 bindkey -M zsh-ws "^N" ws-split-line
 ws-split-line() {
-    wstext-insert $CURSOR "\\$'\n'" ws_text
+    wstext-insert $CURSOR \\$'\n' ws_text
     CURSOR=$wstext_pos
 }
 
@@ -118,9 +118,16 @@ ws-kr() {
     wsdialog_krdial-run
 }
 
-# TODO: remove standout OR integrate with blocks
-bindkey -M zsh-ws "^[[200~" bracketed-paste
-
+zle -N ws-bracketed-paste
+bindkey -M zsh-ws "^[[200~" ws-bracketed-paste
+ws-bracketed-paste() {
+    local ws_pasted_text="$zle_bracketed_paste"
+    zle bracketed-paste ws_pasted_text
+    echo pasted text is \"$ws_pasted_text\" > $debugfile
+    wstext-insert $CURSOR $ws_pasted_text ws_text
+    CURSOR=$wstext_pos
+    #TODO: select (kb-kk), insert into kill ring...
+}
 
 # Delete char
 zle -N ws-del-char-left
@@ -212,7 +219,7 @@ bindkey -M zsh-ws "^V" overwrite-mode
 bindkey -M zsh-ws "^I" expand-or-complete
 
 # testing dialog
-debugfile=/dev/pts/12
+debugfile=/dev/pts/6
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
@@ -227,6 +234,7 @@ wskwtest() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw () {
+    echo KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE> $debugfile
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun
@@ -234,6 +242,7 @@ zle-line-pre-redraw () {
 }
 
 main-pre-redraw() {
+    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
 #    ws-updfn # temporary
 #    echo MAIN buffer="$BUFFER" > $debugfile
 }
