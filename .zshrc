@@ -11,9 +11,9 @@ fi
 # set terminal options
 stty -ixon
 
-stty intr    undef # ^C
+#stty intr    undef # ^C
 stty kill    undef # ^U
-stty eof     undef # ^D
+#stty eof     undef # ^D
 stty start   undef # ^Q
 stty stop    undef # ^S
 stty susp    undef # ^Z
@@ -22,7 +22,7 @@ stty werase  undef # ^W
 stty lnext   undef # ^V
 stty discard undef # ^O
 
-stty eof "^\\"
+stty eof '^\\'
 stty intr '^]'
 
 setopt EXTENDED_GLOB
