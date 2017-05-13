@@ -32,12 +32,22 @@ bindkey -M zsh-ws "^E" up-line-or-history
 bindkey -M zsh-ws "^X" down-line-or-history
 bindkey -M zsh-ws "^S" backward-char
 bindkey -M zsh-ws "^D" forward-char
-bindkey -M zsh-ws "^Qs" beginning-of-line
-bindkey -M zsh-ws "^QS" beginning-of-line
-bindkey -M zsh-ws "^Qd" end-of-line
-bindkey -M zsh-ws "^QD" end-of-line
-#bindkey -M zsh-ws "^A" backward-word
-#bindkey -M zsh-ws "^F" forward-word
+
+zle -N ws-line-start
+bindkey -M zsh-ws "^Qs" ws-line-start
+bindkey -M zsh-ws "^QS" ws-line-start
+ws-line-start() {
+    wstext-line-start $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-line-end
+bindkey -M zsh-ws "^Qd" ws-line-end
+bindkey -M zsh-ws "^QD" ws-line-end
+ws-line-end() {
+    wstext-line-end $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
 
 # name of the variable containing the text
 wstext_textvar=ws_text
@@ -171,19 +181,26 @@ ws-del-word() {
 
 
 # Delete line
-bindkey -M zsh-ws "^Y" kill-whole-line
-bindkey -M zsh-ws "^Qy" kill-line
-bindkey -M zsh-ws "^QY" kill-line
-bindkey -M zsh-ws "^Q^H" backward-kill-line
+zle -N ws-del-line-left
+bindkey -M zsh-ws "^Q^H" ws-del-line-left
+ws-del-line-left() {
+    wstext-del-line-left $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
 
-zle -N delword
-delword() {
-    zle forward-word
-    zle backward-word
-    zle delete-word
-    if [[ $BUFFER[CURSOR] =~ [[:space:]] ]]; then
-	zle delete-char
-    fi
+zle -N ws-del-line-right
+bindkey -M zsh-ws "^Qy" ws-del-line-right
+bindkey -M zsh-ws "^QY" ws-del-line-right
+ws-del-line-right() {
+    wstext-del-line-right $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-del-line
+bindkey -M zsh-ws "^Y" ws-del-line
+ws-del-line() {
+    wstext-del-line $CURSOR ws_text
+    CURSOR=$wstext_pos
 }
 
 # Block Keys
@@ -223,7 +240,7 @@ debugfile=/dev/pts/6
 if [[ ! -e $debugfile ]]; then
     debugfile=/dev/null
 fi
-#debugfile=/dev/null
+debugfile=/dev/null
 
 bindkey -M zsh-ws "^Ql" wskwtest
 zle -N wskwtest

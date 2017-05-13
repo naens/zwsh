@@ -70,13 +70,79 @@ wstext-prev-printable() {
     wstext_pos=$i
 }
 
-
 # Line functions
-wstext-line-start() {}
-wstext-line-len() {}
-wstext-pos2line() {}
+wstext-line-start() {
+    local pos=$1
+    local text="$2"
+    
+    local i=$pos
+    while [[ ! "$text[i]" = $'\n' && $i -ge 1 ]]; do
+        i=$((i-1))
+    done
+    wstext_pos=$i
+}
 
-# Sentence functions
+wstext-line-end() {
+    local pos=$1
+    local text="$2"
+    local max=${#text}
+    
+    local i=$((pos+1))
+    while [[ ! "$text[i]" = $'\n' && $i -le $max ]]; do
+        i=$((i+1))
+    done
+    wstext_pos=$((i-1))
+}
+
+wstext-line2pos() {
+    local line=$1
+    local text="$2"
+    local i=1
+    local curr=1
+    local max=${#text}
+
+    while [[ $curr -lt $line && $i -le $max ]]; do
+        if [[ "$text[i]" = $'\n' ]]; then
+            curr=$((curr+1))
+        fi
+        i=$((i+1))
+    done
+    wstext_pos=$i
+}
+
+wstext-line-len() {
+    local line=$1
+    local text="$2"
+    local max=${#text}
+
+    wstext-line2pos $line "$text"
+
+    local begin=$wstext_pos
+    local i=$wstext_pos
+    while [[ ! "$text[i]" = $'\n' && $i -le $max ]]; do
+        i=$((i+1))
+    done
+    wstext_linelen=$((i-begin))
+}
+
+wstext-pos2line() {
+    local pos=$1
+    local text="$2"
+    local i=1
+    local curr=1
+    local max=${#text}
+
+    while [[ $i -lt $pos && $i -le $max ]]; do
+        if [[ "$text[i]" = $'\n' ]]; then
+            curr=$((curr+1))
+        fi
+        i=$((i+1))
+    done
+    wstext_line=$curr
+}
+
+
+# Sentence functions (end-of-sentence: dot-space-space or dot-newline)
 wstext-next-sentence() {}
 wstext-prev-sentence() {}
 
@@ -190,9 +256,53 @@ wstext-del-word() {
 }
 
 # Delete line functions
-wstext-del-line-left() {}
-wstext-del-line-right() {}
-wstext-del-line() {}
+wstext-del-line-left() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+    wstext-line-start $pos "$text"
+    local from=$wstext_pos
+    eval $textvar=\'$text[1,from]$text[pos+1,end]\'
+    wstext_pos=$from
+    wstext-upd
+}
+
+wstext-del-line-right() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+    wstext-line-start $pos "$text"
+    local begin=$wstext_pos
+    wstext-line-end $pos "$text"
+    local to=$wstext_pos
+    if [[ $begin -eq $pos && $to -lt $end ]]; then
+        eval $textvar=\'$text[1,pos]$text[to+2,end]\'
+    else
+        eval $textvar=\'$text[1,pos]$text[to+1,end]\'
+    fi
+    wstext_pos=$pos
+    wstext-upd    
+}
+
+wstext-del-line() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+    wstext-line-start $pos "$text"
+    local from=$wstext_pos
+    wstext-line-end $pos "$text"
+    local to=$wstext_pos
+    if [[ $to -lt $end ]]; then
+        eval $textvar=\'$text[1,from]$text[to+2,end]\'
+    else
+        eval $textvar=\'$text[1,from]$text[to+1,end]\'
+    fi
+    wstext_pos=$from
+    wstext-upd    
+}
 
 # Delete sentence functions
 wstext-del-sentence-left() {}
