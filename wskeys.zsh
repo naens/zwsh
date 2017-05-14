@@ -72,17 +72,20 @@ ws-word-right() {
 }
 
 zle -N ws-testfun
-bindkey -M zsh-ws "^[f" ws-testfun
+bindkey -M zsh-ws "^[=" ws-testfun
 ws-testfun() {
-    wstext-next-sentence $CURSOR "$ws_text"
-    if [[ -n $wstext_pos ]]; then
-        CURSOR=$wstext_pos
+    local sp=($(wstext-sentence-pos $CURSOR $ws_text))
+    if [[ ! $sp[1] -eq -1 ]]; then
+        ws-debug sp1=$sp[1] \"$ws_text[$sp[1]]\"
+        ws-debug sp2=$sp[2] \"$ws_text[$sp[2]]\"
+        ws-debug sp3=$sp[3] \"$ws_text[$sp[3]]\"
     fi
 }
+
 zle -N ws-testfun2
-bindkey -M zsh-ws "^[g" ws-testfun2
+bindkey -M zsh-ws "^[\\\\" ws-testfun2
 ws-testfun2() {
-    wstext-prev-sentence $CURSOR "$ws_text"
+    wstext-del-sentence-right $CURSOR ws_text
     if [[ -n $wstext_pos ]]; then
         CURSOR=$wstext_pos
     fi

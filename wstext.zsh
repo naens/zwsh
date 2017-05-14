@@ -153,17 +153,17 @@ wstext-next-sentence() {
         local b=($=ZPCRE_OP)
         local pos2=$b[1]
     else
-        unset wstext_pos
+        wstext_pos=${#text}
         return
     fi
 
     # find sentence end
-    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)"
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n)"
     if pcre_match -b -n $pos2 -- $text; then
         local b2=($=ZPCRE_OP)
         wstext_pos=$b2[1]
     else
-        unset wstext_pos
+        wstext_pos=${#text}
     fi
 }
 
@@ -173,14 +173,11 @@ wstext-prev-sentence() {
 
     wstext-prev-word $pos "$text"
     local x=$wstext_pos
-    unset wstext_pos
-    local text_part="$text[1,wstext_pos]"
-    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n)[[:punct:][:space:]]*"
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
     local lastb2=-1
     if pcre_match -b -- $text; then
         while [[ $? -eq 0 ]] do
             local b=($=ZPCRE_OP)
-            ws-debug x=$x b1=$b[1] b2=$b[2] PREV_SENTENCE: found $b
             if [[ $b[1] -gt $x ]]; then
                 wstext_pos=$lastb2
                 break;
@@ -190,9 +187,11 @@ wstext-prev-sentence() {
         done
         if [[ ! $lastb2 -eq -1 ]]; then
             wstext_pos=$lastb2
+        else
+            wstext_pos=0
         fi
     else
-        unset wstext_pos
+        wstext_pos=0
     fi
 }
 
@@ -364,9 +363,113 @@ wstext-del-line() {
 }
 
 # Delete sentence functions
-wstext-del-sentence-left() {}
-wstext-del-sentence-right() {}
-wstext-del-sentence() {}
+
+# get sentence begin / end from the position
+wstext-sentence-pos() {
+    local pos=$1
+    local text="$2"
+    local end=${#text}
+
+    local i=1
+    while [[ ! "$text[i]" =~ "[[:alnum:]]" && $i -le $end ]]; do
+        i=$((i+1))
+    done
+    
+    if [[ $pos -lt $((i-1)) || $i -gt $end ]]; then
+        echo -1
+        return
+    fi
+    local from=$i
+    local to=-1
+    local esen=-1
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
+    if pcre_match -b -n $from -- $text; then
+        while [[ $? -eq 0 ]] do
+            local b=($=ZPCRE_OP)
+            if [[ $b[2] -gt $pos || ($b[2] -eq $pos && $pos -eq $end)]]; then
+                to=$(($b[2]+1))
+                esen=$(($b[1]+1))
+                break;
+            fi
+            from=$(($b[2]+1))
+            pcre_match -b -n $b[2] -- $text
+        done
+        if [[ $to -eq -1 ]]; then
+            echo -1
+        else
+            echo $from $esen $to
+        fi
+    else
+        echo -1
+    fi
+}
+
+wstext-del-sentence-left() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    # getting the positions of the current sentence
+    local sp=($(wstext-sentence-pos $CURSOR $text))
+
+    # return if outside of any sentence
+    if [[ $sp[1] -eq -1 ]]; then
+        unset wstext_pos
+        return
+    fi
+
+    # if at the beginning, delete previous sentence
+    if [[ $((pos+1)) -eq $sp[1] && $pos -gt 0 ]]; then
+        ws-debug DEL_SENTENCE_LEFT: Delete Previous Sentence
+        wstext-prev-sentence $pos "$text"
+        local from=$wstext_pos
+        ws-debug text=\"$text\" from=$from pos=$pos end=$end
+        ws-defvar $textvar "$text[1,from]$text[pos+1,end]"
+        wstext_pos=$from
+        wstext-upd
+    else
+        # if in the middle, delete the beginning of the sentence
+        ws-defvar $textvar "$text[1,$sp[1]-1]$text[pos+1,end]"
+        wstext_pos=$(($sp[1]-1))
+        wstext-upd
+    fi
+}
+
+# deletes from the current position till the stops
+wstext-del-sentence-right() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    local sp=($(wstext-sentence-pos $CURSOR $text))
+
+    if [[ ! $sp[1] -eq -1 ]]; then
+        ws-defvar $textvar "$text[1,$pos]$text[$sp[2],end]"
+        wstext_pos=$pos
+        wstext-upd
+    else
+        unset wstext_pos
+    fi
+}
+
+wstext-del-sentence() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    local sp=($(wstext-sentence-pos $CURSOR $text))
+
+    if [[ ! $sp[1] -eq -1 ]]; then
+        ws-defvar $textvar "$text[1,$sp[1]-1]$text[$sp[3],end]"
+        wstext_pos=$(($sp[1]-1))
+        wstext-upd
+    else
+        unset wstext_pos
+    fi
+}
 
 # Delete paragraph functions
 wstext-del-paragraph-left() {}
