@@ -154,12 +154,39 @@ wstext-next-sentence() {
         i=$((i+1))
     done
 
+    ws-debug NEXT_SENTENCE: pos=$pos max=$max prt=$i text=\""$text"\"
     # find next sentence end
-    
-    wstext_pos=$((i-1))
+    local x=$(ws-find-right $i $'(.  |.\n)' "$text")
+    ws-debug NEXT_SENTENCE: pos=$pos max=$max prt=$i x=$x 
+    if [[ $x -gt -1 ]]; then
+        wstext_pos=$x
+    else
+        wstext_pos=${#text}
+    fi
 }
 
-wstext-prev-sentence() {}
+wstext-prev-sentence() {
+    local pos=$1
+    local text="$2"
+    local max=${#text}
+
+    #find next printable character
+    local i=$pos
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
+        i=$((i-1))
+    done
+
+    ws-debug PREV_SENTENCE: pos=$pos max=$max prt=$i text=\""$text"\"
+    # find next sentence end
+    local x=$(ws-find-left $i $'(.  |.\n)' "$text")
+    ws-debug PREV_SENTENCE: pos=$pos max=$max prt=$i x=$x 
+    if [[ $x -gt -1 ]]; then
+        wstext_pos=$x
+    else
+        wstext_pos=0
+    fi
+
+}
 
 wstext-upd() {
     if typeset -f $wstext_updfnvar > /dev/null; then
