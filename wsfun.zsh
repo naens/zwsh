@@ -164,30 +164,31 @@ ws-insert-formatted-at() {
 }
 
 ws-find-right() {
-    local pos=$1
+    local pos=$(ws-max 1 $1)
     local pattern="$2"
     local text="$3"
-    local search_part="$text[pos+1,${#text}]"
+    local search_part="$text[pos,${#text}]"
     local rest=${search_part%%$~pattern*}
+    ws-debug WS_FIND_RIGHT: pos=$pos pattern=\""$pattern"\" text=\""$text"\" search_part=\""$search_part"\" rest=\""$rest"\"
     if [[ "$rest" = "$search_part" ]]; then
         echo -1
     else
-        local res=$((pos+${#rest}+1))
-        echo $res chr=$text[res]
+        local res=$((pos+${#rest}))
+        echo $res
     fi
 }
 
 ws-find-left() {
-    local pos=$1
+    local pos=$(ws-max 1 $1)
     local pattern="$2"
     local text="$3"
-    local search_part="$text[1,pos]"
+    local search_part="$text[1,pos-1]"
     local rest=${search_part%$~pattern*}
     if [[ "$rest" = "$search_part" ]]; then
         echo -1
     else
         res=$((${#rest}+1))
-        echo $res chr=$text[res]
+        echo $res
     fi
 }
 
@@ -200,6 +201,22 @@ ws-defvar() {
 # debug
 ws-debug() {
     local debug_string="$@"
-    local ws_debugfile=/dev/null
+    local ws_debugfile=/dev/pts/3
     echo "$debug_string" > $ws_debugfile
+}
+
+ws-min() {
+    if [[ "$1" -lt "$2" ]]; then
+        echo "$1"
+    else
+        echo "$2"
+    fi
+}
+
+ws-max() {
+    if [[ "$1" -gt "$2" ]]; then
+        echo "$1"
+    else
+        echo "$2"
+    fi
 }
