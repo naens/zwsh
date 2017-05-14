@@ -146,46 +146,54 @@ wstext-pos2line() {
 wstext-next-sentence() {
     local pos=$1
     local text="$2"
-    local max=${#text}
 
-    #find next printable character
-    local i=$((pos+1))
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
-        i=$((i+1))
-    done
-
-    ws-debug NEXT_SENTENCE: pos=$pos max=$max prt=$i text=\""$text"\"
-    # find next sentence end
-    local x=$(ws-find-right $i $'(.  |.\n)' "$text")
-    ws-debug NEXT_SENTENCE: pos=$pos max=$max prt=$i x=$x 
-    if [[ $x -gt -1 ]]; then
-        wstext_pos=$x
+    # find next alphanumeric character
+    pcre_compile -m -x "[[:alnum:]]"
+    if pcre_match -b -n $pos -- $text; then
+        local b=($=ZPCRE_OP)
+        local pos2=$b[1]
     else
-        wstext_pos=${#text}
+        unset wstext_pos
+        return
+    fi
+
+    # find sentence end
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)"
+    if pcre_match -b -n $pos2 -- $text; then
+        local b2=($=ZPCRE_OP)
+        wstext_pos=$b2[1]
+    else
+        unset wstext_pos
     fi
 }
 
 wstext-prev-sentence() {
     local pos=$1
     local text="$2"
-    local max=${#text}
 
-    #find next printable character
-    local i=$pos
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
-        i=$((i-1))
-    done
-
-    ws-debug PREV_SENTENCE: pos=$pos max=$max prt=$i text=\""$text"\"
-    # find next sentence end
-    local x=$(ws-find-left $i $'(.  |.\n)' "$text")
-    ws-debug PREV_SENTENCE: pos=$pos max=$max prt=$i x=$x 
-    if [[ $x -gt -1 ]]; then
-        wstext_pos=$x
+    wstext-prev-word $pos "$text"
+    local x=$wstext_pos
+    unset wstext_pos
+    local text_part="$text[1,wstext_pos]"
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n)[[:punct:][:space:]]*"
+    local lastb2=-1
+    if pcre_match -b -- $text; then
+        while [[ $? -eq 0 ]] do
+            local b=($=ZPCRE_OP)
+            ws-debug x=$x b1=$b[1] b2=$b[2] PREV_SENTENCE: found $b
+            if [[ $b[1] -gt $x ]]; then
+                wstext_pos=$lastb2
+                break;
+            fi
+            lastb2=$b[2]
+            pcre_match -b -n $b[2] -- $text
+        done
+        if [[ ! $lastb2 -eq -1 ]]; then
+            wstext_pos=$lastb2
+        fi
     else
-        wstext_pos=0
+        unset wstext_pos
     fi
-
 }
 
 wstext-upd() {
@@ -257,7 +265,7 @@ wstext-del-word-right() {
     if [[ $pos -le $word_begin ]]; then
         wstext-next-printable $word_end "$text"
         local del_end=$wstext_pos
-        if [[ $pos -eq 0 && $de_end -eq 0 ]]; then
+        if [[ $pos -eq 0 && $del_end -eq 0 ]]; then
             ws-defvar $textvar "$text[2,end]"
         else
             ws-defvar $textvar "$text[1,pos]$text[del_end+1,end]"

@@ -75,13 +75,17 @@ zle -N ws-testfun
 bindkey -M zsh-ws "^[f" ws-testfun
 ws-testfun() {
     wstext-next-sentence $CURSOR "$ws_text"
-    CURSOR=$wstext_pos
+    if [[ -n $wstext_pos ]]; then
+        CURSOR=$wstext_pos
+    fi
 }
 zle -N ws-testfun2
 bindkey -M zsh-ws "^[g" ws-testfun2
 ws-testfun2() {
     wstext-prev-sentence $CURSOR "$ws_text"
-    CURSOR=$wstext_pos
+    if [[ -n $wstext_pos ]]; then
+        CURSOR=$wstext_pos
+    fi
 }
 
 zle -N ws-start-doc

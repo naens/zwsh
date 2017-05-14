@@ -27,6 +27,8 @@ stty intr '^]'
 
 setopt EXTENDED_GLOB
 
+zmodload zsh/pcre
+
 # global variables and functions
 . $dir/wsfun.zsh
 
