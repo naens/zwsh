@@ -25,6 +25,15 @@
 *** Additional delete keys
 ~^[H~: word-left ~^[Y~: whole-word
 
+*** Sentence and paragraph deletion
+| item	    | go-left | go-right | del-left | del-right | del-whole |
+|-----------+---------+----------+----------+-----------+-----------|
+| sentence  | 	^O S  |   ^O D   |   ^O G   |    ^O H   |   ^O Y    |
+| paragraph |   ^O ^S |   ^O ^D  |   ^O ^G  |    ^O ^H  |   ^O ^Y   |
+|-----------+---------+----------+----------+-----------+-----------|
+(char: C, word: M, line: C-Q,  sexp: C-Q-C sentence: C-O paragraph: C-O-C)
+
+
 ** Select-Copy
 ~^KB~: mark-begin ~^KK~: mark-end
 ~^KC~: copy ~^KV~: move ~^KY~: delete
@@ -119,5 +128,3 @@ find with ~^QF~.
 
 ** Other
 ~^KQ~: quit
-
-
