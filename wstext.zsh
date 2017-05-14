@@ -143,7 +143,22 @@ wstext-pos2line() {
 
 
 # Sentence functions (end-of-sentence: dot-space-space or dot-newline)
-wstext-next-sentence() {}
+wstext-next-sentence() {
+    local pos=$1
+    local text="$2"
+    local max=${#text}
+
+    #find next printable character
+    local i=$((pos+1))
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
+        i=$((i+1))
+    done
+
+    # find next sentence end
+    
+    wstext_pos=$((i-1))
+}
+
 wstext-prev-sentence() {}
 
 wstext-upd() {
@@ -204,24 +219,32 @@ wstext-del-word-right() {
     local pos="$1"
     local textvar="$2"
     local text="${(P)textvar}"
-    wstext-prev-word $((pos+1)) "$text"
+    wstext-prev-word $((pos+2)) "$text"
     local word_begin=$wstext_pos
     wstext-end-word $word_begin "$text"
     local word_end=$wstext_pos
     wstext-next-word $pos "$text"
-    local to=$wstext_pos
+    local next_word=$wstext_pos
     local end=${#text}
     ws-debug pos=$pos word_begin=$word_begin
-    if [[ $pos -eq $word_begin ]]; then
+    if [[ $pos -le $word_begin ]]; then
         wstext-next-printable $word_end "$text"
         local del_end=$wstext_pos
-        ws-defvar $textvar "$text[1,pos]$text[del_end+1,end]"
+        if [[ $pos -eq 0 && $de_end -eq 0 ]]; then
+            ws-defvar $textvar "$text[2,end]"
+        else
+            ws-defvar $textvar "$text[1,pos]$text[del_end+1,end]"
+        fi
     elif [[ $pos -lt $word_end ]]; then
         ws-defvar $textvar "$text[1,pos]$text[word_end+1,end]"
     else
         wstext-next-printable $((pos+1)) "$text"
         local next_printable=$wstext_pos
-        ws-defvar $textvar "$text[1,pos]$text[next_printable+1,end]"
+        if [[ $next_printable -eq $next_word ]]; then
+            ws-defvar $textvar "$text[1,pos]$text[next_printable,end]"
+        else
+            ws-defvar $textvar "$text[1,pos]$text[next_printable+1,end]"
+        fi
     fi
     wstext_pos=$pos
     wstext-upd
@@ -232,7 +255,7 @@ wstext-del-word() {
     local pos="$1"
     local textvar="$2"
     local text="${(P)textvar}"
-    wstext-prev-word $((pos+1)) "$text"
+    wstext-prev-word $((pos+2)) "$text"
     local word_begin=$wstext_pos
     wstext-end-word $word_begin "$text"
     local word_end=$wstext_pos
@@ -242,8 +265,9 @@ wstext-del-word() {
     if [[ $pos -lt $word_end ]]; then
         wstext-next-printable $word_end "$text"
         local del_end=$wstext_pos
-        ws-defvar $textvar "$text[1,word_begin]$text[del_end+1,end]"
-        wstext_pos=$word_begin
+        local from=$(ws-min $word_begin $pos)
+        ws-defvar $textvar "$text[1,from]$text[del_end+1,end]"
+        wstext_pos=$from
     else
         wstext-prev-printable $pos "$text"
         local prev_printable=$wstext_pos
