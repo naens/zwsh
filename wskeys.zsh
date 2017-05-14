@@ -71,20 +71,17 @@ ws-word-right() {
     CURSOR=$wstext_pos
 }
 
-zle -N ws-end-word
-bindkey -M zsh-ws "^[e" ws-end-word
-ws-end-word() {
-    wstext-end-word $CURSOR "$ws_text"
+zle -N ws-testfun
+bindkey -M zsh-ws "^[f" ws-testfun
+ws-testfun() {
+    wstext-next-sentence $CURSOR "$ws_text"
     CURSOR=$wstext_pos
 }
-
-zle -N ws-next-printable
-bindkey -M zsh-ws "^[p" ws-next-printable
-ws-next-printable() {
-    ws-debug WS_NEXT_PRINTABLE cursor=$CURSOR
-    wstext-next-printable $CURSOR "$ws_text"
+zle -N ws-testfun2
+bindkey -M zsh-ws "^[g" ws-testfun2
+ws-testfun2() {
+    wstext-prev-sentence $CURSOR "$ws_text"
     CURSOR=$wstext_pos
-    ws-debug WS_NEXT_PRINTABLE new=$wstext_pos
 }
 
 zle -N ws-start-doc
@@ -102,8 +99,6 @@ ws-end-doc() {
 bindkey -M zsh-ws "^Q^[" undefined-key
 bindkey -M zsh-ws "^K^[" undefined-key
 bindkey -M zsh-ws "^[" send-break
-
-#bindkey "^B" TODO: align?
 
 # Insert Keys
 zle -N ws-self-insert
@@ -244,7 +239,7 @@ wskwtest() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw () {
-    ws-debug KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE
+#    ws-debug KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun
