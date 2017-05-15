@@ -201,9 +201,61 @@ wstext-upd() {
     fi
 }
 
-# Paragraph functions
-wstext-next-paragraph() {}
-wstext-prev-paragraph() {}
+# Previous paragraph: find previous empty line or start of text
+wstext-prev-paragraph() {
+    local pos=$1
+    local text="$2"
+
+    # find an alnum character
+    local i=$pos
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
+        i=$((i-1))
+    done
+
+    # go to first empty line before $i
+    pcre_compile -m -x "\n[[:space:]\\\\]*\n"
+    local lastb1=-1
+    if pcre_match -b -- $text; then
+        while [[ $? -eq 0 ]]; do
+            local b=($=ZPCRE_OP)
+            ws-debug b1=$b[1] b2=$b[2]
+            if [[ $b[1] -gt $i ]]; then
+                break
+            fi
+            lastb1=$b[1]
+            pcre_match -b -n $b[2] -- $text
+        done
+        if [[ $lastb1 -eq -1 ]]; then
+            wstext_pos=0
+        else
+            wstext_pos=$((lastb1+1))
+        fi
+    else
+        wstext_pos=0
+    fi
+}
+
+# Next paragraph: find next empty line or end of text
+wstext-next-paragraph() {
+    local pos=$1
+    local text="$2"
+    local max=${#text}
+
+    # find an alnum character
+    local i=$pos
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $max ]]; do
+        i=$((i+1))
+    done
+
+    # go to first empty line before $i
+    pcre_compile -m -x "\n[[:space:]\\\\]*\n"
+    if pcre_match -b -n $i -- $text; then
+        local b=($=ZPCRE_OP)
+        wstext_pos=$(($b[1]+1))
+    else
+        wstext_pos=$max
+    fi
+}
 
 # Delete character functions
 wstext-del-char-left() {
@@ -450,7 +502,7 @@ wstext-del-sentence-right() {
         wstext_pos=$pos
         wstext-upd
     else
-        unset wstext_pos
+        wstext_pos=$pos
     fi
 }
 
@@ -467,14 +519,72 @@ wstext-del-sentence() {
         wstext_pos=$(($sp[1]-1))
         wstext-upd
     else
-        unset wstext_pos
+        wstext_pos=$pos
     fi
 }
 
 # Delete paragraph functions
-wstext-del-paragraph-left() {}
-wstext-del-paragraph-right() {}
-wstext-del-paragraph() {}
+wstext-find-nl-or-eol() {
+    local pos=$1
+    local text="$2"
+    local end=${#text}
+
+    local i=$(ws-min $((pos+1)) $end)
+    while [[ ! "$text[i]" = $'\n' && $i -lt $end ]]; do
+        i=$((i+1))
+    done
+    echo $i
+}
+
+wstext-del-paragraph-left() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    wstext-prev-paragraph $pos "$text"
+    local from=$(wstext-find-nl-or-eol $wstext_pos "$text")
+    ws-defvar $textvar "$text[1,from]$text[pos+1,end]"
+    wstext_pos=$from
+    wstext-upd
+}
+
+wstext-del-paragraph-right() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    wstext-next-paragraph $pos "$text"
+    local to=$wstext_pos
+    ws-defvar $textvar "$text[1,pos]$text[to,end]"
+    wstext_pos=$pos
+    wstext-upd
+}
+
+wstext-del-paragraph() {
+    local pos=$1
+    local textvar="$2"
+    local text="${(P)textvar}"
+    local end=${#text}
+
+    wstext-prev-paragraph $pos "$text"
+    local from=$wstext_pos
+
+    # find the beginning of the empty line for $to
+    wstext-next-paragraph $pos "$text"
+
+    # find the end of the line for the $to
+    local i=$wstext_pos
+    while [[ ! "$text[i]" = $'\n' && $i -le $end ]]; do
+        i=$((i+1))
+    done
+
+    local to=$i
+    ws-defvar $textvar "$text[1,from]$text[to+1,end]"
+    wstext_pos=$from
+    wstext-upd
+}
 
 # Insert functions: insert text after position: !! substitute single quote by "'"...
 wstext-insert() {
