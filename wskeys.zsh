@@ -240,48 +240,48 @@ ws-del-line() {
 }
 
 # Delete keys: sentence
-zle -N ws-ws-del-sentence-left
-bindkey -M zsh-ws "^Oh" ws-ws-del-sentence-left
-bindkey -M zsh-ws "^OH" ws-ws-del-sentence-left
-ws-ws-del-sentence-left() {
+zle -N ws-del-sentence-left
+bindkey -M zsh-ws "^Oh" ws-del-sentence-left
+bindkey -M zsh-ws "^OH" ws-del-sentence-left
+ws-del-sentence-left() {
     wstext-del-sentence-left $CURSOR ws_text
     CURSOR=$wstext_pos
 }
 
-zle -N ws-ws-del-sentence-right
-bindkey -M zsh-ws "^Og" ws-ws-del-sentence-right
-bindkey -M zsh-ws "^OG" ws-ws-del-sentence-right
-ws-ws-del-sentence-right() {
+zle -N ws-del-sentence-right
+bindkey -M zsh-ws "^Og" ws-del-sentence-right
+bindkey -M zsh-ws "^OG" ws-del-sentence-right
+ws-del-sentence-right() {
     wstext-del-sentence-right $CURSOR ws_text
     CURSOR=$wstext_pos
 }
 
-zle -N ws-ws-del-sentence
-bindkey -M zsh-ws "^Oy" ws-ws-del-sentence
-bindkey -M zsh-ws "^OY" ws-ws-del-sentence
-ws-ws-del-sentence() {
+zle -N ws-del-sentence
+bindkey -M zsh-ws "^Oy" ws-del-sentence
+bindkey -M zsh-ws "^OY" ws-del-sentence
+ws-del-sentence() {
     wstext-del-sentence $CURSOR ws_text
     CURSOR=$wstext_pos
 }
 
 # Delete keys: paragraph
-zle -N ws-ws-del-paragraph-left
-bindkey -M zsh-ws "^O^H" ws-ws-del-paragraph-left
-ws-ws-del-paragraph-left() {
+zle -N ws-del-paragraph-left
+bindkey -M zsh-ws "^O^H" ws-del-paragraph-left
+ws-del-paragraph-left() {
     wstext-del-paragraph-left $CURSOR ws_text
     CURSOR=$wstext_pos
 }
 
-zle -N ws-ws-del-paragraph-right
-bindkey -M zsh-ws "^O^G" ws-ws-del-paragraph-right
-ws-ws-del-paragraph-right() {
+zle -N ws-del-paragraph-right
+bindkey -M zsh-ws "^O^G" ws-del-paragraph-right
+ws-del-paragraph-right() {
     wstext-del-paragraph-right $CURSOR ws_text
     CURSOR=$wstext_pos
 }
 
-zle -N ws-ws-del-paragraph
-bindkey -M zsh-ws "^O^Y" ws-ws-del-paragraph
-ws-ws-del-paragraph() {
+zle -N ws-del-paragraph
+bindkey -M zsh-ws "^O^Y" ws-del-paragraph
+ws-del-paragraph() {
     wstext-del-paragraph $CURSOR ws_text
     CURSOR=$wstext_pos
 }
