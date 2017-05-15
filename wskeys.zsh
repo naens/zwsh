@@ -27,12 +27,30 @@ zle-line-init() {
     unset ws_text
 }
 
-# Cursor Keys
+# History keys
 bindkey -M zsh-ws "^E" up-line-or-history
 bindkey -M zsh-ws "^X" down-line-or-history
+
+# Cursor Move: character
 bindkey -M zsh-ws "^S" backward-char
 bindkey -M zsh-ws "^D" forward-char
 
+# Cursor Move: word
+zle -N ws-word-left
+bindkey -M zsh-ws "^A" ws-word-left
+ws-word-left() {
+    wstext-prev-word $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+    
+zle -N ws-word-right
+bindkey -M zsh-ws "^F" ws-word-right
+ws-word-right() {
+    wstext-next-word $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+# Cursor move: line
 zle -N ws-line-start
 bindkey -M zsh-ws "^Qs" ws-line-start
 bindkey -M zsh-ws "^QS" ws-line-start
@@ -49,26 +67,44 @@ ws-line-end() {
     CURSOR=$wstext_pos
 }
 
+# Cursor move: sentence
+zle -N ws-prev-sentence
+bindkey -M zsh-ws "^Os" ws-prev-sentence
+bindkey -M zsh-ws "^OS" ws-prev-sentence
+ws-prev-sentence() {
+    wstext-prev-sentence $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-next-sentence
+bindkey -M zsh-ws "^Od" ws-next-sentence
+bindkey -M zsh-ws "^OD" ws-next-sentence
+ws-next-sentence() {
+    wstext-next-sentence $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+# Cursor move: paragraph
+zle -N ws-prev-paragraph
+bindkey -M zsh-ws "^O^S" ws-prev-paragraph
+ws-prev-paragraph() {
+    wstext-prev-paragraph $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-next-paragraph
+bindkey -M zsh-ws "^O^D" ws-next-paragraph
+ws-next-paragraph() {
+    wstext-next-paragraph $CURSOR "$ws_text"
+    CURSOR=$wstext_pos
+}
+
 # name of the variable containing the text
 wstext_textvar=ws_text
 wstext_updfnvar=ws-updfn
 
 ws-updfn() {
     BUFFER="$ws_text"
-}
-
-zle -N ws-word-left
-bindkey -M zsh-ws "^A" ws-word-left
-ws-word-left() {
-    wstext-prev-word $CURSOR "$ws_text"
-    CURSOR=$wstext_pos
-}
-    
-zle -N ws-word-right
-bindkey -M zsh-ws "^F" ws-word-right
-ws-word-right() {
-    wstext-next-word $CURSOR "$ws_text"
-    CURSOR=$wstext_pos
 }
 
 zle -N ws-testfun
@@ -141,7 +177,7 @@ ws-bracketed-paste() {
     #TODO: select (kb-kk), insert into kill ring...
 }
 
-# Delete char
+# Delete keys: char
 zle -N ws-del-char-left
 bindkey -M zsh-ws "^H" ws-del-char-left
 bindkey -M zsh-ws "^?" ws-del-char-left
@@ -157,7 +193,7 @@ ws-del-char-right() {
     CURSOR=$wstext_pos
 }
 
-# Delete word
+# Delete keys: word
 zle -N ws-del-word-right
 bindkey -M zsh-ws "^T" ws-del-word-right
 ws-del-word-right() {
@@ -181,8 +217,7 @@ ws-del-word() {
     CURSOR=$wstext_pos
 }
 
-
-# Delete line
+# Delete keys: line
 zle -N ws-del-line-left
 bindkey -M zsh-ws "^Q^H" ws-del-line-left
 ws-del-line-left() {
@@ -204,6 +239,54 @@ ws-del-line() {
     wstext-del-line $CURSOR ws_text
     CURSOR=$wstext_pos
 }
+
+# Delete keys: sentence
+zle -N ws-ws-del-sentence-left
+bindkey -M zsh-ws "^Oh" ws-ws-del-sentence-left
+bindkey -M zsh-ws "^OH" ws-ws-del-sentence-left
+ws-ws-del-sentence-left() {
+    wstext-del-sentence-left $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-ws-del-sentence-right
+bindkey -M zsh-ws "^Og" ws-ws-del-sentence-right
+bindkey -M zsh-ws "^OG" ws-ws-del-sentence-right
+ws-ws-del-sentence-right() {
+    wstext-del-sentence-right $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-ws-del-sentence
+bindkey -M zsh-ws "^Oy" ws-ws-del-sentence
+bindkey -M zsh-ws "^OY" ws-ws-del-sentence
+ws-ws-del-sentence() {
+    wstext-del-sentence $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+# Delete keys: paragraph
+zle -N ws-ws-del-paragraph-left
+bindkey -M zsh-ws "^O^H" ws-ws-del-paragraph-left
+ws-ws-del-paragraph-left() {
+    wstext-del-paragraph-left $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-ws-del-paragraph-right
+bindkey -M zsh-ws "^O^G" ws-ws-del-paragraph-right
+ws-ws-del-paragraph-right() {
+    wstext-del-paragraph-right $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
+zle -N ws-ws-del-paragraph
+bindkey -M zsh-ws "^O^Y" ws-ws-del-paragraph
+ws-ws-del-paragraph() {
+    wstext-del-paragraph $CURSOR ws_text
+    CURSOR=$wstext_pos
+}
+
 
 # Block Keys
 #zle -N ws-kb
