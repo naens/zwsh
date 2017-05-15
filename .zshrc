@@ -25,6 +25,8 @@ stty discard undef # ^O
 stty eof '^\\'
 stty intr '^]'
 
+stty erase '^H'
+
 setopt EXTENDED_GLOB
 
 zmodload zsh/pcre
