@@ -180,7 +180,6 @@ ws-bracketed-paste() {
 # Delete keys: char
 zle -N ws-del-char-left
 bindkey -M zsh-ws "^H" ws-del-char-left
-bindkey -M zsh-ws "^?" ws-del-char-left
 ws-del-char-left() {
     wstext-del-char-left $CURSOR ws_text
     CURSOR=$wstext_pos
