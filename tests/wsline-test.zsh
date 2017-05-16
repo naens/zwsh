@@ -6,26 +6,28 @@
 # Enter: 1: go to field 2, 2: exit accepting
 # Esc: 1: exit cancelling, 2: go to field 1.
 
+zle -N testinit
+bindkey -M wskeys "^[p" testinit
 testinit() {
     LBUFFER+=$'\n'
     LBUFFER+="Field1: >>>"
     wsline-init "test1" $CURSOR 8 "^I" wsline-test1-tab
     LBUFFER+="<<<"
     LBUFFER+=$'\n'
-    LBUFFER+="Field2: >>>"
+    LBUFFER+="Field2: [[["
     wsline-init "test2" $CURSOR 12 "^I" wsline-test2-tab
-    LBUFFER+="<<<"
+    LBUFFER+="]]]"
     LBUFFER+=$'\n'
     wsline-activate "test1"
 }
 
 # test1 functions
 wsline-test1-tab() {
-    wsline-activate "test1"
+    wsline-activate "test2"
 }
 
 wsline-test1-accept() {
-    wsline-activate "test1"
+    wsline-activate "test2"
 }
 
 wsline-test1-cancel() {
@@ -36,7 +38,7 @@ wsline-test1-cancel() {
 
 # test2 functions
 wsline-test2-tab() {
-    wsline-activate "test2"
+    wsline-activate "test1"
 }
 
 wsline-test2-accept() {
@@ -48,5 +50,6 @@ wsline-test2-accept() {
 }
 
 wsline-test2-cancel() {
-    wsline-activate "test2"
+    wsline-activate "test1"
 }
+
