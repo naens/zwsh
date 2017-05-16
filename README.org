@@ -15,6 +15,11 @@ A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
  + [[doc/wskeys.org][key description]]
  + [[doc/wstext.org][the concept of separating the text from the screen]]
 
+* Tests
+The directory *tests* contains tests to test different modules independently
+from the whole application.  Also allows to test features and cases rarely or
+not used in the main application, which could be useful in future versions.
+
 ---------
 
 * To do plan
