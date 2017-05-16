@@ -148,7 +148,7 @@ ws-insert-text-at() {
         local bufsz=${#BUFFER}
         BUFFER=$BUFFER[1,pos]$text$BUFFER[pos+1,bufsz]
     fi
-    if [[ $pos -gt $CURSOR ]]; then
+    if [[ $pos -ge $CURSOR ]]; then
         CURSOR=$(( $curs + $pos ))
     fi
 }
@@ -169,7 +169,6 @@ ws-find-right() {
     local text="$3"
     local search_part="$text[pos,${#text}]"
     local rest=${search_part%%$~pattern*}
-    ws-debug WS_FIND_RIGHT: pos=$pos pattern=\""$pattern"\" text=\""$text"\" search_part=\""$search_part"\" rest=\""$rest"\"
     if [[ "$rest" = "$search_part" ]]; then
         echo -1
     else
@@ -201,8 +200,8 @@ ws-defvar() {
 # debug
 ws-debug() {
     local debug_string="$@"
-    local ws_debugfile=/dev/pts/2
-    ws_debugfile=/dev/null
+    local ws_debugfile=/dev/pts/13
+#    ws_debugfile=/dev/null
     echo "$debug_string" > $ws_debugfile
 }
 
@@ -220,4 +219,20 @@ ws-max() {
     else
         echo "$2"
     fi
+}
+
+# repeat insert $3 $2 times at $1 in BUFFER
+ws-insert-xtimes() {
+    local pos=$1
+    local i=$2
+    local string=$3
+    local curs=CURSOR
+    while [[ $i -gt 0 ]]; do
+        i=$((i-1))
+        ws-insert-text-at $pos "$string"
+        if [[ $curs -ge $pos ]]; then
+            curs=$((curs+${#string}))
+        fi
+    done
+    CURSOR=$curs
 }
