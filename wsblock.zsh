@@ -12,7 +12,7 @@
 # ^U=undo
 # ^6=redo (zle redo)
 
-bindkey -N wsblock zsh-ws
+bindkey -N wsblock wskeys
 # TODO:  * edit mode functions must be in separate file
 #        * update kr and kw modes: remove, avoid keybinding conflicts
 #        * bind saved selection to killring, insert:
@@ -41,8 +41,8 @@ wsblock-leave-mode() {
     unset kw
     ws_saved=$wsblock_text
     unset wsblock_text
-    zle -K zsh-ws
-#    zle -M "unset kb, return to zsh-ws mode"
+    zle -K wskeys
+#    zle -M "unset kb, return to wskeys mode"
 }
 
 wsblock-upd() {

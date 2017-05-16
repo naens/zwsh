@@ -1,4 +1,4 @@
-bindkey -N wsedit zsh-ws
+bindkey -N wsedit wskeys
 
 wsedit-pre-redraw() {
     if [[ $CURSOR -le $wsedit_begin ]]; then
@@ -80,8 +80,8 @@ wsedit-back-delline() {
 # Switch main to editor mode key bindings
 # Switch to editor mode: ^KD
 zle -N ws-edit
-bindkey -M zsh-ws "^Kd" ws-edit
-bindkey -M zsh-ws "^KD" ws-edit
+bindkey -M wskeys "^Kd" ws-edit
+bindkey -M wskeys "^KD" ws-edit
 bindkey -M wsblock "^Kd" ws-edit
 bindkey -M wsblock "^KD" ws-edit
 ws-edit() {
@@ -220,10 +220,10 @@ bindkey -M wsedit "^Kq" undefined-key
 bindkey -M wsedit "^KQ" undefined-key
 
 # TODO: * enter+open functions: ^KE=replace ^KS=keep-and-save
-bindkey -M zsh-ws "^Ke" undefined-key
-bindkey -M zsh-ws "^KE" undefined-key
-bindkey -M zsh-ws "^Ks" undefined-key
-bindkey -M zsh-ws "^KS" undefined-key
+bindkey -M wskeys "^Ke" undefined-key
+bindkey -M wskeys "^KE" undefined-key
+bindkey -M wskeys "^Ks" undefined-key
+bindkey -M wskeys "^KS" undefined-key
 
 # TODO: * Find functions
 bindkey -M wsedit "^Qf" undefined-key

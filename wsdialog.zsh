@@ -191,8 +191,8 @@ wsdialog-run() {
 
     # prepare wsline and enter
     local cols=$(tput cols)
-    eval "wsline_wsdialog_${dialog}_maxlen=$(( $cols - ${#line1_txt} - 1))"
-    wsline-init wsdialog_$dialog wsdialog-upd
+    local len=$(( $cols - ${#line1_txt} - 1))
+    wsline-init wsdialog_$dialog $CURSOR $len wsdialog-upd
     local mname=wsdialog_$dialog"_line"
     ws-debug WSDIALOG_RUN: enter \"$mname\" mode
     zle -K $mname

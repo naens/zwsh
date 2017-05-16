@@ -37,15 +37,15 @@ zmodload zsh/pcre
 # wstext
 . $dir/wstext.zsh
 
+# bind ws keys
+. $dir/wskeys.zsh
+
 # line mode
 . $dir/wsline.zsh
 
 # dialog mode
 . $dir/wsdialog.zsh
 	    
-# bind ws keys
-. $dir/wskeys.zsh
-
 # ws block functions
 . $dir/wsblock.zsh
 
@@ -60,6 +60,9 @@ zmodload zsh/pcre
 
 # ws editor mode
 . $dir/wsedit.zsh
+
+# load tests
+. $dir/tests/*
 
 # prompt functions
 function collapse_pwd
@@ -88,4 +91,4 @@ HISTFILE=~/.zsh_history
 SAVEHIST=10000
 HISTSIZE=10000
 
-bindkey -A zsh-ws main
+bindkey -A wskeys main

@@ -7,8 +7,8 @@
 # ^L=repeat previous incremental search
 
 zle -N ws-find
-bindkey -M zsh-ws "^Qf" ws-find
-bindkey -M zsh-ws "^QF" ws-find
+bindkey -M wskeys "^Qf" ws-find
+bindkey -M wskeys "^QF" ws-find
 ws-find() {
     ws_search=$LBUFFER
     hst=$HISTNO
@@ -37,12 +37,12 @@ zle-history-line-set() {
 }
 
 # main mode find keys
-bindkey -M zsh-ws "^Qr" beginning-of-buffer-or-history
-bindkey -M zsh-ws "^QR" beginning-of-buffer-or-history
-bindkey -M zsh-ws "^Qc" end-of-buffer-or-history
-bindkey -M zsh-ws "^QC" end-of-buffer-or-history
-bindkey -M zsh-ws "^W" history-search-backward
-bindkey -M zsh-ws "^Z" history-search-forward
+bindkey -M wskeys "^Qr" beginning-of-buffer-or-history
+bindkey -M wskeys "^QR" beginning-of-buffer-or-history
+bindkey -M wskeys "^Qc" end-of-buffer-or-history
+bindkey -M wskeys "^QC" end-of-buffer-or-history
+bindkey -M wskeys "^W" history-search-backward
+bindkey -M wskeys "^Z" history-search-forward
 
 bindkey -M isearch "^H" backward-delete-char
 bindkey -M isearch "^?" backward-delete-char
@@ -53,7 +53,7 @@ bindkey -M isearch "^X" history-incremental-search-forward
 
 # repeat previous search
 zle -N wsfind-repeat
-bindkey -M zsh-ws "^L" wsfind-repeat
+bindkey -M wskeys "^L" wsfind-repeat
 wsfind-repeat() {
     if [[ -n $ws_search ]]; then
 	zle history-incremental-search-backward $ws_search
