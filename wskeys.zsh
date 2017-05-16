@@ -39,14 +39,14 @@ bindkey -M zsh-ws "^D" forward-char
 zle -N ws-word-left
 bindkey -M zsh-ws "^A" ws-word-left
 ws-word-left() {
-    wstext-prev-word $CURSOR "$ws_text"
+    wstext-prev-word $CURSOR
     CURSOR=$wstext_pos
 }
     
 zle -N ws-word-right
 bindkey -M zsh-ws "^F" ws-word-right
 ws-word-right() {
-    wstext-next-word $CURSOR "$ws_text"
+    wstext-next-word $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -55,7 +55,7 @@ zle -N ws-line-start
 bindkey -M zsh-ws "^Qs" ws-line-start
 bindkey -M zsh-ws "^QS" ws-line-start
 ws-line-start() {
-    wstext-line-start $CURSOR "$ws_text"
+    wstext-line-start $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -63,7 +63,7 @@ zle -N ws-line-end
 bindkey -M zsh-ws "^Qd" ws-line-end
 bindkey -M zsh-ws "^QD" ws-line-end
 ws-line-end() {
-    wstext-line-end $CURSOR "$ws_text"
+    wstext-line-end $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -72,7 +72,7 @@ zle -N ws-prev-sentence
 bindkey -M zsh-ws "^Os" ws-prev-sentence
 bindkey -M zsh-ws "^OS" ws-prev-sentence
 ws-prev-sentence() {
-    wstext-prev-sentence $CURSOR "$ws_text"
+    wstext-prev-sentence $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -80,7 +80,7 @@ zle -N ws-next-sentence
 bindkey -M zsh-ws "^Od" ws-next-sentence
 bindkey -M zsh-ws "^OD" ws-next-sentence
 ws-next-sentence() {
-    wstext-next-sentence $CURSOR "$ws_text"
+    wstext-next-sentence $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -88,14 +88,14 @@ ws-next-sentence() {
 zle -N ws-prev-paragraph
 bindkey -M zsh-ws "^O^S" ws-prev-paragraph
 ws-prev-paragraph() {
-    wstext-prev-paragraph $CURSOR "$ws_text"
+    wstext-prev-paragraph $CURSOR
     CURSOR=$wstext_pos
 }
 
 zle -N ws-next-paragraph
 bindkey -M zsh-ws "^O^D" ws-next-paragraph
 ws-next-paragraph() {
-    wstext-next-paragraph $CURSOR "$ws_text"
+    wstext-next-paragraph $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -110,7 +110,7 @@ ws-updfn() {
 zle -N ws-testfun
 bindkey -M zsh-ws "^[=" ws-testfun
 ws-testfun() {
-    local sp=($(wstext-sentence-pos $CURSOR $ws_text))
+    local sp=($(wstext-sentence-pos $CURSOR))
     if [[ ! $sp[1] -eq -1 ]]; then
         ws-debug sp1=$sp[1] \"$ws_text[$sp[1]]\"
         ws-debug sp2=$sp[2] \"$ws_text[$sp[2]]\"
@@ -121,7 +121,7 @@ ws-testfun() {
 zle -N ws-testfun2
 bindkey -M zsh-ws "^[\\\\" ws-testfun2
 ws-testfun2() {
-    wstext-del-sentence-right $CURSOR ws_text
+    wstext-del-sentence-right $CURSOR
     if [[ -n $wstext_pos ]]; then
         CURSOR=$wstext_pos
     fi
@@ -148,14 +148,14 @@ zle -N ws-self-insert
 bindkey -M zsh-ws -R "!"-"~" ws-self-insert
 bindkey -M zsh-ws " " ws-self-insert
 ws-self-insert() {
-    wstext-insert $CURSOR $KEYS ws_text
+    wstext-insert $CURSOR $KEYS
     CURSOR=$wstext_pos
 }
 
 zle -N ws-split-line
 bindkey -M zsh-ws "^N" ws-split-line
 ws-split-line() {
-    wstext-insert $CURSOR \\$'\n' ws_text
+    wstext-insert $CURSOR \\$'\n'
     CURSOR=$wstext_pos
 }
 
@@ -172,7 +172,7 @@ ws-bracketed-paste() {
     local ws_pasted_text="$zle_bracketed_paste"
     zle bracketed-paste ws_pasted_text
     ws-debug pasted text is \"$ws_pasted_text\"
-    wstext-insert $CURSOR $ws_pasted_text ws_text
+    wstext-insert $CURSOR $ws_pasted_text
     CURSOR=$wstext_pos
     #TODO: select (kb-kk), insert into kill ring...
 }
@@ -181,14 +181,14 @@ ws-bracketed-paste() {
 zle -N ws-del-char-left
 bindkey -M zsh-ws "^H" ws-del-char-left
 ws-del-char-left() {
-    wstext-del-char-left $CURSOR ws_text
+    wstext-del-char-left $CURSOR
     CURSOR=$wstext_pos
 }
 
 zle -N ws-del-char-right
 bindkey -M zsh-ws "^G" ws-del-char-right
 ws-del-char-right() {
-    wstext-del-char-right $CURSOR ws_text
+    wstext-del-char-right $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -196,7 +196,7 @@ ws-del-char-right() {
 zle -N ws-del-word-right
 bindkey -M zsh-ws "^T" ws-del-word-right
 ws-del-word-right() {
-    wstext-del-word-right $CURSOR ws_text
+    wstext-del-word-right $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -204,7 +204,7 @@ zle -N ws-del-word-left
 bindkey -M zsh-ws "^[h" ws-del-word-left
 bindkey -M zsh-ws "^[H" ws-del-word-left
 ws-del-word-left() {
-    wstext-del-word-left $CURSOR ws_text
+    wstext-del-word-left $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -212,7 +212,7 @@ zle -N ws-del-word
 bindkey -M zsh-ws "^[y" ws-del-word
 bindkey -M zsh-ws "^[Y" ws-del-word
 ws-del-word() {
-    wstext-del-word $CURSOR ws_text
+    wstext-del-word $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -220,7 +220,7 @@ ws-del-word() {
 zle -N ws-del-line-left
 bindkey -M zsh-ws "^Q^H" ws-del-line-left
 ws-del-line-left() {
-    wstext-del-line-left $CURSOR ws_text
+    wstext-del-line-left $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -228,14 +228,14 @@ zle -N ws-del-line-right
 bindkey -M zsh-ws "^Qy" ws-del-line-right
 bindkey -M zsh-ws "^QY" ws-del-line-right
 ws-del-line-right() {
-    wstext-del-line-right $CURSOR ws_text
+    wstext-del-line-right $CURSOR
     CURSOR=$wstext_pos
 }
 
 zle -N ws-del-line
 bindkey -M zsh-ws "^Y" ws-del-line
 ws-del-line() {
-    wstext-del-line $CURSOR ws_text
+    wstext-del-line $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -244,7 +244,7 @@ zle -N ws-del-sentence-left
 bindkey -M zsh-ws "^Oh" ws-del-sentence-left
 bindkey -M zsh-ws "^OH" ws-del-sentence-left
 ws-del-sentence-left() {
-    wstext-del-sentence-left $CURSOR ws_text
+    wstext-del-sentence-left $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -252,7 +252,7 @@ zle -N ws-del-sentence-right
 bindkey -M zsh-ws "^Og" ws-del-sentence-right
 bindkey -M zsh-ws "^OG" ws-del-sentence-right
 ws-del-sentence-right() {
-    wstext-del-sentence-right $CURSOR ws_text
+    wstext-del-sentence-right $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -260,7 +260,7 @@ zle -N ws-del-sentence
 bindkey -M zsh-ws "^Oy" ws-del-sentence
 bindkey -M zsh-ws "^OY" ws-del-sentence
 ws-del-sentence() {
-    wstext-del-sentence $CURSOR ws_text
+    wstext-del-sentence $CURSOR
     CURSOR=$wstext_pos
 }
 
@@ -268,21 +268,21 @@ ws-del-sentence() {
 zle -N ws-del-paragraph-left
 bindkey -M zsh-ws "^O^H" ws-del-paragraph-left
 ws-del-paragraph-left() {
-    wstext-del-paragraph-left $CURSOR ws_text
+    wstext-del-paragraph-left $CURSOR
     CURSOR=$wstext_pos
 }
 
 zle -N ws-del-paragraph-right
 bindkey -M zsh-ws "^O^G" ws-del-paragraph-right
 ws-del-paragraph-right() {
-    wstext-del-paragraph-right $CURSOR ws_text
+    wstext-del-paragraph-right $CURSOR
     CURSOR=$wstext_pos
 }
 
 zle -N ws-del-paragraph
 bindkey -M zsh-ws "^O^Y" ws-del-paragraph
 ws-del-paragraph() {
-    wstext-del-paragraph $CURSOR ws_text
+    wstext-del-paragraph $CURSOR
     CURSOR=$wstext_pos
 }
 
