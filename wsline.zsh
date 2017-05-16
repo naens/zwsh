@@ -48,18 +48,18 @@ wsline-activate() {
    # enter new state
     wstext_textvar=wsline_${name}_text
     wstext_updfnvar=wsline-${name}-update
+    wstext_posvar=wsline_${name}_textpos
     local beginvar=wsline_${name}_begin
 
     ws-debug WSLINE: entering wsline-${name}-mode, begin=${(P)beginvar}
 
     zle -K wsline-${name}-mode
-    eval "wsline_${name}_scrollpos=1"
-    eval "wsline_${name}_textpos=1"
+    eval "wsline_${name}_scrollpos=0"
     wsline-update $name
 }
 
 # remove wsline, enter previous mode
-wsline-end() {
+wsline-exit() {
     local name=$1
     local from=$wsline_begin
     local to=$((wsline_begin+wsline_len))
@@ -119,9 +119,9 @@ wsline-update() {
     local begin=${(P)beginvar}
     
     local scrollposvar=wsline_${name}_scrollpos
-    local scrollpos=$(ws-max $(ws-min ${(P)scrollposvar} $((tlen-flen+1))) 1)
-    local textposvar=wsline_${name}_textpos
-    local textpos=$(ws-max $(ws-min ${(P)textposvar} $tlen) 1)
+    local scrollpos=$(ws-max $(ws-min ${(P)scrollposvar} $((tlen-flen))) 0)
+    local posvar=wsline_${name}_textpos
+    local pos=${(P)textpos}
 
 
     ws-debug WSLINE_UPDATE: name=$name flen=$flen tlen=$tlen begin=$begin

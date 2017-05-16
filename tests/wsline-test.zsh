@@ -31,8 +31,8 @@ wsline-test1-accept() {
 }
 
 wsline-test1-cancel() {
-    wsline-end "test1"
-    wsline-end "test2"    # restores original mode && calls update
+    wsline-exit "test1"
+    wsline-exit "test2"    # restores original mode && calls update
     zle -M "not accepted!"
 }
 
