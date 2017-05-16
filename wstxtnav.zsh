@@ -3,11 +3,12 @@
 # the wstext.zsh file should contain only current text modification functions,
 # whereas wstxtnav.zsh only more abstract helper functions.
 
-wstxtnav-prev-alnum() {
+wstxtnav-find-prev() {
     local pos=$1
     local text="$2"
+    local pattern="$3"
     local i=$pos
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
+    while [[ ! "$text[i]" =~ "$pattern" && $i -ge 1 ]]; do
         i=$((i-1))
     done
     if [[ $i -lt 1 ]]; then
@@ -17,12 +18,13 @@ wstxtnav-prev-alnum() {
     fi
 }
 
-wstxtnav-next-alnum() {
+wstxtnav-find-next() {
     local pos=$1
     local text="$2"
     local text_end=${#text}
+    local pattern="$3"
     local i=$((pos+1))
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
+    while [[ ! "$text[i]" =~ "$pattern" && $i -le $text_end ]]; do
         i=$((i+1))
     done
     if [[ $i -gt $text_end ]]; then
@@ -36,29 +38,6 @@ wstxtnav-prev-word() {
 }
 
 wstxtnav-next-word() {
-}
-
-wstextnav-start-word() {
-    local pos=$1
-    local text="$2"
-
-    local i=$pos
-    while [[ "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
-        i=$((i+1))
-    done
-    echo $i
-}
-
-wstextnav-end-word() {
-    local pos=$1
-    local text="$2"
-    local text_end=${#text}
-
-    local i=$((pos+1))
-    while [[ "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
-    echo $((i-1))
 }
 
 wstextnav-start-line() {

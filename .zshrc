@@ -34,6 +34,9 @@ zmodload zsh/pcre
 # global variables and functions
 . $dir/wsfun.zsh
 
+# wstxtnav
+. $dir/wstxtnav.zsh
+
 # wstext
 . $dir/wstext.zsh
 
