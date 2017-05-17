@@ -296,6 +296,7 @@ zle-line-pre-redraw () {
 
 main-pre-redraw() {
     ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
+    ws_curs=$CURSOR    
 #    ws-updfn # temporary
 #    echo MAIN buffer="$BUFFER" > $debugfile
 }
