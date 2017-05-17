@@ -610,5 +610,6 @@ wstext-insert() {
         ws-defvar $wstext_textvar "$text[1,pos]$str$text[pos+1,${#text}]"
     fi
     eval "$wstext_posvar=$((pos+${#str}))"
+    ws-debug WSTEXT_INSERT: str=\"$str\" pos=$pos posvar=$wstext_posvar newpos=${(P)wstext_posvar}
     wstext-upd
 }

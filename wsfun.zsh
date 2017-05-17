@@ -236,3 +236,24 @@ ws-insert-xtimes() {
     done
     CURSOR=$curs
 }
+
+# update scroll position given:
+#  * text length
+#  * field length
+#  * position
+#  * old scroll position
+# returns resutl as echo
+ws-get-scrollpos() {
+    local t=$1
+    local f=$2
+    local p=$3
+    local s=$4
+    if [[ $t -lt $f ]]; then
+        r=0
+    else
+        maxscroll=$((p>t-f?t-f:p))
+        minscroll=$((p>f?p-f:0))
+        r=$((s<minscroll?minscroll:s>maxscroll?maxscroll:s))
+    fi
+    echo $r
+}
