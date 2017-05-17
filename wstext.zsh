@@ -113,6 +113,7 @@ wstext-line-end() {
         i=$((i+1))
     done
     eval "$wstext_posvar=$((i-1))"
+    wstext-upd
 }
 
 wstext-line2pos() {
