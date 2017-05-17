@@ -29,6 +29,7 @@ wsline-init() {
     while [[ $# -gt 4 ]]; do
         local key="$4"
         local fun="$5"
+        zle -N $fun
         bindkey -M $mode "$key" "$fun"
         shift
         shift
