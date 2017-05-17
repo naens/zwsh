@@ -93,7 +93,7 @@ wstext-prev-printable() {
 # Line functions
 wstext-line-start() {
     local pos=${(P)wstext_posvar}
-    local text="$2"
+    local text="${(P)wstext_textvar}"
     
     local i=$pos
     while [[ ! "$text[i]" = $'\n' && $i -ge 1 ]]; do
@@ -286,7 +286,7 @@ wstext-next-paragraph() {
 
 # Delete character functions
 wstext-del-char-left() {
-    local pos="$1"
+    local pos=${(P)wstext_posvar}
     if [[ $pos -eq 0 ]]; then
         eval "$wstext_posvar=$pos"
     else
@@ -299,19 +299,19 @@ wstext-del-char-left() {
 }
 
 wstext-del-char-right() {
-    local pos="$1"
+    local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
     if [[ $pos -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,pos]$text[pos+2,text_end]"
     fi
-    eval "$wstext_posvar=$((pos))"
+    eval "$wstext_posvar=$pos"
     wstext-upd
 }
 
 # Delete word functions
 wstext-del-word-left() {
-    local pos="$1"
+    local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     wstext-prev-word $pos "$text"
     local from=$wstext_pos
@@ -326,7 +326,7 @@ wstext-del-word-left() {
 #               non-word printable: delete 1 char + delete non-printable that follow
 #               non-word non-printable: delete all non-printable that follow cursor position
 wstext-del-word-right() {
-    local pos="$1"
+    local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     wstext-prev-word $((pos+2)) "$text"
     local word_begin=$wstext_pos
@@ -361,7 +361,7 @@ wstext-del-word-right() {
 
 # delete whole word if inside a word and characters and non-printable outside
 wstext-del-word() {
-    local pos="$1"
+    local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     wstext-prev-word $((pos+2)) "$text"
     local word_begin=$wstext_pos
@@ -392,8 +392,8 @@ wstext-del-line-left() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start $pos "$text"
-    local from=$wstext_pos
+    wstext-line-start "$text"
+    local from=${(P)wstext_posvar}
     ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
     eval "$wstext_posvar=$from"
     wstext-upd
@@ -403,10 +403,10 @@ wstext-del-line-right() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start $pos "$text"
-    local begin=$wstext_pos
-    wstext-line-end $pos "$text"
-    local to=$wstext_pos
+    wstext-line-start "$text"
+    local begin=${(P)wstext_posvar}
+    wstext-line-end "$text"
+    local to=${(P)wstext_posvar}
     if [[ $begin -eq $pos && $to -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,pos]$text[to+2,text_end]"
     else
@@ -420,10 +420,10 @@ wstext-del-line() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start $pos "$text"
-    local from=$wstext_pos
-    wstext-line-end $pos "$text"
-    local to=$wstext_pos
+    wstext-line-start "$text"
+    local from=${(P)wstext_posvar}
+    wstext-line-end "$text"
+    local to=${(P)wstext_posvar}
     if [[ $to -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,from]$text[to+2,text_end]"
     else
@@ -492,8 +492,8 @@ wstext-del-sentence-left() {
     # if at the beginning, delete previous sentence
     if [[ $((pos+1)) -eq $sp[1] && $pos -gt 0 ]]; then
         ws-debug DEL_SENTENCE_LEFT: Delete Previous Sentence
-        wstext-prev-sentence $pos "$text"
-        local from=$wstext_pos
+        wstext-prev-sentence "$text"
+        local from=${(P)wstext_posvar}
         ws-debug text=\"$text\" from=$from pos=$pos text_end=$text_end
         ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
         eval "$wstext_posvar=$from"
@@ -557,8 +557,8 @@ wstext-del-paragraph-left() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-prev-paragraph $pos "$text"
-    local from=$(wstext-find-nl-or-eol $wstext_pos "$text")
+    wstext-prev-paragraph "$text"
+    local from=$(wstext-find-nl-or-eol ${(P)wstext_posvar} "$text")
     ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
     eval "$wstext_posvar=$from"
     wstext-upd
@@ -569,8 +569,8 @@ wstext-del-paragraph-right() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-next-paragraph $pos "$text"
-    local to=$wstext_pos
+    wstext-next-paragraph "$text"
+    local to=${(P)wstext_posvar}
     ws-defvar $wstext_textvar "$text[1,pos]$text[to,text_end]"
     eval "$wstext_posvar=$pos"
     wstext-upd
@@ -581,14 +581,14 @@ wstext-del-paragraph() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-prev-paragraph $pos "$text"
-    local from=$wstext_pos
+    wstext-prev-paragraph "$text"
+    local from=${(P)wstext_posvar}
 
     # find the beginning of the empty line for $to
-    wstext-next-paragraph $pos "$text"
+    wstext-next-paragraph "$text"
 
     # find the end of the line for the $to
-    local i=$wstext_pos
+    local i=${(P)wstext_posvar}
     while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
         i=$((i+1))
     done

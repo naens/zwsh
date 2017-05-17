@@ -16,6 +16,7 @@ zle-line-init() {
     unset ws_select
     unset region_highlight
     unset ws_text
+    unset ws_curs
 }
 
 # History keys
@@ -97,6 +98,7 @@ wstext_updfnvar=ws-updfn
 wstext_posvar=ws_curs
 
 ws-updfn() {
+    ws-debug WS_UPDFN: ws_text=$ws_text pos=$ws_curs
     BUFFER="$ws_text"
     CURSOR=$ws_curs
 }
