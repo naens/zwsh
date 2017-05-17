@@ -21,21 +21,17 @@ wstext-next-word() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    local nonalnum=$(wstxtnav-find-next $pos "$text" "[^[:alnum:]]")
-    if [[ $nonalnum -eq -1 ]]; then
-        eval "$wstext_posvar=$text_end"
-        wstext-upd
-        return
-    fi
+    # skip word or end of text
+    local i=$((pos+1))
+    while [[ "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
+        i=$((i+1))
+    done
 
-    local alnum=$(wstxtnav-find-next $nonalnum "$text" "[[:alnum:]]")
-    if [[ $alnum -eq -1 ]]; then
-        eval "$wstext_posvar=$text_end"
-        wstext-upd
-        return
-    fi
-    
-    eval "$wstext_posvar=$alnum"
+    # skip until next word
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
+        i=$((i+1))
+    done
+    eval "$wstext_posvar=$((i-1))"
     wstext-upd
 }
 
@@ -43,21 +39,30 @@ wstext-prev-word() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
 
-    local alnum=$(wstxtnav-find-prev $pos "$text" "[[:alnum:]]")
-    if [[ $alnum -eq -1 ]]; then
-        eval "$wstext_posvar=0"
-        wstext-upd
-        return
-    fi
-    
-    local nonalnum=$(wstxtnav-find-prev $alnum "$text" "[^[:alnum:]]")
-    if [[ $nonalnum -eq -1 ]]; then
-        eval "$wstext_posvar=0"
-        wstext-upd
-        return
-    fi
+    # skip until next word
+    local i=$pos
+    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
+        i=$((i-1))
+    done
 
-    eval "$wstext_posvar=$nonalnum"
+    # skip word or end of text
+    while [[ "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
+        i=$((i-1))
+    done
+    eval "$wstext_posvar=$i"
+    wstext-upd
+}
+
+wstext-end-word() {
+    local pos=${(P)wstext_posvar}
+    local text="${(P)wstext_textvar}"
+    local text_end=${#text}
+
+    local i=$((pos+1))
+    while [[ "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
+        i=$((i+1))
+    done
+    eval "$wstext_posvar=$((i-1))"
     wstext-upd
 }
 
