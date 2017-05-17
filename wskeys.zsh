@@ -98,7 +98,6 @@ wstext_updfnvar=ws-updfn
 wstext_posvar=ws_curs
 
 ws-updfn() {
-    ws-debug WS_UPDFN: ws_text=$ws_text pos=$ws_curs
     BUFFER="$ws_text"
     CURSOR=$ws_curs
 }
@@ -125,7 +124,6 @@ zle -N ws-self-insert
 bindkey -M wskeys -R "!"-"~" ws-self-insert
 bindkey -M wskeys " " ws-self-insert
 ws-self-insert() {
-    ws-debug WS_SELF_INSERT keys=$KEYS
     wstext-insert "$KEYS"
 }
 
