@@ -50,10 +50,10 @@ zmodload zsh/pcre
 . $dir/wsblock.zsh
 
 # file for ^KW binding functions and file writing
-. $dir/wsfsave.zsh
+. $dir/wsdfsave.zsh
 
 # file for ^KR binding functions and file import
-. $dir/wsfopen.zsh
+. $dir/wsdfopen.zsh
 
 # ws find key bindings
 . $dir/wsfind.zsh
