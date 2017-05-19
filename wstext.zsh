@@ -62,57 +62,21 @@ wstext-line-end() {
 }
 
 # Sentence functions (end-of-sentence: dot-space-space or dot-newline)
-wstext-next-sentence() {
+wstext-prev-sentence() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    # find next alphanumeric character
-    pcre_compile -m -x "[[:alnum:]]"
-    if pcre_match -b -n $pos -- $text; then
-        local b=($=ZPCRE_OP)
-        local pos2=$b[1]
-    else
-        eval "$wstext_posvar=${#text}"
-        wstext-upd
-        return
-    fi
+    local prev_sentence_pos=$(wstxt-prev-sentence $pos "${(P)wstext_textvar}")
 
-    # find sentence end
-    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n)"
-    if pcre_match -b -n $pos2 -- $text; then
-        local b2=($=ZPCRE_OP)
-        eval "$wstext_posvar=$b2[1]"
-    else
-        eval "$wstext_posvar=${#text}"
-    fi
+    eval "$wstext_posvar=$prev_sentence_pos"
     wstext-upd
 }
 
-wstext-prev-sentence() {
+wstext-next-sentence() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    local x=$(wstxtfun-prev-word $pos "$text")
-    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
-    local lastb2=-1
-    if pcre_match -b -- $text; then
-        while [[ $? -eq 0 ]] do
-            local b=($=ZPCRE_OP)
-            if [[ $b[1] -gt $x ]]; then
-                eval "$wstext_posvar=$lastb2"
-                break;
-            fi
-            lastb2=$b[2]
-            pcre_match -b -n $b[2] -- $text
-        done
-        if [[ ! $lastb2 -eq -1 ]]; then
-            eval "$wstext_posvar=$lastb2"
-        else
-            eval "$wstext_posvar=0"
-        fi
-    else
-        eval "$wstext_posvar=0"
-    fi
+    local next_sentece_pos=$(wstxt-next-sentence $pos "${(P)wstext_textvar}")
+
+    eval "$wstext_posvar=$next_sentence_pos"
     wstext-upd
 }
 
@@ -125,58 +89,20 @@ wstext-upd() {
 # Previous paragraph: find previous empty line or start of text
 wstext-prev-paragraph() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    # find an alnum character
-    local i=$pos
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -ge 1 ]]; do
-        i=$((i-1))
-    done
+    local prev_paragraph_pos=$(wstxtfun-prev-paragraph-pos $pos "${(P)wstext_textvar}")
 
-    # go to first empty line before $i
-    pcre_compile -m -x "\n[[:space:]\\\\]*\n"
-    local lastb1=-1
-    if pcre_match -b -- $text; then
-        while [[ $? -eq 0 ]]; do
-            local b=($=ZPCRE_OP)
-            ws-debug b1=$b[1] b2=$b[2]
-            if [[ $b[1] -gt $i ]]; then
-                break
-            fi
-            lastb1=$b[1]
-            pcre_match -b -n $b[2] -- $text
-        done
-        if [[ $lastb1 -eq -1 ]]; then
-            eval "$wstext_posvar=0"
-        else
-            eval "$wstext_posvar=$((lastb1+1))"
-        fi
-    else
-        eval "$wstext_posvar=0"
-    fi
+    eval "$wstext_posvar=$prev_paragraph_pos"
     wstext-upd
 }
 
 # Next paragraph: find next empty line or end of text
 wstext-next-paragraph() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
 
-    # find an alnum character
-    local i=$pos
-    while [[ ! "$text[i]" =~ [[:alnum:]] && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
+    local next_paragraph_pos=$(wstxtfun-next-paragraph $pos "${(P)wstext_textvar}")
 
-    # go to first empty line before $i
-    pcre_compile -m -x "\n[[:space:]\\\\]*\n"
-    if pcre_match -b -n $i -- $text; then
-        local b=($=ZPCRE_OP)
-        eval "$wstext_posvar=$(($b[1]+1))"
-    else
-        eval "$wstext_posvar=$text_end"
-    fi
+    eval "$wstext_posvar=$next_paragraph_pos"
     wstext-upd
 }
 
@@ -373,8 +299,7 @@ wstext-del-sentence-left() {
     # if at the beginning, delete previous sentence
     if [[ $((pos+1)) -eq $sp[1] && $pos -gt 0 ]]; then
         ws-debug DEL_SENTENCE_LEFT: Delete Previous Sentence
-        wstext-prev-sentence "$text"
-        local from=${(P)wstext_posvar}
+        local from=$(wstxtfun-prev-sentence "$text")
         ws-debug text=\"$text\" from=$from pos=$pos text_end=$text_end
         ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
         eval "$wstext_posvar=$from"
@@ -421,25 +346,13 @@ wstext-del-sentence() {
 }
 
 # Delete paragraph functions
-wstext-find-nl-or-eol() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    local i=$(ws-min $((pos+1)) $text_end)
-    while [[ ! "$text[i]" = $'\n' && $i -lt $text_end ]]; do
-        i=$((i+1))
-    done
-    echo $i
-}
-
 wstext-del-paragraph-left() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-prev-paragraph "$text"
-    local from=$(wstext-find-nl-or-eol ${(P)wstext_posvar} "$text")
+    local prevp=$(wstxtfun-prev-paragraph $pos "$text")
+    local from=$(wstxtfun-line-end $prevp "$text")
     ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
     eval "$wstext_posvar=$from"
     wstext-upd
@@ -450,8 +363,7 @@ wstext-del-paragraph-right() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-next-paragraph "$text"
-    local to=${(P)wstext_posvar}
+    local to=$(wstxtfun-next-paragraph $pos "$text")
     ws-defvar $wstext_textvar "$text[1,pos]$text[to,text_end]"
     eval "$wstext_posvar=$pos"
     wstext-upd
@@ -462,14 +374,13 @@ wstext-del-paragraph() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    wstext-prev-paragraph "$text"
-    local from=${(P)wstext_posvar}
+    local from=$(wstxtfun-prev-paragraph $pos "$text")
 
     # find the beginning of the empty line for $to
-    wstext-next-paragraph "$text"
+    local next_paragraph=$(wstxtfun-next-paragraph $pos "$text")
 
     # find the end of the line for the $to
-    local i=${(P)wstext_posvar}
+    local i=next_paragraph
     while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
         i=$((i+1))
     done
@@ -491,6 +402,5 @@ wstext-insert() {
         ws-defvar $wstext_textvar "$text[1,pos]$str$text[pos+1,${#text}]"
     fi
     eval "$wstext_posvar=$((pos+${#str}))"
-    ws-debug WSTEXT_INSERT: str=\"$str\" pos=$pos posvar=$wstext_posvar newpos=${(P)wstext_posvar}
     wstext-upd
 }
