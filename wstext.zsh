@@ -45,30 +45,6 @@ wstext-end-word() {
     wstext-upd
 }
 
-wstext-next-printable() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    local i=$((pos+1))
-    while [[ ! "$text[i]" =~ [[:graph:]] && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
-    eval "$wstext_posvar=$((i-1))"
-}
-
-wstext-prev-printable() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    local i=$pos
-    while [[ ! "$text[i]" =~ [[:graph:]] && $i -ge 1 ]]; do
-        i=$((i-1))
-    done
-    eval "$wstext_posvar=$i"
-}
-
 # Line functions
 wstext-line-start() {
     local pos=${(P)wstext_posvar}
@@ -310,10 +286,9 @@ wstext-del-word-right() {
     local word_end=$(wstxtfun-end-word $word_begin "$text")
     local next_word=$(wstxtfun-next-word $pos "$text")
     local text_end=${#text}
-    ws-debug pos=$pos word_begin=$word_begin
     if [[ $pos -le $word_begin ]]; then
-        wstext-next-printable $word_end "$text"
-        local del_end=${(P)wstext_posvar}
+        local del_end=$(wstxtfun-next-printable $word_end "$text")
+        ws-debug DEL_WORD_RIGHT: pos=$pos word_begin=$word_begin del_end=$del_end
         if [[ $pos -eq 0 && $del_end -eq 0 ]]; then
             ws-defvar $wstext_textvar "$text[2,text_end]"
         else
@@ -322,8 +297,7 @@ wstext-del-word-right() {
     elif [[ $pos -lt $word_end ]]; then
         ws-defvar $wstext_textvar "$text[1,pos]$text[word_end+1,text_end]"
     else
-        wstext-next-printable $((pos+1)) "$text"
-        local next_printable=${(P)wstext_posvar}
+        local next_printable=$(wstxtfun-next-printable $((pos+1)) "$text")
         if [[ $next_printable -eq $next_word ]]; then
             ws-defvar $wstext_textvar "$text[1,pos]$text[next_printable,text_end]"
         else
@@ -343,16 +317,13 @@ wstext-del-word() {
     local to=$(wstxtfun-next-word $pos "$text")
     local text_end=${#text}
     if [[ $pos -lt $word_end ]]; then
-        wstext-next-printable $word_end "$text"
-        local del_end=$wstext_pos
+        local del_end-$(wstxtfun-next-printable $word_end "$text")
         local from=$(ws-min $word_begin $pos)
         ws-defvar $wstext_textvar "$text[1,from]$text[del_end+1,text_end]"
         eval "$wstext_posvar=$from"
     else
-        wstext-prev-printable $pos "$text"
-        local prev_printable=$wstext_pos
-        wstext-next-printable $((pos+1)) "$text"
-        local next_printable=$wstext_pos
+        local prev_printable=$(wstxtfun-prev-printable $pos "$text")
+        local next_printable=$(wstxt-next-printable $((pos+1)) "$text")
         ws-defvar $wstext_textvar "$text[1,prev_printable]$text[next_printable+1,text_end]"
         eval "$wstext_posvar=$prev_printable"
     fi
