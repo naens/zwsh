@@ -17,9 +17,8 @@ wstext-char-right() {
 
 wstext-prev-word() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    local prev=$(wstxtfun-prev-word $pos "$text")
+    local prev=$(wstxtfun-prev-word $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$prev"
     wstext-upd
@@ -27,9 +26,8 @@ wstext-prev-word() {
 
 wstext-next-word() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    local next=$(wstxtfun-next-word $pos "$text")
+    local next=$(wstxtfun-next-word $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$next"
     wstext-upd
@@ -37,9 +35,8 @@ wstext-next-word() {
 
 wstext-end-word() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
 
-    local end_word=$(wstxtfun-end-word $pos "$text")
+    local end_word=$(wstxtfun-end-word $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$end_word"
     wstext-upd
@@ -48,74 +45,20 @@ wstext-end-word() {
 # Line functions
 wstext-line-start() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    
-    local i=$pos
-    while [[ ! "$text[i]" = $'\n' && $i -ge 1 ]]; do
-        i=$((i-1))
-    done
-    eval "$wstext_posvar=$i"
+
+    local line_start=$(wstxtfun-line-start $pos "${(P)wstext_textvar}")
+
+    eval "$wstext_posvar=$line_start"
     wstext-upd
 }
 
 wstext-line-end() {
     local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-    
-    local i=$((pos+1))
-    while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
-    eval "$wstext_posvar=$((i-1))"
+
+    local line_end=$(wstxtfun-line-end $pos "${(P)wstext_textvar}")    
+
+    eval "$wstext_posvar=$line_end"
     wstext-upd
-}
-
-wstext-line2pos() {
-    local line=$1
-    local text="${(P)wstext_textvar}"
-    local i=1
-    local curr=1
-    local text_end=${#text}
-
-    while [[ $curr -lt $line && $i -le $text_end ]]; do
-        if [[ "$text[i]" = $'\n' ]]; then
-            curr=$((curr+1))
-        fi
-        i=$((i+1))
-    done
-    eval "$wstext_posvar=$i"
-}
-
-wstext-line-len() {
-    local line=$1
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    wstext-line2pos $line "$text"
-
-    local begin=${(P)wstext_posvar}
-    local i=${(P)wstext_posvar}
-    while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
-    wstext_linelen=$((i-begin))
-}
-
-wstext-pos2line() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local i=1
-    local curr=1
-    local text_end=${#text}
-
-    while [[ $i -lt $pos && $i -le $text_end ]]; do
-        if [[ "$text[i]" = $'\n' ]]; then
-            curr=$((curr+1))
-        fi
-        i=$((i+1))
-    done
-    wstext_line=$curr
 }
 
 # Sentence functions (end-of-sentence: dot-space-space or dot-newline)
@@ -268,8 +211,8 @@ wstext-del-char-right() {
 wstext-del-word-left() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
-    local from=$(wstxtfun-prev-word $pos "$text")
     local text_end=${#text}
+    local from=$(wstxtfun-prev-word $pos "$text")
     ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
     eval "$wstext_posvar=$from"
     wstext-upd
@@ -317,7 +260,7 @@ wstext-del-word() {
     local to=$(wstxtfun-next-word $pos "$text")
     local text_end=${#text}
     if [[ $pos -lt $word_end ]]; then
-        local del_end-$(wstxtfun-next-printable $word_end "$text")
+        local del_end=$(wstxtfun-next-printable $word_end "$text")
         local from=$(ws-min $word_begin $pos)
         ws-defvar $wstext_textvar "$text[1,from]$text[del_end+1,text_end]"
         eval "$wstext_posvar=$from"
@@ -335,8 +278,7 @@ wstext-del-line-left() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start "$text"
-    local from=${(P)wstext_posvar}
+    local from=$(wstxtfun-line-start $pos "$text")
     ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
     eval "$wstext_posvar=$from"
     wstext-upd
@@ -346,10 +288,8 @@ wstext-del-line-right() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start "$text"
-    local begin=${(P)wstext_posvar}
-    wstext-line-end "$text"
-    local to=${(P)wstext_posvar}
+    local begin=$(wstxtfun-line-start $pos "$text")
+    local to=$(wstext-line-end $pos "$text")
     if [[ $begin -eq $pos && $to -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,pos]$text[to+2,text_end]"
     else
@@ -363,10 +303,8 @@ wstext-del-line() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
-    wstext-line-start "$text"
-    local from=${(P)wstext_posvar}
-    wstext-line-end "$text"
-    local to=${(P)wstext_posvar}
+    local from=$(wstxtfun-line-start $pos "$text")
+    local to=$(wstxtfun-line-end $pos "$text")
     if [[ $to -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,from]$text[to+2,text_end]"
     else
