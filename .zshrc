@@ -65,7 +65,8 @@ zmodload zsh/pcre
 . $dir/wsedit.zsh
 
 # load tests
-. $dir/tests/*
+. $dir/tests/wsline-test.zsh
+. $dir/tests/wsdialog-test.zsh
 
 # prompt functions
 function collapse_pwd

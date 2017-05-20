@@ -23,6 +23,9 @@ not used in the main application, which could be useful in future versions.
 ---------
 
 * To do plan
+** wsline
+ + Test edit, navigation, functionality
+
 ** wsedit
 Without implementing wsblock keybindings, finish wsedit mode:
  + keybindings
@@ -30,9 +33,6 @@ Without implementing wsblock keybindings, finish wsedit mode:
  + exit saving / not saving / putting into buffer wsedit mode
  + enter wsedit mode: using buffer / using file
  + add fullscreen mode and vertical scroll
-
-** wsline
- + add horizontal scroll
 
 ** wsblock
 Rewrite wsblock for edit, normal and wsline modes:

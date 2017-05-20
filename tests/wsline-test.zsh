@@ -5,7 +5,6 @@
 # Tab: go to other field
 # Enter: 1: go to field 2, 2: exit accepting
 # Esc: 1: exit cancelling, 2: go to field 1.
-
 zle -N testinit
 bindkey -M wskeys "^[p" testinit
 testinit() {

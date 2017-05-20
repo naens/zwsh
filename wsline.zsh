@@ -61,17 +61,27 @@ wsline-activate() {
 }
 
 # remove wsline, enter previous mode
+# TODO: on signal leave!!!!!
+# TODO: multiple wsline leave => restore state
 wsline-exit() {
     local name=$1
     local from=$wsline_begin
     local to=$((wsline_begin+wsline_len))
+
+    # restore buffer
     BUFFER[from,to]=""
 
+    # restore cursor
+
+    # restore highlighting
+
+    # restore variables
     local prevtextvarvar=wsline_${name}_pervtextvar
     wstext_textvar=${(P)prevtextvarvar}
     local prevupdfnvarvar=wsline_${name}_prevupdfnvar
     wstext_updfnvar=${(P)prevupdfnvarvar}
     local modevar=wsline_${name}_prevmode
+    ws-debug WSLINE_EXIT: textvar=$wstext_prevtextvar modevar=$modevar
     zle -K ${(P)modevar}
 }
 
