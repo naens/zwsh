@@ -34,8 +34,10 @@ wsline-init() {
         shift
         shift
     done
-
-    ws-insert-xtimes $begin $len "_"
+    
+    ws-debug WSLINE_INIT{1}: CURSOR=$CURSOR begin=$begin len=$len
+    ws-insert-xtimes $begin $len " "
+    ws-debug WSLINE_INIT{2}: CURSOR=$CURSOR
 }
 
 # cursor on wsline, text on first position, switch to mode
@@ -56,7 +58,7 @@ wsline-activate() {
     ws-debug WSLINE: entering wsline-${name}-mode, begin=${(P)beginvar}
 
     zle -K wsline-${name}-mode
-    eval "wsline_${name}_scrollpos=0"
+#    eval "wsline_${name}_scrollpos=0"
     wsline-update $name
 }
 
@@ -136,17 +138,18 @@ wsline-update() {
 
     local oldscroll=${(P)scrollposvar}
     local scrollpos=$(ws-get-scrollpos $tlen $flen $textpos $oldscroll)
+    eval "$scrollposvar=$scrollpos"
 
     ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
     ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
     # TODO: skip beginning, if scroll not at first position
     # TODO: place cursor: !!!textpos + fieldpos
-    if [[ $flen -le $tlen ]]; then
+#    if [[ $flen -le $tlen ]]; then
         BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
-    else
-        BUFFER[begin+1,begin+flen]="$text"
-        ws-insert-xtimes $((begin+tlen)) $((flen-tlen)) "."
-    fi
+#    else
+#        BUFFER[begin+1,begin+flen]="$text"
+        ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) " "
+#    fi
     local cursorpos=$((begin+textpos-scrollpos))
     ws-debug cursorpos=$cursorpos
     CURSOR=$((begin+textpos-scrollpos))

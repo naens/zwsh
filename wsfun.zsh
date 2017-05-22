@@ -148,8 +148,8 @@ ws-insert-text-at() {
         local bufsz=${#BUFFER}
         BUFFER=$BUFFER[1,pos]$text$BUFFER[pos+1,bufsz]
     fi
-    if [[ $pos -ge $CURSOR ]]; then
-        CURSOR=$(( $curs + $pos ))
+    if [[ $pos -le $CURSOR ]]; then
+        CURSOR=$(( $curs + $len ))
     fi
 }
 
@@ -200,7 +200,7 @@ ws-defvar() {
 # debug
 ws-debug() {
     local debug_string="$@"
-    local ws_debugfile=/dev/pts/3
+#    local ws_debugfile=/dev/pts/3
     ws_debugfile=/dev/null
     echo "$debug_string" > $ws_debugfile
 }
@@ -226,15 +226,11 @@ ws-insert-xtimes() {
     local pos=$1
     local i=$2
     local string=$3
-    local curs=CURSOR
     while [[ $i -gt 0 ]]; do
         i=$((i-1))
         ws-insert-text-at $pos "$string"
-        if [[ $curs -ge $pos ]]; then
-            curs=$((curs+${#string}))
-        fi
     done
-    CURSOR=$curs
+    # CURSOR is moved by the ws-insert-text-at function forward
 }
 
 # update scroll position given:
@@ -251,8 +247,8 @@ ws-get-scrollpos() {
     if [[ $t -lt $f ]]; then
         r=0
     else
-        maxscroll=$((p>t-f?t-f:p))
-        minscroll=$((p>f?p-f:0))
+        maxscroll=$((p>t-f?t-f+1:p))
+        minscroll=$((p>=f?p-f+1:0))
         r=$((s<minscroll?minscroll:s>maxscroll?maxscroll:s))
     fi
     echo $r

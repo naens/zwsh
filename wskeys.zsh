@@ -17,6 +17,14 @@ zle-line-init() {
     unset region_highlight
     unset ws_text
     unset ws_curs
+    zle -K wskeys
+
+    # name of the variable containing the text
+    wstext_textvar=ws_text
+    wstext_updfnvar=ws-updfn
+    wstext_posvar=ws_curs
+
+    ws-debug ZLE_LINE_INIT
 }
 
 # History keys
@@ -91,11 +99,6 @@ bindkey -M wskeys "^O^D" ws-next-paragraph
 ws-next-paragraph() {
     wstext-next-paragraph
 }
-
-# name of the variable containing the text
-wstext_textvar=ws_text
-wstext_updfnvar=ws-updfn
-wstext_posvar=ws_curs
 
 ws-updfn() {
     BUFFER="$ws_text"
