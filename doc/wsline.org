@@ -1,0 +1,39 @@
+#+TITLE: wsline module description
+
+* Overview
+The wsline module adds single line editable field functionslity.  Events can
+be assigned to keybindings.  The predefined keybindings, are
+ * ~^M~: accept (runs ~wsline-${name}-accept~ function if defined)
+ * ~^U~: cancel (runs ~wsline-${name}-cancel~ function if defined)
+
+The length of the field can be limited, which does not limit the string,
+there is automatic horizontal scroll, that ensures the visivility of the
+cursor.
+
+* wsline functions
+ * ~wsline-init~: initializes the values of the wsline mode variables and
+   allocates a location in the buffer, where wsline is going to write.
+ * ~wsline-activate~: switches to the wsline in the argument and puts cursor
+   inside.
+ * ~wsline-exit~: removes the allocated space in the buffer, should be called
+   from a function called from wsline key binding function, like accept or
+   cancel, but can also be called from a normal function in order to
+   terminate the wsline.
+
+* relationship to the caller mode
+The wsline module is unaware of the caller mode, so the environment should
+be saved and restored by the caller module.  The wsline function
+~wsline-exit~ only restores the buffer to the state before the ~wsline-init~
+call.  The ~wsline-exit~ call unsets all used varialbles, so the ~wsline~
+contents (in ~wsline_${name}_text~ variable) should be saved or used to a
+variable before the ~wsline-exit~ call.
+
+* Functions defined by the user
+
+The user should define the event functions, typically ~wsline-${name}-accept~
+function, bound to ~^M~ and ~wsline-${name}-cancel~ function, bound to ~^U~.
+Other functions with other keybindings can also be used, if it is passed to
+th ~wsline-init~ function as arguments in the format:
+
+~wsline-init~ $name $begin $len~ followed by a succession of ~<keybinding> 
+<function name> the number of keybindings needed to define.

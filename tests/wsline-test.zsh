@@ -25,6 +25,7 @@ wsline-test1-tab() {
     wsline-activate "test2"
 }
 
+# TODO: restore state (cursor, highlight...)
 wsline-test1-accept() {
     wsline-activate "test2"
 }
@@ -51,4 +52,3 @@ wsline-test2-accept() {
 wsline-test2-cancel() {
     wsline-activate "test1"
 }
-

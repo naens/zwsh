@@ -33,7 +33,7 @@ wsdialog-add() {
     eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
     eval "wsdialog_${dialog}-acceptfn() { wsdialog-acceptfn $dialog }"
     eval "wsdialog_${dialog}-cancelfn() { wsdialog-cancelfn $dialog }"
-    wsline-prepare wsdialog_${dialog}
+#    wsline-prepare wsdialog_${dialog}
     ws-debug WSDIALOG_ADD: \"${dialog}\"
 }
 

@@ -21,9 +21,11 @@ wsline-init() {
     local mode=wsline-${name}-mode
     bindkey -N $mode wsline
     if typeset -f wsline-${name}-accept > /dev/null; then
+        zle -N wsline-${name}-accept
         bindkey -M $mode "^M" wsline-${name}-accept
     fi
     if typeset -f wsline-${name}-cancel > /dev/null; then
+        zle -N wsline-${name}-cancel
         bindkey -M $mode "^U" wsline-${name}-cancel
     fi
     while [[ $# -gt 4 ]]; do
@@ -44,11 +46,6 @@ wsline-init() {
 wsline-activate() {
     local name=$1
 
-   # save previous state
-    eval "wsline_${name}_prevtextvar=$wstext_textvar"
-    eval "wsline_${name}_prevupdfnvar=$wstext_updfnvar"
-    eval "wsline_${name}_prevmode=$KEYMAP"
-
    # enter new state
     wstext_textvar=wsline_${name}_text
     wstext_updfnvar=wsline-${name}-update
@@ -62,9 +59,6 @@ wsline-activate() {
     wsline-update $name
 }
 
-# remove wsline, enter previous mode
-# TODO: on signal leave!!!!!
-# TODO: multiple wsline leave => restore state
 wsline-exit() {
     local name=$1
     local from=$wsline_begin
@@ -73,54 +67,20 @@ wsline-exit() {
     # restore buffer
     BUFFER[from,to]=""
 
-    # restore cursor
-
-    # restore highlighting
-
-    # restore variables
-    local prevtextvarvar=wsline_${name}_pervtextvar
-    wstext_textvar=${(P)prevtextvarvar}
-    local prevupdfnvarvar=wsline_${name}_prevupdfnvar
-    wstext_updfnvar=${(P)prevupdfnvarvar}
-    local modevar=wsline_${name}_prevmode
-    ws-debug WSLINE_EXIT: textvar=$wstext_prevtextvar modevar=$modevar
-    zle -K ${(P)modevar}
-}
-
-wsline-accept() {
-    local name=$1
-    $name-acceptfn
-}
-
-wsline-cancel() {
-    local name=$1
-    $name-cancelfn
-}
-
-wsline-prepare() {
-    local name=$1
-
-    zle -N wsline-$name-accept
-    bindkey -M ${1}_line "^M" wsline-$name-accept
-    eval "wsline-$name-accept() { wsline-accept $name }"
-
-    zle -N wsline-$name-cancel
-    bindkey -M ${1}_line "^U" wsline-$name-cancel
-    eval "wsline-$name-cancel() { wsline-cancel $name }"
+    unset wsline_${name}_begin
+    unset wsline_${name}_len
+    unset wsline_${name}_text
+    unset wsline_${name}_textpos
+    unset wsline_${name}_update
+    unset wstext_textvar
+    unset wstext_updfnvar
+    unset wstext_posvar
 }
 
 # wsline variables:
 #  - begin: position where the editable area begins
 #  - len: length of the editable area
 #  - text: variable containing the contents of the text
-
-# called when closing wsline
-wsline-finalize() {
-    local name=$1
-    unset wsline_${name}_begin
-    unset wsline_${name}_len
-    unset wsline_${name}_text
-}
 
 wsline-update() {
     local name=$1
@@ -142,14 +102,8 @@ wsline-update() {
 
     ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
     ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
-    # TODO: skip beginning, if scroll not at first position
-    # TODO: place cursor: !!!textpos + fieldpos
-#    if [[ $flen -le $tlen ]]; then
-        BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
-#    else
-#        BUFFER[begin+1,begin+flen]="$text"
-        ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) " "
-#    fi
+    BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
+    ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) " "
     local cursorpos=$((begin+textpos-scrollpos))
     ws-debug cursorpos=$cursorpos
     CURSOR=$((begin+textpos-scrollpos))
