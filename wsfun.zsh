@@ -197,6 +197,11 @@ ws-defvar() {
     eval $varname=\'${text:gs/\'/\'\"\'\"\'}\'
 }
 
+ws-printvar() {
+    local var=$1
+    echo "${(P)var}"
+}
+
 # debug
 ws-debug() {
     local debug_string="$@"
