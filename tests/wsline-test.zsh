@@ -8,6 +8,11 @@
 zle -N testinit
 bindkey -M wskeys "^[p" testinit
 testinit() {
+    wstestline_oldbuffer="$BUFFER"
+    wstestline_oldcursor=$CURSOR
+    wstestline_oldtextvar=$wstext_textvar
+    wstestline_oldupdfnvar=$wstext_updfnvar
+    wstestline_oldposvar=$wstext_posvar
     LBUFFER+=$'\n'
     LBUFFER+="Field1: >>>"
     wsline-init "test1" $CURSOR 8 "^I" wsline-test1-tab
@@ -33,7 +38,7 @@ wsline-test1-accept() {
 wsline-test1-cancel() {
     wsline-exit "test1"
     wsline-exit "test2"    # restores original mode && calls update
-    zle -M "not accepted!"
+    wstestline-restore
 }
 
 # test2 functions
@@ -41,12 +46,22 @@ wsline-test2-tab() {
     wsline-activate "test1"
 }
 
+wstestline-restore() {
+    BUFFER="$wstestline_oldbuffer"
+    CURSOR="$wstestline_oldcursor"
+    wstext_textvar=$wstestline_oldtextvar
+    wstext_updfnvar=$wstestline_oldupdfnvar
+    wstext_posvar=$wstestline_oldposvar
+    zle -K wskeys
+}
+
 wsline-test2-accept() {
-    local field1
-    local field2
-    wsline-end "test1"
-    wsline-end "test2"    # restores original mode && calls update
-    zle -M "accepted: field1=\"$field1\" field2=\"$field2\""
+    local field1="$(ws-printvar wsline_test1_text)"
+    local field2="$(ws-printvar wsline_test2_text)"
+    wsline-exit "test1"
+    wsline-exit "test2"    # unsets variables
+    wstestline-restore
+#    zle -M "accepted: field1=\"$field1\" field2=\"$field2\""
 }
 
 wsline-test2-cancel() {

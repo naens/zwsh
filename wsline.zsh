@@ -61,11 +61,6 @@ wsline-activate() {
 
 wsline-exit() {
     local name=$1
-    local from=$wsline_begin
-    local to=$((wsline_begin+wsline_len))
-
-    # restore buffer
-    BUFFER[from,to]=""
 
     unset wsline_${name}_begin
     unset wsline_${name}_len
