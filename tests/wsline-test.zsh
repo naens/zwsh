@@ -25,27 +25,7 @@ testinit() {
     wsline-activate "test1"
 }
 
-# test1 functions
-wsline-test1-tab() {
-    wsline-activate "test2"
-}
-
-# TODO: restore state (cursor, highlight...)
-wsline-test1-accept() {
-    wsline-activate "test2"
-}
-
-wsline-test1-cancel() {
-    wsline-exit "test1"
-    wsline-exit "test2"    # restores original mode && calls update
-    wstestline-restore
-}
-
-# test2 functions
-wsline-test2-tab() {
-    wsline-activate "test1"
-}
-
+# when quitting, restore previous state
 wstestline-restore() {
     BUFFER="$wstestline_oldbuffer"
     CURSOR="$wstestline_oldcursor"
@@ -55,13 +35,36 @@ wstestline-restore() {
     zle -K wskeys
 }
 
+# test1 functions
+wsline-test1-tab() {
+    wsline-activate "test2"
+}
+
+wsline-test1-accept() {
+    wsline-activate "test2"
+}
+
+# test1: quit on cancel
+wsline-test1-cancel() {
+    wsline-exit "test1"
+    wsline-exit "test2"    # restores original mode && calls update
+    wstestline-restore
+    zle -M "not accepted!"
+}
+
+# test2 functions
+wsline-test2-tab() {
+    wsline-activate "test1"
+}
+
+# test2: quit on accept
 wsline-test2-accept() {
     local field1="$(ws-printvar wsline_test1_text)"
     local field2="$(ws-printvar wsline_test2_text)"
     wsline-exit "test1"
     wsline-exit "test2"    # unsets variables
     wstestline-restore
-#    zle -M "accepted: field1=\"$field1\" field2=\"$field2\""
+    zle -M "accepted: field1=\"$field1\" field2=\"$field2\""
 }
 
 wsline-test2-cancel() {
