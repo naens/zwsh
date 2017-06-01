@@ -9,3 +9,7 @@ DEADJOE
 *.pdf
 \#*.\#
 .\#*
+*.bak
+*.bk
+*.back
+*.backup

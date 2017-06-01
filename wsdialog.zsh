@@ -1,3 +1,7 @@
+# TODO: replace with new wsline functionality
+#       => scroll
+#       => size of wsdialog constant: no need to count from end!!!
+
 # prepare dialogs
 wsdialog-add() {
     local dialog=$1
