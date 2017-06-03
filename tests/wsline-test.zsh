@@ -15,11 +15,13 @@ testinit() {
     wstestline_oldposvar=$wstext_posvar
     LBUFFER+=$'\n'
     LBUFFER+="Field1: >>>"
-    wsline-init "test1" $CURSOR 8 "^I" wsline-test1-tab
+    wsline-init "test1" $CURSOR 8
+    wsline-addkey "test1" "^I" wsline-test1-tab
     LBUFFER+="<<<"
     LBUFFER+=$'\n'
     LBUFFER+="Field2: [[["
-    wsline-init "test2" $CURSOR 12 "^I" wsline-test2-tab
+    wsline-init "test2" $CURSOR 12
+    wsline-addkey "test2" "^I" wsline-test2-tab
     LBUFFER+="]]]"
     LBUFFER+=$'\n'
     wsline-activate "test1"

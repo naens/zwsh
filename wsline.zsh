@@ -28,18 +28,18 @@ wsline-init() {
         zle -N wsline-${name}-cancel
         bindkey -M $mode "^U" wsline-${name}-cancel
     fi
-    while [[ $# -gt 4 ]]; do
-        local key="$4"
-        local fun="$5"
-        zle -N $fun
-        bindkey -M $mode "$key" "$fun"
-        shift
-        shift
-    done
     
     ws-debug WSLINE_INIT{1}: CURSOR=$CURSOR begin=$begin len=$len
     ws-insert-xtimes $begin $len " "
     ws-debug WSLINE_INIT{2}: CURSOR=$CURSOR
+}
+
+wsline-add-key() {
+    local mode=$1
+    local key="$2"
+    local fun="$3"
+    zle -N $fun
+    bindkey -M $mode "$key" "$fun"
 }
 
 # cursor on wsline, text on first position, switch to mode
