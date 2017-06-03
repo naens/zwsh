@@ -193,6 +193,45 @@ wstxtfun-next-sentence() {
     fi
 }
 
+# get sentence begin / end from the position
+wstxtfun-sentence-pos() {
+    local pos=$1
+    local text="$2"
+    local text_end=${#text}
+
+    local i=1
+    while [[ ! "$text[i]" =~ "[[:alnum:]]" && $i -le $text_end ]]; do
+        i=$((i+1))
+    done
+
+    if [[ $pos -lt $((i-1)) || $i -gt $text_end ]]; then
+        echo -1
+        return
+    fi
+    local from=$i
+    local to=-1
+    local esen=-1
+    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
+    if pcre_match -b -n $from -- $text; then
+        while [[ $? -eq 0 ]] do
+            local b=($=ZPCRE_OP)
+            if [[ $b[2] -gt $pos || ($b[2] -eq $pos && $pos -eq $text_end)]]; then
+                to=$(($b[2]+1))
+                esen=$(($b[1]+1))
+                break;
+            fi
+            from=$(($b[2]+1))
+            pcre_match -b -n $b[2] -- $text
+        done
+        if [[ $to -eq -1 ]]; then
+            echo -1
+        else
+            echo $from $esen $to
+        fi
+    else
+        echo -1
+    fi
+}
 
 # paragraph functions
 wstxtfun-prev-paragraph() {

@@ -241,54 +241,13 @@ wstext-del-line() {
 }
 
 # Delete sentence functions
-
-# get sentence begin / end from the position
-wstext-sentence-pos() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    local i=1
-    while [[ ! "$text[i]" =~ "[[:alnum:]]" && $i -le $text_end ]]; do
-        i=$((i+1))
-    done
-    
-    if [[ $pos -lt $((i-1)) || $i -gt $text_end ]]; then
-        echo -1
-        return
-    fi
-    local from=$i
-    local to=-1
-    local esen=-1
-    pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
-    if pcre_match -b -n $from -- $text; then
-        while [[ $? -eq 0 ]] do
-            local b=($=ZPCRE_OP)
-            if [[ $b[2] -gt $pos || ($b[2] -eq $pos && $pos -eq $text_end)]]; then
-                to=$(($b[2]+1))
-                esen=$(($b[1]+1))
-                break;
-            fi
-            from=$(($b[2]+1))
-            pcre_match -b -n $b[2] -- $text
-        done
-        if [[ $to -eq -1 ]]; then
-            echo -1
-        else
-            echo $from $esen $to
-        fi
-    else
-        echo -1
-    fi
-}
-
 wstext-del-sentence-left() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
     # getting the positions of the current sentence
-    local sp=($(wstext-sentence-pos $CURSOR $text))
+    local sp=($(wstxtfun-sentence-pos $pos "$text"))
 
     # return if outside of any sentence
     if [[ $sp[1] -eq -1 ]]; then
@@ -299,7 +258,7 @@ wstext-del-sentence-left() {
     # if at the beginning, delete previous sentence
     if [[ $((pos+1)) -eq $sp[1] && $pos -gt 0 ]]; then
         ws-debug DEL_SENTENCE_LEFT: Delete Previous Sentence
-        local from=$(wstxtfun-prev-sentence "$text")
+        local from=$(wstxtfun-prev-sentence $pos "$text")
         ws-debug text=\"$text\" from=$from pos=$pos text_end=$text_end
         ws-defvar $wstext_textvar "$text[1,from]$text[pos+1,text_end]"
         eval "$wstext_posvar=$from"
@@ -318,7 +277,7 @@ wstext-del-sentence-right() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    local sp=($(wstext-sentence-pos $CURSOR $text))
+    local sp=($(wstxtfun-sentence-pos $pos "$text"))
 
     if [[ ! $sp[1] -eq -1 ]]; then
         ws-defvar $wstext_textvar "$text[1,$pos]$text[$sp[2],text_end]"
@@ -334,7 +293,7 @@ wstext-del-sentence() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
 
-    local sp=($(wstext-sentence-pos $CURSOR $text))
+    local sp=($(wstxtfun-sentence-pos $pos "$text"))
 
     if [[ ! $sp[1] -eq -1 ]]; then
         ws-defvar $wstext_textvar "$text[1,$sp[1]-1]$text[$sp[3],text_end]"
