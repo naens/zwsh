@@ -1,12 +1,7 @@
-# TODO: replace with new wsline functionality
-#       => scroll
-#       => size of wsdialog constant: no need to count from end!!!
-
 # prepare dialogs
 wsdialog-add() {
     local dialog=$1
     local mname=wsdialog_${dialog}_line
-    bindkey -N $mname wsline
     ws-debug WSDIALOG_ADD: \"$dialog\"
     local modesvar=wsdialog_${dialog}_modes
     local modes=(${(P)modesvar})
@@ -30,15 +25,12 @@ wsdialog-add() {
             zle -N $funname
             bindkey -M $l4mname $k $funname
             eval "$funname() { wsdialog-l4keyfn $dialog $func }"
-            ws-debug WSDIALOG_ADD: bind $funname to $k "#$func#"
         done
     done
     eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
     eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
-    eval "wsdialog_${dialog}-acceptfn() { wsdialog-acceptfn $dialog }"
-    eval "wsdialog_${dialog}-cancelfn() { wsdialog-cancelfn $dialog }"
-#    wsline-prepare wsdialog_${dialog}
-    ws-debug WSDIALOG_ADD: \"${dialog}\"
+    eval "wsdialog_${dialog}-accept() { wsdialog-acceptfn $dialog }"
+    eval "wsdialog_${dialog}-cancel() { wsdialog-cancelfn $dialog }"
 }
 
 wsdialog-l4keyfn() {
@@ -97,8 +89,6 @@ wsdialog-unsetvars() {
     unset wsdialog_line1_fmt
     unset wsdialog_line2_fmt
     unset wsdialog_line3_fmt
-    unset wsdialog_prompt_bigin
-    unset wsdialog_prompt_end
     unset wsdialog_line2_start
     unset wsdialog_line3_start
     unset wsdialog_maxlen
@@ -177,6 +167,11 @@ wsdialog-run() {
     wsdialog_line1_len=${#ws_pft}
     wsdialog_line1_fmt=($ws_pff)
 
+    # insert wsline
+    local cols=$(tput cols)
+    local len=$((cols-wsdialog_line1_len))
+    wsline-init wsdialog_$dialog $CURSOR $len
+
     wsdialog_line2_start=$(( wsdialog_start + wsdialog_line1_len ))
     ws-insert-formatted-at $wsdialog_line2_start $line2
     wsdialog_line2_len=${#ws_pft}
@@ -188,29 +183,22 @@ wsdialog-run() {
     wsdialog_line3_fmt=($ws_pff)
 
     wsdialog_line4_start=$(( wsdialog_line3_start + wsdialog_line3_len ))
-    wsdialog_prompt_begin=$(( $wsdialog_line2_start - 1 ))
-    wsdialog_prompt_end=$(( ${#BUFFER} - $wsdialog_prompt_begin ))
-    wsdialog_end=$(( ${#BUFFER} - wsdialog_line4_start ))
-    CURSOR=$wsdialog_prompt_begin
+    wsdialog_end=$((${#BUFFER}-wsdialog_line4_start))
+    CURSOR=$((wsdialog_line2_start-1))
 
-    # prepare wsline and enter
-    local cols=$(tput cols)
-    local len=$(( $cols - ${#line1_txt} - 1))
-    wsline-init wsdialog_$dialog $CURSOR $len wsdialog-upd
-    local mname=wsdialog_$dialog"_line"
-    ws-debug WSDIALOG_RUN: enter \"$mname\" mode
-    zle -K $mname
+    # enter wsline
+    wsline-activate wsdialog_$dialog
 }
 
-wsdialog-upd() {
-    region_highlight=$wsdialog_init_highlight
-    ws-apply-format $wsdialog_start $wsdialog_line1_fmt
-    wsdialog_line2_start=$((wsdialog_start + wsdialog_line1_len + wsline_len))
-    wsdialog_line3_start=$((wsdialog_line2_start + wsdialog_line2_len))
-    wsdialog_line4_start=$((wsdialog_line3_start + wsdialog_line3_len))
-    ws-apply-format $wsdialog_line2_start $wsdialog_line2_fmt
-    ws-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
-}
+#wsdialog-upd() {
+#    region_highlight=$wsdialog_init_highlight
+#    ws-apply-format $wsdialog_start $wsdialog_line1_fmt
+#    wsdialog_line2_start=$((wsdialog_start + wsdialog_line1_len + wsline_len))
+#    wsdialog_line3_start=$((wsdialog_line2_start + wsdialog_line2_len))
+#    wsdialog_line4_start=$((wsdialog_line3_start + wsdialog_line3_len))
+#    ws-apply-format $wsdialog_line2_start $wsdialog_line2_fmt
+#    ws-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
+#}
 
 # remove dialog l4
 wsdialog-rml4() {
