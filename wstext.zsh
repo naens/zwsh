@@ -215,7 +215,7 @@ wstext-del-line-right() {
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
     local begin=$(wstxtfun-line-start $pos "$text")
-    local to=$(wstext-line-end $pos "$text")
+    local to=$(wstxtfun-line-end $pos "$text")
     if [[ $begin -eq $pos && $to -lt $text_end ]]; then
         ws-defvar $wstext_textvar "$text[1,pos]$text[to+2,text_end]"
     else
