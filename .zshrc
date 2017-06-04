@@ -27,7 +27,7 @@ stty intr '^]'
 
 stty erase '^H'
 
-setopt EXTENDED_GLOB
+#setopt EXTENDED_GLOB
 
 zmodload zsh/pcre
 
