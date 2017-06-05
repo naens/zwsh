@@ -13,12 +13,9 @@ make-eread-msg() {
 wsdialog-add krdial
 
 kr2-accept() {
-    echo KR_ACCEPT > $debugfile
     if [[ -n "$wsdialog_text" ]] && kr2-read "$wsdialog_text"; then
-        echo KR_ACCEPT: read from $wsdialog_text: $wskr_text  > $debugfile
       	unset wsdialog_l4mode
     else
-        echo KR_ACCEPT: could not read from file \"$wsdialog_text\" > $debugfile
         make-eread-msg
         wsdialog_l4mode=eread
     fi
@@ -31,7 +28,6 @@ kr2-restore() {
 
 # get file contents, file name in first argument, contents in wskr_text
 kr2-read() {
-    echo KR_READ: file=$1 > $debugfile
     wskr_text=$(cat "$1" 2>&-)
     return $?
 }

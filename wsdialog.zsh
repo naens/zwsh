@@ -27,10 +27,10 @@ wsdialog-add() {
             eval "$funname() { wsdialog-l4keyfn $dialog $func }"
         done
     done
-    eval "wsdialog_${dialog}-run() { wsdialog-run $dialog }"
-    eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
-    eval "wsdialog_${dialog}-accept() { wsdialog-acceptfn $dialog }"
-    eval "wsdialog_${dialog}-cancel() { wsdialog-cancelfn $dialog }"
+    eval "wsdialog-${dialog}-run() { wsdialog-run $dialog }"
+    eval "wsdialog-${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
+    eval "wsdialog-${dialog}-accept() { wsdialog-acceptfn $dialog }"
+    eval "wsdialog-${dialog}-cancel() { wsdialog-cancelfn $dialog }"
 }
 
 wsdialog-l4keyfn() {
@@ -56,7 +56,7 @@ wsdialog-l4keyfn() {
 # removes line 1-3 and line4 if present
 wsdialog-del() {
     local bufsz=${#BUFFER}
-    local end=$((bufsz - wsdialog_end + 1))
+    local end=$((wsdialog_start+wsdialog_len+wsdialog_l4len))
     local str1=$BUFFER[1,wsdialog_start-1]
     local str2=$BUFFER[end,bufsz]
     BUFFER=$str1$str2
@@ -84,22 +84,19 @@ wsdialog-unsetvars() {
     unset wsdialog_savecurs
     unset wsdialog_start
     unset wsdialog_init_highlight
-    unset wsdialog_end
     unset wsdialog_text
-    unset wsdialog_line1_fmt
-    unset wsdialog_line2_fmt
-    unset wsdialog_line3_fmt
-    unset wsdialog_line2_start
-    unset wsdialog_line3_start
     unset wsdialog_maxlen
     unset wsdialog_savemode
+    unset wsdialog_len
+    unset wsdialog_l4len
+    unset wsdialog_l4start
 }
 
 # display line4 and enter l4 mode
 wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
-    local end=$(( ${#BUFFER} - $wsdialog_end ))
+    local end=$((wsdialog_start+wsdialog_len))
     ws-debug WSDIALOG_L4RUN: l4mode=$l4mode
 
     wsdialog_prel4save_cursor=$CURSOR
@@ -110,8 +107,8 @@ wsdialog-l4run() {
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
     local l4rt=${(P)l4rtv}
     ws-insert-formatted-at $wsdialog_line4_start $l4rt
-    local l4len=${#ws_pft}
-    CURSOR=$((wsdialog_line4_start + l4len))
+    wsdialog_l4len=${#ws_pft}
+    CURSOR=$((wsdialog_l4start+wsdialog_l4len))
 
     # save wsline variables
     wsline-setvars wsdialog_${dialog}
@@ -159,57 +156,45 @@ wsdialog-run() {
     wsdialog_start=$CURSOR
     wsdialog_init_highlight=$region_highlight
 
-    local line1=$msg$'\n'
+    local line1=$msg
     local line2=" *RETURN* done | *Backspace* or *^H* erase left"$'\n'
     local line3="  *^U* cancel  |       *Del* or *^G* erase char"$'\n'
 
-    ws-insert-formatted-at $CURSOR $line1
-    wsdialog_line1_len=${#ws_pft}
-    wsdialog_line1_fmt=($ws_pff)
+    ws-insert-formatted-at $CURSOR "$line1"
+    l1len=${#ws_pft}
+#    wsdialog_line1_fmt=($ws_pff)
 
     # insert wsline
     local cols=$(tput cols)
-    local len=$((cols-wsdialog_line1_len))
+    local len=$((cols-l1len-1))
     wsline-init wsdialog_$dialog $CURSOR $len
 
-    wsdialog_line2_start=$(( wsdialog_start + wsdialog_line1_len ))
-    ws-insert-formatted-at $wsdialog_line2_start $line2
-    wsdialog_line2_len=${#ws_pft}
-    wsdialog_line2_fmt=($ws_pff)
+    local l2start=$((wsdialog_start+l1len+len))
+    ws-insert-formatted-at $l2start $'\n'"$line2"
+    local l2len=${#ws_pft}
+#    wsdialog_line2_fmt=($ws_pff)
 
-    wsdialog_line3_start=$(( wsdialog_line2_start + wsdialog_line2_len ))
-    ws-insert-formatted-at $wsdialog_line3_start $line3
-    wsdialog_line3_len=${#ws_pft}
-    wsdialog_line3_fmt=($ws_pff)
+    local l3start=$((l2start+l2len))
+    ws-insert-formatted-at $l3start "$line3"
+    local l3len=${#ws_pft}
+#    wsdialog_line3_fmt=($ws_pff)
+    wsdialog_len=$((l1len+len+1+l2len+l3len))
 
-    wsdialog_line4_start=$(( wsdialog_line3_start + wsdialog_line3_len ))
-    wsdialog_end=$((${#BUFFER}-wsdialog_line4_start))
-    CURSOR=$((wsdialog_line2_start-1))
+    wsdialog_l4start=$((l3start+l3len))
+    wsdialog_l4len=0
+    CURSOR=$((l2start-1))
 
     # enter wsline
     wsline-activate wsdialog_$dialog
 }
-
-#wsdialog-upd() {
-#    region_highlight=$wsdialog_init_highlight
-#    ws-apply-format $wsdialog_start $wsdialog_line1_fmt
-#    wsdialog_line2_start=$((wsdialog_start + wsdialog_line1_len + wsline_len))
-#    wsdialog_line3_start=$((wsdialog_line2_start + wsdialog_line2_len))
-#    wsdialog_line4_start=$((wsdialog_line3_start + wsdialog_line3_len))
-#    ws-apply-format $wsdialog_line2_start $wsdialog_line2_fmt
-#    ws-apply-format $wsdialog_line3_start $wsdialog_line3_fmt
-#}
 
 # remove dialog l4
 wsdialog-rml4() {
     local dialog=$1
     ws-debug WSDIALOG_RML4: dialog=\"$dialog\"
 
-    # check
-    local end=$(( ${#BUFFER} - $wsdialog_end ))
-
     # remove old line4
-    BUFFER[wsdialog_line4_start+1,end]=""
+    BUFFER[wsdialog_l4start,wsdialog_l4start+wsdialog_l4len+1]=""
 
     # restore region highlight
     ws-debug WSDIALOG_RML4: prel4-highlight=$wsdialog_prel4save_highlight

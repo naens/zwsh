@@ -140,7 +140,7 @@ zle -N ws-kr
 bindkey -M wskeys "^Kr" ws-kr
 bindkey -M wskeys "^KR" ws-kr
 ws-kr() {
-    wsdialog_krdial-run
+    wsdialog-krdial-run
 }
 
 zle -N ws-bracketed-paste

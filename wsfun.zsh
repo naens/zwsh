@@ -160,7 +160,6 @@ ws-insert-formatted-at() {
     ws-parse-format "$ft"
     ws-insert-text-at $pos "$ws_pft"
     ws-apply-format $pos $ws_pff
-#    echo "pos=$pos ws_pft=#$ws_pft# ws_pff=#$ws_pff#" > $debugfile
 }
 
 ws-find-right() {
@@ -205,8 +204,8 @@ ws-printvar() {
 # debug
 ws-debug() {
     local debug_string="$@"
-    local ws_debugfile=/dev/pts/3
-    ws_debugfile=/dev/null
+    local ws_debugfile=/dev/pts/2
+#    ws_debugfile=/dev/null
     echo "$debug_string" > $ws_debugfile
 }
 

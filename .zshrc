@@ -9,7 +9,7 @@ fi
 # completion settings
 zstyle ':completion:*:default' menu no-select
 #unsetopt auto_menu
-setopt BASH_AUTO_LIST
+#setopt BASH_AUTO_LIST
 
 autoload -Uz compinit
 compinit
