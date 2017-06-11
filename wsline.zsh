@@ -28,10 +28,10 @@ wsline-init() {
         zle -N wsline-${name}-cancel
         bindkey -M $mode "^U" wsline-${name}-cancel
     fi
-    
-    ws-debug WSLINE_INIT{1}: CURSOR=$CURSOR begin=$begin len=$len
+    ws-debug WSLINE_INIT: name=$name
+    ws-debug WSLINE_INIT"{1}": CURSOR=$CURSOR begin=$begin len=$len
     ws-insert-xtimes $begin $len " "
-    ws-debug WSLINE_INIT{2}: CURSOR=$CURSOR
+    ws-debug WSLINE_INIT"{2}": CURSOR=$CURSOR
 }
 
 wsline-add-key() {
@@ -52,7 +52,7 @@ wsline-activate() {
     wstext_posvar=wsline_${name}_textpos
     local beginvar=wsline_${name}_begin
 
-    ws-debug WSLINE: entering wsline-${name}-mode, begin=${(P)beginvar}
+    ws-debug WSLINE_ACTIVATE: entering mode \"wsline-${name}-mode\", begin=${(P)beginvar}
 
     zle -K wsline-${name}-mode
 #    eval "wsline_${name}_scrollpos=0"

@@ -29,8 +29,8 @@ wsdialog-add() {
     done
     eval "wsdialog-${dialog}-run() { wsdialog-run $dialog }"
     eval "wsdialog-${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
-    eval "wsdialog-${dialog}-accept() { wsdialog-acceptfn $dialog }"
-    eval "wsdialog-${dialog}-cancel() { wsdialog-cancelfn $dialog }"
+    eval "wsline-wsdialog_${dialog}-accept() { wsdialog-acceptfn $dialog }"
+    eval "wsline-wsdialog_${dialog}-cancel() { wsdialog-cancelfn $dialog }"
 }
 
 wsdialog-l4keyfn() {
@@ -66,18 +66,23 @@ wsdialog-del() {
 wsdialog-close() {
     local dialog=$1
     local do_restore=wsdialog_${dialog}_restore
-    wsline-finalize $dialog
+    wsline-exit "$dialog"
 
     #restore text, cursor and region_highlight
     wsdialog-del
-    CURSOR=wsdialog_savecurs
+    CURSOR=$wsdialog_savecurs
     region_highlight=$wsdialog_init_highlight
 
+    wstext_textvar=$wsdialog_oldtextvar
+    wstext_updfnvar=$wsdialog_oldupdfnvar
+    wstext_posvar=$wsdialog_oldposvar
     zle -K $wsdialog_savemode
     ${(P)do_restore}
 
     # unset variables
     wsdialog-unsetvars
+    
+    ws-debug WSDIALOG_CLOSE: exit wsdialog $dialog
 }
 
 wsdialog-unsetvars() {
@@ -123,6 +128,7 @@ wsdialog-acceptfn() {
     local dialog=$1
     local do_accept=wsdialog_${dialog}_accept
     local textvar=wsline_wsdialog_${dialog}_text
+    ws-debug WSDIALOG_ACCEPTFN: dialog=$dialog
     wsdialog_text="${(P)textvar}"
     ${(P)do_accept}     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
@@ -135,6 +141,7 @@ wsdialog-acceptfn() {
 # close everything and call restore
 wsdialog-cancelfn() {
     local dialog=$1
+    ws-debug WSDIALOG_CANCELFN: dialog=$dialog
 
     unset wsdialog_text
     wsdialog-close $dialog
@@ -150,6 +157,9 @@ wsdialog-run() {
 
     wsdialog_savecurs=$CURSOR
     wsdialog_savemode=$KEYMAP
+    wsdialog_oldtextvar=$wstext_textvar
+    wsdialog_oldupdfnvar=$wstext_updfnvar
+    wsdialog_oldposvar=$wstext_posvar
 
     zle end-of-line
     LBUFFER+=$'\n'
