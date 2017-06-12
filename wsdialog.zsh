@@ -28,7 +28,7 @@ wsdialog-add() {
         done
     done
     eval "wsdialog-${dialog}-run() { wsdialog-run $dialog }"
-    eval "wsdialog-${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
+    eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
     eval "wsline-wsdialog_${dialog}-accept() { wsdialog-acceptfn $dialog }"
     eval "wsline-wsdialog_${dialog}-cancel() { wsdialog-cancelfn $dialog }"
 }
@@ -110,14 +110,11 @@ wsdialog-l4run() {
 
     # display line4 and move cursor
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
-    local l4rt=${(P)l4rtv}
-    ws-insert-formatted-at $wsdialog_line4_start $l4rt
+    local l4rt="${(P)l4rtv}"
+    ws-insert-formatted-at $wsdialog_l4start "$l4rt"
     wsdialog_l4len=${#ws_pft}
     CURSOR=$((wsdialog_l4start+wsdialog_l4len))
 
-    # save wsline variables
-    wsline-setvars wsdialog_${dialog}
-    
     # enter l4mode
     local l4mname=wsdialog_${dialog}_${l4mode}_l4
     zle -K "$l4mname"
@@ -219,11 +216,8 @@ wsdialog-ret-dial() {
     local dialog=$1
     wsdialog-rml4 $dialog
 
-    #restore dialog mode
-    local dialog_mode=wsdialog_${dialog}_line
-    wsline-getvars wsdialog_${dialog}
-    zle -K $dialog_mode
-
     # remove line4 marker
     unset wsdialog_l4mode
+
+    wsline-activate wsdialog_$dialog
 }
