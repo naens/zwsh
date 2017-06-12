@@ -74,28 +74,28 @@ ws-line-end() {
 
 # Cursor move: sentence
 zle -N ws-prev-sentence
-bindkey -M wskeys "^Os" ws-prev-sentence
-bindkey -M wskeys "^OS" ws-prev-sentence
+#bindkey -M wskeys "^Os" ws-prev-sentence
+#bindkey -M wskeys "^OS" ws-prev-sentence
 ws-prev-sentence() {
     wstext-prev-sentence
 }
 
 zle -N ws-next-sentence
-bindkey -M wskeys "^Od" ws-next-sentence
-bindkey -M wskeys "^OD" ws-next-sentence
+#bindkey -M wskeys "^Od" ws-next-sentence
+#bindkey -M wskeys "^OD" ws-next-sentence
 ws-next-sentence() {
     wstext-next-sentence
 }
 
 # Cursor move: paragraph
 zle -N ws-prev-paragraph
-bindkey -M wskeys "^O^S" ws-prev-paragraph
+#bindkey -M wskeys "^O^S" ws-prev-paragraph
 ws-prev-paragraph() {
     wstext-prev-paragraph
 }
 
 zle -N ws-next-paragraph
-bindkey -M wskeys "^O^D" ws-next-paragraph
+#bindkey -M wskeys "^O^D" ws-next-paragraph
 ws-next-paragraph() {
     wstext-next-paragraph
 }
@@ -174,15 +174,15 @@ ws-del-word-right() {
 }
 
 zle -N ws-del-word-left
-bindkey -M wskeys "^[h" ws-del-word-left
-bindkey -M wskeys "^[H" ws-del-word-left
+#bindkey -M wskeys "^[h" ws-del-word-left
+#bindkey -M wskeys "^[H" ws-del-word-left
 ws-del-word-left() {
     wstext-del-word-left
 }
 
 zle -N ws-del-word
-bindkey -M wskeys "^[y" ws-del-word
-bindkey -M wskeys "^[Y" ws-del-word
+#bindkey -M wskeys "^[y" ws-del-word
+#bindkey -M wskeys "^[Y" ws-del-word
 ws-del-word() {
     wstext-del-word
 }
@@ -209,41 +209,41 @@ ws-del-line() {
 
 # Delete keys: sentence
 zle -N ws-del-sentence-left
-bindkey -M wskeys "^Oh" ws-del-sentence-left
-bindkey -M wskeys "^OH" ws-del-sentence-left
+#bindkey -M wskeys "^Oh" ws-del-sentence-left
+#bindkey -M wskeys "^OH" ws-del-sentence-left
 ws-del-sentence-left() {
     wstext-del-sentence-left
 }
 
 zle -N ws-del-sentence-right
-bindkey -M wskeys "^Og" ws-del-sentence-right
-bindkey -M wskeys "^OG" ws-del-sentence-right
+#bindkey -M wskeys "^Og" ws-del-sentence-right
+#bindkey -M wskeys "^OG" ws-del-sentence-right
 ws-del-sentence-right() {
     wstext-del-sentence-right
 }
 
 zle -N ws-del-sentence
-bindkey -M wskeys "^Oy" ws-del-sentence
-bindkey -M wskeys "^OY" ws-del-sentence
+#bindkey -M wskeys "^Oy" ws-del-sentence
+#bindkey -M wskeys "^OY" ws-del-sentence
 ws-del-sentence() {
     wstext-del-sentence
 }
 
 # Delete keys: paragraph
 zle -N ws-del-paragraph-left
-bindkey -M wskeys "^O^H" ws-del-paragraph-left
+#bindkey -M wskeys "^O^H" ws-del-paragraph-left
 ws-del-paragraph-left() {
     wstext-del-paragraph-left
 }
 
 zle -N ws-del-paragraph-right
-bindkey -M wskeys "^O^G" ws-del-paragraph-right
+#bindkey -M wskeys "^O^G" ws-del-paragraph-right
 ws-del-paragraph-right() {
     wstext-del-paragraph-right
 }
 
 zle -N ws-del-paragraph
-bindkey -M wskeys "^O^Y" ws-del-paragraph
+#bindkey -M wskeys "^O^Y" ws-del-paragraph
 ws-del-paragraph() {
     wstext-del-paragraph
 }
