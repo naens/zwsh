@@ -141,6 +141,13 @@ bindkey -M wskeys "^Kr" ws-kr
 bindkey -M wskeys "^KR" ws-kr
 ws-kr() {
     wsdialog-wsdfopen-run
+    wsdfopen_endfn=ws-kr-end
+}
+
+ws-kr-end() {
+    if [[ -n "$wsdfopen_text" ]]; then
+        LBUFFER+="$wsdfopen_text"
+    fi
 }
 
 zle -N ws-bracketed-paste

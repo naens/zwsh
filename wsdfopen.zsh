@@ -22,12 +22,15 @@ wsdfopen-accept() {
 }
 
 wsdfopen-restore() {
-    LBUFFER+=$wskr_text
-    unset wskr_text
+    if [[ -n $wsdfopen_endfn ]]; then
+        $wsdfopen_endfn
+        unset wsdfopen_endfn
+    fi
+    unset wsdfopen_text
 }
 
 # get file contents, file name in first argument, contents in wskr_text
 wsdfopen-read() {
-    wskr_text=$(cat "$1" 2>&-)
+    wsdfopen_text=$(cat "$1" 2>&-)
     return $?
 }
