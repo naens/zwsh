@@ -76,19 +76,45 @@ zmodload zsh/pcre
 . $dir/tests/wsline-test.zsh
 . $dir/tests/wsdialog-test.zsh
 
+# special folders
+typeset -A zw_special_folders
+zw_special_folders[TMP]=/tmp
+zw_special_folders[PROJ]=~/projects
+zw_special_folders[DOC]=~/Documents
+zw_special_folders[V]=~/Videos
+
+# store special folders as procedures
+for k in ${(k)zw_special_folders}; do
+    folder=$zw_special_folders[$k]
+    eval "$k: () { cd \"$folder\" }"
+done
+
 # prompt functions
 function collapse_pwd
 {
-    if [[ $(pwd) == $HOME* ]]; then
-	subdir=$(pwd | sed -e "s,^$HOME,,")
-	echo $subdir | sed -e "s,/,:,"
+    local pwd=$(pwd)
+    local wdk=""
+    local wdsub=""
+    for k in ${(k)zw_special_folders}; do
+        folder=$zw_special_folders[$k]
+        if [[ "$pwd" = "$folder"* ]]; then
+            wdk=$k
+            wdsub=$(echo $pwd | sed -e "s,^$folder,,")
+        fi
+    done
+    if [[ -z "$wdk" && "$pwd" == "$HOME"* ]]; then
+        wdk=ZSH
+        wdsub=$(echo $pwd | sed -e "s,^$HOME,," )
+    fi
+    if [[ -n "$wdk" ]]; then
+        echo "$wdk"$(echo "$wdsub" | sed -e "s,/,:,")
     else
-	echo $(pwd)
+        echo "ZSH$pwd"
     fi
 }
 
 setopt PROMPT_SUBST
-export PROMPT=ZSH'$(collapse_pwd)>'
+export PROMPT='$(collapse_pwd)>'
 
 # options completion
 #setopt menu_complete

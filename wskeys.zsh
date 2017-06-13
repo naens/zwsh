@@ -283,7 +283,17 @@ bindkey -M wskeys "^U" undo
 bindkey -M wskeys "^6" redo
 
 # Other Keys
-bindkey -M wskeys "^M" accept-line
+zle -N wskeys-accept-line
+#bindkey -M wskeys "^M" accept-line
+bindkey -M wskeys "^M" wskeys-accept-line
+wskeys-accept-line() { # in case if special action before accept needed
+    zle accept-line
+}
+
+V:() {
+    cd ~/Videos
+}
+
 bindkey -M wskeys "^J" run-help
 bindkey -M wskeys "^V" overwrite-mode
 bindkey -M wskeys "^I" expand-or-complete
