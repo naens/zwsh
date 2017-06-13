@@ -80,14 +80,20 @@ zmodload zsh/pcre
 typeset -A zw_special_folders
 zw_special_folders[TMP]=/tmp
 zw_special_folders[PROJ]=~/projects
-zw_special_folders[DOC]=~/Documents
+zw_special_folders[DOCS]=~/Documents
 zw_special_folders[V]=~/Videos
+zw_special_folders[LOG]=/var/log
+zw_special_folders[OPT]=/opt
 
 # store special folders as procedures
-for k in ${(k)zw_special_folders}; do
-    folder=$zw_special_folders[$k]
-    eval "$k: () { cd \"$folder\" }"
-done
+# TODO: allow specify subfolder, example: PROJ:pedit -> goes to subfolder pedit
+#for k in ${(k)zw_special_folders}; do
+#    folder=$zw_special_folders[$k]
+#    eval "$k: () { cd \"$folder\" }"
+#done
+
+#not used
+#setopt auto_cd
 
 # prompt functions
 function collapse_pwd

@@ -284,14 +284,107 @@ bindkey -M wskeys "^6" redo
 
 # Other Keys
 zle -N wskeys-accept-line
-#bindkey -M wskeys "^M" accept-line
+bindkey -M wskeys "^[m" accept-line
 bindkey -M wskeys "^M" wskeys-accept-line
-wskeys-accept-line() { # in case if special action before accept needed
-    zle accept-line
-}
+wskeys-accept-line() {
+    # substitute special folders:
+    #  * if outside ' and " quotes (not quoted and not escaped)
+    #  * if is not following alnum character, nor active $, nor active \
+    #  * if is not commented (not following # on the same line)
+    #  * is followed by :
+    local in_sq=""
+    local in_dq=""
+    local var_act=""
+    local bsl_act=""
+    local in_wd=""
+    local in_com=""
+    local i=1
+    local old_buffer="$BUFFER"
+    local new_buffer=""
+    while [[ $i -le ${#old_buffer} ]]; do
+        local char=$old_buffer[$i]
+        local found=""
+        if [[ -z $in_sq && -z $in_dq && -z $var_act && -z $bsl_act 
+           && -z $in_wd && -z $in_com && "$char" =~ [[:alnum:]_-] ]]; then
+            # if there is a substituable string beginning from $i, replace
+            for k in ${(k)zw_special_folders}; do
+                folder=$zw_special_folders[$k]
+                local klen=${#k}
+                ws-debug i=$i len=${#old_buffer} k=$k klen=$klen folder=$folder ob=\""$old_buffer[i,i+klen]"\"
+                if [[ $((i+klen)) -le ${#old_buffer} && "$old_buffer[i,i+klen]" = "$k:" ]]; then
+                    found=1
+                    ws-debug FOUND $k:
+                    new_buffer+="$folder/"
+                    i=$((i+klen+1))
+                    break
+                fi
+            done
+            if [[ -n "$found" ]]; then
+                continue
+            fi
+        fi
 
-V:() {
-    cd ~/Videos
+        # test single quote
+        if [[ -z $in_sq && -z $in_dq && -z $bsl_act && -z $in_com && "$char" = "'" ]]; then
+            in_sq=1
+        elif [[ -n $in_sq && -z $in_dq && -z $bsl_act && -z $in_com && "$char" = "'" ]]; then
+            in_sq=""
+        fi
+
+        # test $var
+        if [[ -z $in_sq && -z $var_act && -z $bsl_act && -z $in_com && "$char" = "\$" ]]; then
+            var_act=1
+        elif [[ -z $in_sq && -n $var_act && -z $bsl_act && -z $in_com ]]; then
+            var_act=""
+        fi
+
+        # test double quote
+        if [[ -z $in_sq && -z $in_dq && -z $bsl_act && -z $in_com && "$char" = "\"" ]]; then
+            in_dq=1
+        elif [[ -z $in_sq && -n $in_dq && -z $bsl_act && -z $in_com && "$char" = "\"" ]]; then
+            in_dq=""
+        fi
+
+        # test backslash
+        if [[ -z $bsl_act && -z $in_com && "$char" = "\\" ]]; then
+            bsl_act=1
+        elif [[ -n $bsl_act ]]; then
+            bsl_act=""
+        fi
+
+        # test in_wd
+        if [[ -z $in_sq && -z $in_dq && -z $bsl_act 
+           && -z $in_wd && -z $in_com && "$char" =~ [[:alnum:]_-] ]]; then
+            in_wd=1
+        elif [[ -z $in_sq && -z $in_dq && -z $bsl_act 
+           && -n $in_wd && -z $in_com && ! "$char" =~ [[:alnum:]_-] ]]; then
+            in_wd=""
+        fi
+
+        # test in_com
+        if [[ -z $in_sq && -z $in_dq && -z $bsl_act && -z $in_com && "$char" = "#" ]]; then
+            in_com=1
+        elif [[ -n $in_com && "$char" = $'\n' ]]; then
+            in_com=""
+        fi
+
+        new_buffer+="$char"
+        i=$((i+1))
+    done
+    
+    if [[ -d "$new_buffer" ]]; then
+        cd "$new_buffer"
+        echo
+        BUFFER=""
+        zle reset-prompt
+    else
+        print -s "$BUFFER"
+        zle down-history
+        echo
+        echo "$new_buffer" | source /dev/stdin
+        BUFFER=""
+        zle reset-prompt
+    fi
 }
 
 bindkey -M wskeys "^J" run-help
