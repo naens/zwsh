@@ -92,8 +92,7 @@ zw_special_folders[OPT]=/opt
 #    eval "$k: () { cd \"$folder\" }"
 #done
 
-#not used
-#setopt auto_cd
+setopt auto_cd
 
 # prompt functions
 function collapse_pwd

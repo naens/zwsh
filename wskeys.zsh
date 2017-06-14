@@ -372,7 +372,7 @@ wskeys-accept-line() {
         i=$((i+1))
     done
     
-    if [[ -d "$new_buffer" ]]; then
+    if [[ -d "$new_buffer" ]]; then # TODO: allow spaces before/after
         cd "$new_buffer"
         echo
         BUFFER=""
@@ -381,7 +381,8 @@ wskeys-accept-line() {
         print -s "$BUFFER"
         zle down-history
         echo
-        echo "$new_buffer" | source /dev/stdin
+#        echo "$new_buffer" | source /dev/stdin # TODO: improve
+        eval "$new_buffer" 
         BUFFER=""
         zle reset-prompt
     fi
