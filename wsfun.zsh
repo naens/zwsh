@@ -205,7 +205,7 @@ ws-printvar() {
 ws-debug() {
     local debug_string="$@"
     local ws_debugfile=/dev/pts/2
-#    ws_debugfile=/dev/null
+    ws_debugfile=/dev/null
     echo "$debug_string" > $ws_debugfile
 }
 
