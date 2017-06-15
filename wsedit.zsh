@@ -38,12 +38,12 @@ wsedit-tab() {
     LBUFFER+=$'\t'
 }
 
-zle -N wsedit-self-insert
-bindkey -M wsedit -R "!"-"~" wsedit-self-insert
-bindkey -M wsedit " " wsedit-self-insert
-wsedit-self-insert() {
-    LBUFFER+=$KEYS
-}
+#zle -N wsedit-self-insert
+#bindkey -M wsedit -R "!"-"~" wsedit-self-insert
+#bindkey -M wsedit " " wsedit-self-insert
+#wsedit-self-insert() {
+#    LBUFFER+=$KEYS
+#}
 
 # Delete Keys
 zle -N wsedit-delchar
@@ -82,26 +82,39 @@ wsedit-back-delline() {
 zle -N ws-edit
 bindkey -M wskeys "^Kd" ws-edit
 bindkey -M wskeys "^KD" ws-edit
-bindkey -M wsblock "^Kd" ws-edit
-bindkey -M wsblock "^KD" ws-edit
+#bindkey -M wsblock "^Kd" ws-edit
+#bindkey -M wsblock "^KD" ws-edit
 ws-edit() {
     wsedit_saved_keymap=$KEYMAP
     wsedit_begin=0     # no header yet
 
     # TODO: check if enter fullscreen mode or not
     wsedit_fullscreen=false
-    if [[ $KEYMAP == "wsblock" ]]; then
-        skip
-    else
+#    if [[ $KEYMAP == "wsblock" ]]; then
+#        skip
+#    else
         zle -K wsedit
-    fi
+#    fi
+
+    # save previous vars
+    wstext_textvar_save=$wstext_textvar
+    wstext_updfnvar_save=$wstext_updfnvar
+    wstext_posvar_save=$wstext_posvar
+
+    wsedit_text="${(P)wstext_textvar}"
+    wsedit_pos=${(P)wstext_posvar}
+
+    # define variables
+    wstext_textvar=wsedit_text
+    wstext_updfnvar=wsedit-refresh
+    wstext_posvar=wsedit_pos
 }
 
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 wsedit-header() {
     local begin_old=$wsedit_begin
-    local curs_old=$CURSOR
+#    local curs_old=$CURSOR
     ws-pos $wsedit_begin
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
@@ -114,14 +127,14 @@ wsedit-header() {
     # wsedit_ begin of editable area
     wsedit_begin=$(( ${#header_text} + 2 ))
 
-    local diff=$(( $wsedit_begin - $begin_old ))
-    CURSOR=$(( $curs_old + $diff ))
-    if [[ -n $kb ]]; then
-        kb=$(( $kb + $diff ))
-    fi
-    if [[ -n $kk ]]; then
-        kk=$(( $kk + $diff ))
-    fi
+#    local diff=$(( $wsedit_begin - $begin_old ))
+    #CURSOR=$(( $curs_old + $diff ))
+#    if [[ -n $kb ]]; then
+#        kb=$(( $kb + $diff ))
+#    fi
+#    if [[ -n $kk ]]; then
+#        kk=$(( $kk + $diff ))
+#    fi
 }
 
 # refresh all: the text and the header
@@ -135,6 +148,9 @@ wsedit-refresh() {
     else
         wsedit-header
     fi
+    ws-debug WSEDIT_REFRESH wsedit_text=\""$wsedit_text"\" wsedit_pos=$wsedit_pos
+    BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
+    CURSOR=$((wsedit_begin+wsedit_pos))
 }
 
 # Switch to *editor mode* and open a file: ^KE
@@ -151,18 +167,33 @@ bindkey -M wsedit "^Kd" wsedit-exit
 bindkey -M wsedit "^KD" wsedit-exit
 wsedit-exit() {
     CURSOR=$(( $CURSOR - $wsedit_begin ))
-    if [[ $KEYMAP == "wseditblock" ]]; then
-        kb=$(( $kb - $wsedit_begin ))
-        if [[ -n $kk ]]; then
-            kk=$(( $kk - $wsedit_begin ))
-        fi
-        zle -K wsblock
-        wsblock-upd
-    else
-        zle -K $wsedit_saved_keymap
-    fi
-    BUFFER[1,$wsedit_begin]=""
+#    if [[ $KEYMAP == "wseditblock" ]]; then
+#        kb=$(( $kb - $wsedit_begin ))
+#        if [[ -n $kk ]]; then
+#            kk=$(( $kk - $wsedit_begin ))
+#        fi
+#        zle -K wsblock
+#        wsblock-upd
+#    else
+#        zle -K $wsedit_saved_keymap
+#    fi
+#    BUFFER[1,$wsedit_begin]=""
+
+    # define variables
+    wstext_textvar=$wstext_textvar_save
+    wstext_updfnvar=$wstext_updfnvar_save
+    wstext_posvar=$wstext_posvar_save
+
+    eval "$wstext_textvar=\"$wsedit_text\""
+    eval "$wstext_posvar=\"$wsedit_pos\""
+    ws-debug "$wstext_textvar -> $wsedit_text"
+    ws-debug "$wstext_posvar -> $wsedit_pos"
+
     unset wsedit_begin
+    unset wsedit_text
+    unset wsedit_pos
+    zle -K $wsedit_saved_keymap
+    $wstext_updfnvar
 }
 
 # Close the currenpt file and save: ^KX (buffer empty)

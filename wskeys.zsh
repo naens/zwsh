@@ -284,6 +284,7 @@ bindkey -M wskeys "^6" redo
 
 # Other Keys
 zle -N wskeys-accept-line
+#bindkey -M wskeys "^[^M" accept-line
 bindkey -M wskeys "^[m" accept-line
 bindkey -M wskeys "^M" wskeys-accept-line
 wskeys-accept-line() {
@@ -378,13 +379,20 @@ wskeys-accept-line() {
         BUFFER=""
         zle reset-prompt
     else
-        print -s "$BUFFER"
-        zle down-history
-        echo
+#        print -s "$BUFFER"
+#        zle down-history
+#        echo
 #        echo "$new_buffer" | source /dev/stdin # TODO: improve
-        eval "$new_buffer" 
-        BUFFER=""
-        zle reset-prompt
+#        eval "$new_buffer"
+#        - "$new_buffer"
+
+#        BUFFER=""
+#        zle reset-prompt
+#        zle execute-named-cmd "$new_buffer"
+
+        BUFFER="$new_buffer"
+        zle .accept-line
+
     fi
 }
 
