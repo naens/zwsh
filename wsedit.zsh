@@ -21,45 +21,38 @@ bindkey -M wsedit "^QX" undefined-key
 zle -N wsedit-newline
 bindkey -M wsedit "^M" wsedit-newline
 wsedit-newline() {
-    LBUFFER+=$'\n'
+    wstext-insert $'\n'
 }
 
 zle -N wsedit-splitline
 bindkey -M wsedit "^N" wsedit-splitline
 wsedit-splitline() {
-    local curs=$CURSOR
-    LBUFFER+=$'\n'
-    CURSOR=$curs
+    wstext-insert $'\n'
+    wsedit_pos=$((wsedit_pos-1))
+    wsedit-refresh
 }
 
 zle -N wsedit-tab
 bindkey -M wsedit "^I" wsedit-tab
 wsedit-tab() {
-    LBUFFER+=$'\t'
+    wstext-insert $'\t'
 }
-
-#zle -N wsedit-self-insert
-#bindkey -M wsedit -R "!"-"~" wsedit-self-insert
-#bindkey -M wsedit " " wsedit-self-insert
-#wsedit-self-insert() {
-#    LBUFFER+=$KEYS
-#}
 
 # Delete Keys
-zle -N wsedit-delchar
-bindkey -M wsedit "^G" wsedit-delchar
-wsedit-delchar() {
-    zle delete-char
-}
+#zle -N wsedit-delchar
+#bindkey -M wsedit "^G" wsedit-delchar
+#wsedit-delchar() {
+#    zle delete-char
+#}
 
-zle -N wsedit-backdelchar
-bindkey -M wsedit "^H" wsedit-backdelchar
-bindkey -M wsedit "^?" wsedit-backdelchar
-wsedit-backdelchar() {
-    if [[ $CURSOR -gt $wsedit_begin ]]; then
-        zle backward-delete-char
-    fi
-}
+#zle -N wsedit-backdelchar
+#bindkey -M wsedit "^H" wsedit-backdelchar
+#bindkey -M wsedit "^?" wsedit-backdelchar
+#wsedit-backdelchar() {
+#    if [[ $CURSOR -gt $wsedit_begin ]]; then
+#        zle backward-delete-char
+#    fi
+#}
 
 zle -N wsedit-delline
 bindkey -M wsedit "^Y" wsedit-delline
