@@ -7,6 +7,33 @@ wsedit-pre-redraw() {
     wsedit-refresh
 }
 
+# Cursor Movement Functions
+zle -N wsedit-prev-line
+bindkey -M wsedit "^E" wsedit-prev-line
+wsedit-prev-line() {
+}
+
+bindkey -M wsedit "^X" wsedit-next-line
+wsedit-next-line() {
+}
+
+bindkey -M wsedit "^R" undefined-key #TODO
+bindkey -M wsedit "^C" undefined-key #TODO
+
+zle -N wsedit-start-document
+bindkey -M wsedit "^Qr" wsedit-start-document
+bindkey -M wsedit "^QR" wsedit-start-document
+wsedit-start-document() {
+    wstext-start-document
+}
+
+zle -N wsedit-end-document
+bindkey -M wsedit "^Qc" wsedit-end-document
+bindkey -M wsedit "^QC" wsedit-end-document
+wsedit-end-document() {
+    wstext-end-document
+}
+
 # Cursor Scroll Functions TODO: ^ W/^Z (scroll line)
 bindkey -M wsedit "^W" undefined-key
 bindkey -M wsedit "^Z" undefined-key
@@ -36,38 +63,6 @@ zle -N wsedit-tab
 bindkey -M wsedit "^I" wsedit-tab
 wsedit-tab() {
     wstext-insert $'\t'
-}
-
-# Delete Keys
-#zle -N wsedit-delchar
-#bindkey -M wsedit "^G" wsedit-delchar
-#wsedit-delchar() {
-#    zle delete-char
-#}
-
-#zle -N wsedit-backdelchar
-#bindkey -M wsedit "^H" wsedit-backdelchar
-#bindkey -M wsedit "^?" wsedit-backdelchar
-#wsedit-backdelchar() {
-#    if [[ $CURSOR -gt $wsedit_begin ]]; then
-#        zle backward-delete-char
-#    fi
-#}
-
-zle -N wsedit-delline
-bindkey -M wsedit "^Y" wsedit-delline
-wsedit-delline() {
-    if [[ $wsedit_begin -lt ${#BUFFER} ]]; then
-        zle kill-whole-line
-    fi
-}
-
-zle -N wsedit-back-delline
-bindkey -M wsedit "^Q^H" wsedit-back-delline
-wsedit-back-delline() {
-    if [[ $CURSOR -gt $wsedit_begin ]]; then
-        zle backward-kill-line
-    fi
 }
 
 # Switch main to editor mode key bindings
@@ -109,6 +104,8 @@ wsedit-header() {
     local begin_old=$wsedit_begin
 #    local curs_old=$CURSOR
     ws-pos $wsedit_begin
+#    wstxtfun-pos $wsedit_pos "$wsedit_text"
+#TODO: test & delete old ws-pos function
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""

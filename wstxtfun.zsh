@@ -125,7 +125,7 @@ wstxtfun-pos2line() {
         fi
         i=$((i+1))
     done
-     echo $curr
+    echo $curr
 }
 
 wstxtfun-line-len() {

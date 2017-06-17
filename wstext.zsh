@@ -61,6 +61,37 @@ wstext-line-end() {
     wstext-upd
 }
 
+# goto previous line (same position if possible)
+wstext-prev-line() {
+    local pos=${(P)wstext_posvar}
+    local text="${(P)wstext_textvar}"
+    local text_end=${#text}
+
+#TODO: wstxtfun-pos $pos "$text" # defines $ws_row and $ws_col
+#TODO: local nlines=...
+    if [[ $ws_row -eq 1 ]]; then
+        eval "$wstext_posvar=0"
+        wstext-upd
+    elif [[ $ws_row -eq $nlines ]]; then
+        eval "$wstext_posvar=$text_end"
+        wstext-upd
+    else
+        local new_col=$((ws_row-1))
+#TODO   wstext-goto "$text" $ws_row $new_col
+    fi
+}
+
+# goto next line (same position if possible)
+wstext-next-line() {
+    local pos=${(P)wstext_posvar}
+    local text="${(P)wstext_textvar}"
+    local text_end=${#text}
+
+    eval "$wstext_posvar=$text_end"
+    wstext-upd
+}
+
+
 # Sentence functions (end-of-sentence: dot-space-space or dot-newline)
 wstext-prev-sentence() {
     local pos=${(P)wstext_posvar}
@@ -103,6 +134,21 @@ wstext-next-paragraph() {
     local next_paragraph_pos=$(wstxtfun-next-paragraph $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$next_paragraph_pos"
+    wstext-upd
+}
+
+# start document
+wstext-start-document() {
+    eval "$wstext_posvar=0"
+    wstext-upd
+}
+
+# end document
+wstext-end-document() {
+    local text="${(P)wstext_textvar}"
+    local text_end=${#text}
+
+    eval "$wstext_posvar=$text_end"
     wstext-upd
 }
 
