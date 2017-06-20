@@ -102,10 +102,9 @@ ws-edit() {
 # update $wsedit_begin to match the next character after the header
 wsedit-header() {
     local begin_old=$wsedit_begin
-#    local curs_old=$CURSOR
-    ws-pos $wsedit_begin
-#    wstxtfun-pos $wsedit_pos "$wsedit_text"
-#TODO: test & delete old ws-pos function
+    local ws_row
+    local ws_col
+    read ws_row ws_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""

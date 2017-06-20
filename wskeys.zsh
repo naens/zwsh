@@ -312,7 +312,8 @@ wskeys-accept-line() {
                 folder=$zw_special_folders[$k]
                 local klen=${#k}
                 ws-debug i=$i len=${#old_buffer} k=$k klen=$klen folder=$folder ob=\""$old_buffer[i,i+klen]"\"
-                if [[ $((i+klen)) -le ${#old_buffer} && "$old_buffer[i,i+klen]" = "$k:" ]]; then
+                if [[ $((i+klen)) -le ${#old_buffer}
+                   && $(ws-uc "$old_buffer[i,i+klen]") = "$k:" ]]; then
                     found=1
                     ws-debug FOUND $k:
                     new_buffer+="$folder/"

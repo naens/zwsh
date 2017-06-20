@@ -30,43 +30,6 @@ ws-do-bold() {
     done
 }
 
-# get position in $ws_row and in $ws_col
-ws-pos() {
-    local from
-    local to
-    if [[ -n $1 ]]; then
-        from=$(( $1 + 1 ))
-    else
-        from=1
-    fi
-    if [[ -n $2 ]]; then
-        to=$(( $2 + 1 ))
-    else
-        to=$(( ${#BUFFER} + 1 ))
-    fi
-    local curs=$(( $CURSOR + 1 ))
-    if [[ $from -le $curs && $curs -le $to ]]; then
-        ws_row=1
-        ws_col=1
-        for i in {$from..$to}; do
-            if [[ $i -eq $curs ]]; then
-                break
-            fi
-            if [[ $BUFFER[$i] == $'\n' ]]; then
-                ws_row=$(( $ws_row + 1 ))
-                ws_col=1
-            elif [[ $BUFFER[$i] == $'\t' ]]; then
-                local rest=$(( ($ws_col - 1) % 8 ))
-                ws_col=$(( $ws_col + 8 - $rest))
-            elif [[ -n $kb && -z $kk && $i -eq $(( $kb + 1 )) ]]; then
-                ws_col=$(( $ws_col - 2 ))                
-            else
-                ws_col=$(( $ws_col + 1 ))
-            fi
-        done
-    fi
-}
-
 # get screen dimensions in $ws_rows and $ws_cols
 ws-size() {
     ws_rows=$(tput lines)
@@ -256,4 +219,8 @@ ws-get-scrollpos() {
         r=$((s<minscroll?minscroll:s>maxscroll?maxscroll:s))
     fi
     echo $r
+}
+
+ws-uc() {
+    echo $(tr "[:lower:]" "[:upper:]" <<< "$1")
 }

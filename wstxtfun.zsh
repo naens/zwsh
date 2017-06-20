@@ -1,5 +1,36 @@
+# position functions
+wstxtfun-pos() {
+    local pos=$1
+    local text="$2"
+    local text_end=${#text}
+    local ws_row=1
+    local ws_col=1
+    for i in {1..$text_end}; do
+        if [[ $i -gt $pos ]]; then
+            break
+        fi
+        if [[ $text[i] == $'\n' ]]; then
+            ws_row=$((ws_row+1))
+            ws_col=1
+        elif [[ $text[i] == $'\t' ]]; then
+            local rest=$(( (ws_col-1) % 8 ))
+            ws_col=$((ws_col+8-rest))
+        else
+            ws_col=$((ws_col+1))
+        fi
+    done
+    echo $ws_row $ws_col
+}
+
+wstxtfun-yx-pos()
+{
+    local y=$1
+    local x=$2
+    local text="$3"
+}
+
 # character functions
-ws-txtfun-prev-printable() {
+wstxtfun-prev-printable() {
     local pos=$1
     local text="$2"
     local text_end=${#text}
@@ -287,4 +318,3 @@ wstxtfun-next-paragraph() {
         echo $text_end
     fi
 }
- 
