@@ -27,6 +27,15 @@ wstxtfun-yx-pos()
     local y=$1
     local x=$2
     local text="$3"
+    ws-debug y=$y x=$x
+    local lp=$(wstxtfun-line2pos $y "$text")
+    local len=$(wstxtfun-line-len $y "$text")
+    ws-debug y=$y x=$x lp=$lp len=$len
+    if [[ $x -le $len ]]; then
+        echo $((lp+x-2))
+    else
+        echo $((lp+len-1))
+    fi
 }
 
 # character functions
@@ -164,7 +173,7 @@ wstxtfun-line-len() {
     local text="$2"
     local text_end=${#text}
 
-    local begin=$(wstext-line2pos $line "$text")
+    local begin=$(wstxtfun-line2pos $line "$text")
     local i=$begin
     while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
         i=$((i+1))

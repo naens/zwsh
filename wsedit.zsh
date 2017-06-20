@@ -11,6 +11,7 @@ wsedit-pre-redraw() {
 zle -N wsedit-prev-line
 bindkey -M wsedit "^E" wsedit-prev-line
 wsedit-prev-line() {
+    wstext-prev-line
 }
 
 bindkey -M wsedit "^X" wsedit-next-line

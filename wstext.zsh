@@ -78,8 +78,10 @@ wstext-prev-line() {
         eval "$wstext_posvar=$text_end"
         wstext-upd
     else
-        local new_col=$((ws_row-1))
-        wstxtfun-yx-pos "$text" $ws_row $new_col
+        local new_row=$((ws_row-1))
+        local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
+        eval "$wstext_posvar=$new_pos"
+        wstext-upd
     fi
 }
 
