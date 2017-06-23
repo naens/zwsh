@@ -151,6 +151,21 @@ wstxtfun-line2pos() {
     echo $i
 }
 
+wstxtfun-nlines() {
+    local text="$1"
+    local i=1
+    local count=1
+    local text_end=${#text}
+
+    while [[ $i -le $text_end ]]; do
+        if [[ "$text[i]" = $'\n' ]]; then
+            count=$((count+1))
+        fi
+        i=$((i+1))
+    done
+    echo $count
+}
+
 wstxtfun-pos2line() {
     local pos=$1
     local text="$2"

@@ -78,12 +78,19 @@ zmodload zsh/pcre
 
 # special folders
 typeset -A zw_special_folders
+
+zw_special_folders[FONTS]=~/Documents/fonts
+zw_special_folders[ELEC]=~/Documents/Prog/elec
+zw_special_folders[QMS]=~/Documents/Prog/qms
+
 zw_special_folders[TMP]=/tmp
 zw_special_folders[PROJ]=~/projects
 zw_special_folders[DOC]=~/Documents
 zw_special_folders[V]=~/Videos
 zw_special_folders[LOG]=/var/log
 zw_special_folders[OPT]=/opt
+zw_special_folders[ISO]=~/Downloads/iso
+
 
 # TODO directory autocompletion
 

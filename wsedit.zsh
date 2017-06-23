@@ -14,8 +14,10 @@ wsedit-prev-line() {
     wstext-prev-line
 }
 
+zle -N wsedit-next-line
 bindkey -M wsedit "^X" wsedit-next-line
 wsedit-next-line() {
+    wstext-next-line
 }
 
 bindkey -M wsedit "^R" undefined-key #TODO
@@ -138,7 +140,7 @@ wsedit-refresh() {
     else
         wsedit-header
     fi
-    ws-debug WSEDIT_REFRESH wsedit_text=\""$wsedit_text"\" wsedit_pos=$wsedit_pos
+#    ws-debug WSEDIT_REFRESH wsedit_text=\""$wsedit_text"\" wsedit_pos=$wsedit_pos
     BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
     CURSOR=$((wsedit_begin+wsedit_pos))
 }

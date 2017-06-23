@@ -71,18 +71,10 @@ wstext-prev-line() {
     local ws_col
     read ws_row ws_col <<< $(wstxtfun-pos $pos "$text")
 
-    if [[ $ws_row -eq 1 ]]; then
-        eval "$wstext_posvar=0"
-        wstext-upd
-    elif [[ $ws_row -eq $nlines ]]; then
-        eval "$wstext_posvar=$text_end"
-        wstext-upd
-    else
-        local new_row=$((ws_row-1))
-        local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
-        eval "$wstext_posvar=$new_pos"
-        wstext-upd
-    fi
+    local new_row=$((ws_row-1))
+    local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
+    eval "$wstext_posvar=$new_pos"
+    wstext-upd
 }
 
 # goto next line (same position if possible)
@@ -95,8 +87,13 @@ wstext-next-line() {
     local ws_col
     read ws_row ws_col <<< $(wstxtfun-pos $pos "$text")
 
-    eval "$wstext_posvar=$text_end"
-    wstext-upd
+    local nlines=$(wstxtfun-nlines "$text")
+    local new_row=$((ws_row+1))
+    if [[ $nlines -ge $new_row ]]; then
+        local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
+        eval "$wstext_posvar=$new_pos"
+        wstext-upd
+    fi
 }
 
 
