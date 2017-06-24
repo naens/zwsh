@@ -243,8 +243,40 @@ bindkey -M wsedit "^Kq" undefined-key
 bindkey -M wsedit "^KQ" undefined-key
 
 # TODO: * enter+open functions: ^KE=replace ^KS=keep-and-save
-bindkey -M wskeys "^Ke" undefined-key
-bindkey -M wskeys "^KE" undefined-key
+zle -N wskeys-replace
+bindkey -M wskeys "^Ke" wskeys-replace
+bindkey -M wskeys "^KE" wskeys-replace
+# replace current buffer with contents from file
+wskeys-replace() {
+    wsdialog-wsdfopen-run
+    wsdfopen_endfn=wstext-replace-enter
+    # TODO: test!!!
+}
+
+wstext-replace-enter() {
+    if [[ -n "$wsdfopen_text" ]]; then
+        wsedit_saved_keymap=$KEYMAP
+        wsedit_begin=0     # no header yet
+
+        # TODO: check if enter fullscreen mode or not
+        wsedit_fullscreen=false
+        zle -K wsedit
+
+        # save previous vars
+        wstext_textvar_save=$wstext_textvar
+        wstext_updfnvar_save=$wstext_updfnvar
+        wstext_posvar_save=$wstext_posvar
+
+        wsedit_text="$wsdfopen_text"
+        wsedit_pos=1
+
+        # define variables
+        wstext_textvar=wsedit_text
+        wstext_updfnvar=wsedit-refresh
+        wstext_posvar=wsedit_pos
+    fi
+}
+
 bindkey -M wskeys "^Ks" undefined-key
 bindkey -M wskeys "^KS" undefined-key
 
