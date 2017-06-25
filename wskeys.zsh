@@ -409,6 +409,18 @@ bindkey -M wskeys "^J" run-help
 bindkey -M wskeys "^V" overwrite-mode
 bindkey -M wskeys "^I" expand-or-complete
 
+zle -N wskeys-exec-to-prompt
+bindkey -M wskeys "^Km" wskeys-exec-to-prompt
+bindkey -M wskeys "^KM" wskeys-exec-to-prompt
+wskeys-exec-to-prompt() {
+    local newbuf=$(eval $ws_text 2>&-)
+    if [[ -n "$newbuf" ]]; then
+        ws_text="$newbuf"
+        ws_curs=0
+        ws-updfn
+    fi
+}
+
 bindkey -M wskeys "^Ql" wskwtest
 zle -N wskwtest
 wskwtest() {
@@ -417,7 +429,7 @@ wskwtest() {
 }
 
 zle -N zle-line-pre-redraw
-zle-line-pre-redraw () {
+zle-line-pre-redraw() {
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun
