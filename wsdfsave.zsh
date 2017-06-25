@@ -1,59 +1,63 @@
 # writes the contents of the selection to a file
-wsdialog_kwdial_msg="Write to file: "
-wsdialog_kwdial_modes[1]=badfn
-wsdialog_kwdial_modes[2]=fexists
-wsdialog_kwdial_modes[3]=ewrite
-wsdialog_kwdial_accept=kw-accept
-wsdialog_kwdial_restore=kw-restore
+wsdialog_wsdfsave_msg="Write to file: "
+wsdialog_wsdfsave_modes[1]=badfn
+wsdialog_wsdfsave_modes[2]=fexists
+wsdialog_wsdfsave_modes[3]=ewrite
+wsdialog_wsdfsave_accept=wsdfsave-accept
+wsdialog_wsdfsave_restore=wsdfsave-restore
 
-# badfn
-wsdialog_kwdial_badfn_msg="Bad file name."
-
-# fexists (yes=overwrite, no=edit)
-wsdialog_kwdial_fexists_msg="#That file already exists.# Overwrite (Y/N)?"
-declare -A wsdialog_kwdial_fexists_funcs
-wsdialog_kwdial_fexists_funcs[y]=kw-fexists-yes
-wsdialog_kwdial_fexists_funcs[n]=kw-fexists-no
-
-# ewrite
-make-ewrite-msg() {
-    local ewrite_msg='#Error writing file "<FN>".#  Press Enter to continue.'
-    wsdialog_kwdial_ewrite_msg="$(echo $ewrite_msg | sed s:\<FN\>:$wsdialog_text:)"
+wsdfsave-run() {
+    wsdialog-wsdfsave-run
 }
 
-wsdialog-add kwdial
+# badfn
+wsdialog_wsdfsave_badfn_msg="Bad file name."
 
-kw-accept() {
+# fexists (yes=overwrite, no=edit)
+wsdialog_wsdfsave_fexists_msg="#That file already exists.# Overwrite (Y/N)?"
+declare -A wsdialog_wsdfsave_fexists_funcs
+wsdialog_wsdfsave_fexists_funcs[y]=wsdfsave-fexists-yes
+wsdialog_wsdfsave_fexists_funcs[n]=wsdfsave-fexists-no
+
+# ewrite
+wsdfsave-make-ewrite-msg() {
+    local ewrite_msg='#Error writing file "<FN>".#  Press Enter to continue.'
+    wsdialog_wsdfsave_ewrite_msg="$(echo $ewrite_msg | sed s:\<FN\>:$wsdialog_text:)"
+}
+
+wsdialog-add wsdfsave
+
+wsdfsave-accept() {
     if [[ -z "$wsdialog_text" || ${#wsdialog_text} -eq 0 ]]; then
         wsdialog_l4mode=badfn
     elif [[ -e "$wsdialog_text" ]]; then
         wsdialog_l4mode=fexists
-    elif kw-save "$wsdialog_text" "$wsblock_text"; then
+    elif wsdfsave-save "$wsdialog_text" "$wsdfsave_text"; then
         unset wsdialog_l4mode
     else
-        make-ewrite-msg
+        wsdfsave-make-ewrite-msg
         wsdialog_l4mode=ewrite
     fi
 }
 
-kw-restore() {
+wsdfsave-restore() {
 }
 
-kw-fexists-yes() {
-    if kw-save "$wsdialog_text" "$wsblock_text"; then
+wsdfsave-fexists-yes() {
+    if wsdfsave-save "$wsdialog_text" "$wsdfsave_text"; then
         wsdialog_l4mode="<accept>"
     else
-        make-ewrite-msg
+        wsdfsave-savemake-ewrite-msg
         wsdialog_l4mode=ewrite
     fi
 }
 
-kw-fexists-no() {
+wsdfsave-fexists-no() {
     unset wsdialog_l4mode
 }
 
 # file in first argument, text in second argument
-kw-save() {
+wsdfsave-save() {
     $ws_echo "$2" 2>&- > "$1"
     return $?
 }

@@ -24,7 +24,8 @@ zle-line-init() {
     wstext_updfnvar=ws-updfn
     wstext_posvar=ws_curs
 
-    ws-debug ZLE_LINE_INIT
+    ws_text="$BUFFER"
+    ws_curs=$CURSOR    
 }
 
 # History keys
@@ -140,14 +141,22 @@ zle -N ws-kr
 bindkey -M wskeys "^Kr" ws-kr
 bindkey -M wskeys "^KR" ws-kr
 ws-kr() {
-    wsdialog-wsdfopen-run
     wsdfopen_endfn=ws-kr-end
+    wsdfopen-run
 }
 
 ws-kr-end() {
     if [[ -n "$wsdfopen_text" ]]; then
-        LBUFFER+="$wsdfopen_text"
+        wstext-insert "$wsdfopen_text"
     fi
+}
+
+zle -N ws-kx
+bindkey -M wskeys "^Kx" ws-kx
+bindkey -M wskeys "^Kx" ws-kx
+ws-kx() {
+    wsdfsave_text="$ws_text"
+    wsdfsave-run
 }
 
 zle -N ws-bracketed-paste
@@ -155,7 +164,6 @@ bindkey -M wskeys "^[[200~" ws-bracketed-paste
 ws-bracketed-paste() {
     local ws_pasted_text="$zle_bracketed_paste"
     zle bracketed-paste ws_pasted_text
-    ws-debug pasted text is \"$ws_pasted_text\"
     wstext-insert $ws_pasted_text
     #TODO: select (kb-kk), insert into kill ring...
 }
@@ -311,11 +319,11 @@ wskeys-accept-line() {
             for k in ${(k)zw_special_folders}; do
                 folder=$zw_special_folders[$k]
                 local klen=${#k}
-                ws-debug i=$i len=${#old_buffer} k=$k klen=$klen folder=$folder ob=\""$old_buffer[i,i+klen]"\"
+#                ws-debug i=$i len=${#old_buffer} k=$k klen=$klen folder=$folder ob=\""$old_buffer[i,i+klen]"\"
                 if [[ $((i+klen)) -le ${#old_buffer}
                    && $(ws-uc "$old_buffer[i,i+klen]") = "$k:" ]]; then
                     found=1
-                    ws-debug FOUND $k:
+#                    ws-debug FOUND $k:
                     new_buffer+="$folder/"
                     i=$((i+klen+1))
                     break
@@ -410,7 +418,6 @@ wskwtest() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw () {
-#    ws-debug KEYMAP=$KEYMAP BUFFER=$BUFFER state=$ZLE_STATE
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun
@@ -418,8 +425,7 @@ zle-line-pre-redraw () {
 }
 
 wskeys-pre-redraw() {
-    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
-    ws_curs=$CURSOR    
+#    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
+#    ws_curs=$CURSOR    
 #    ws-updfn # temporary
-#    ws-debug MAIN buffer="$BUFFER"
 }

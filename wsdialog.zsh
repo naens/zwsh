@@ -77,12 +77,12 @@ wsdialog-close() {
     wstext_updfnvar=$wsdialog_oldupdfnvar
     wstext_posvar=$wsdialog_oldposvar
     zle -K $wsdialog_savemode
-    ${(P)do_restore}
 
     # unset variables
     wsdialog-unsetvars
-    
-    ws-debug WSDIALOG_CLOSE: exit wsdialog $dialog
+
+    # call restore function
+    ${(P)do_restore}
 }
 
 wsdialog-unsetvars() {
@@ -95,6 +95,9 @@ wsdialog-unsetvars() {
     unset wsdialog_len
     unset wsdialog_l4len
     unset wsdialog_l4start
+    unset wsdialog_oldtextvar
+    unset wsdialog_oldupdfnvar
+    unset wsdialog_oldposvar
 }
 
 # display line4 and enter l4 mode

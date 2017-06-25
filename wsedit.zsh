@@ -213,19 +213,16 @@ zle -N wsedit-kr
 bindkey -M wsedit "^Kr" wsedit-kr
 bindkey -M wsedit "^KR" wsedit-kr
 wsedit-kr() {
-    wsedit_savebuf=$BUFFER[$(( $wsedit_begin + 1 )),${#BUFFER}]
-    wsedit_savecurs=$(( $CURSOR - $wsedit_begin ))
     BUFFER=""
-    ws-krfn
-    wskr_insert="wsedit-kr-insert"
+    wsdfopen_endfn=wsedit-kr-end
+    wsdfopen-run
 }
 
-wsedit-kr-insert() {
+wsedit-kr-end() {
     wsedit_begin=0
-    BUFFER=$wsedit_savebuf
-    CURSOR=$wsedit_savecurs
-    LBUFFER+=$wskr_text
-    unset wskr_text
+    if [[ -n "$wsdfopen_text" ]]; then
+        wstext-insert "$wsdfopen_text"
+    fi
 }
 
 # TODO: * file functions: ^KE=open, ^KS=save, ^KO=copy
