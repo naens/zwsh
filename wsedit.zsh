@@ -249,6 +249,11 @@ zle -N wsedit-save
 bindkey -M wsedit "^Ks" wsedit-save
 bindkey -M wsedit "^KS" wsedit-save
 wsedit-save() {
+    if [[ -n "$wsedit_fn" ]]; then
+        if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
+            return
+        fi
+    fi
     BUFFER=""
     wsdfsave_text="$wsedit_text"
     wsdfsave-run
@@ -259,6 +264,12 @@ zle -N wsedit-save-exit
 bindkey -M wsedit "^Kx" wsedit-save-exit
 bindkey -M wsedit "^KX" wsedit-save-exit
 wsedit-save-exit() {
+    if [[ -n "$wsedit_fn" ]]; then
+        if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
+            wsedit-save-exit-end
+            return
+        fi
+    fi
     BUFFER=""
     wsdfsave_text="$wsedit_text"
     wsdfsave_endfn=wsedit-save-exit-end
