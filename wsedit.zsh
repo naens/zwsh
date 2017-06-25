@@ -103,11 +103,15 @@ ws-edit() {
 
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
-wsedit-header() {
+wsedit-refresh() {
     local begin_old=$wsedit_begin
     local ws_row
     local ws_col
     read ws_row ws_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
+
+    local tlines=$(wstxtfun-nlines "$wsedit_text")
+    local slines=$(tput lines)
+
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""
@@ -116,36 +120,27 @@ wsedit-header() {
     if [[ -n "$wsedit_fn" ]]; then
         fn="$wsedit_fn"
     fi
-    local header_text=$(printf "%16s       L%05d  C%03d %s" \
-                               $fn $ws_row $ws_col $ostr)
-    BUFFER[1,$wsedit_begin]=$'\n'$header_text$'\n'
-    # wsedit_ begin of editable area
+    local header_text=$(printf "%16s       L%05d  C%03d %s fullscreens=%s" \
+                               $fn $ws_row $ws_col $ostr $wsedit_fullscreen)
     wsedit_begin=$(( ${#header_text} + 2 ))
 
-#    local diff=$(( $wsedit_begin - $begin_old ))
-    #CURSOR=$(( $curs_old + $diff ))
-#    if [[ -n $kb ]]; then
-#        kb=$(( $kb + $diff ))
-#    fi
-#    if [[ -n $kk ]]; then
-#        kk=$(( $kk + $diff ))
-#    fi
-}
-
-# refresh all: the text and the header
-wsedit-refresh() {
-    # TODO: update $ws_text and other text varisables
+    # TODO: * when only fullscreen possible => automatic switch
     if $wsedit_fullscreen; then
-        ws-size       # define $ws_rows and $ws_cols
-        wsedit-header # displays header on the first row
-        
-        # TODO: update text display...
+        local prompt="$PROMPT"
+        PROMPT=''
+        zle reset-prompt
+
+        BUFFER[0,$wsedit_begin-1]="$header_text"$'\n'
+        BUFFER[wsedit_begin,${#BUFFER}]="$wsedit_text"
+        ws-insert-xtimes $((wsedit_begin+${#wsedit_text}-1)) $((slines-tlines-1)) $'\n@'
+        CURSOR=$((wsedit_begin+wsedit_pos-1))
+        PROMPT="$prompt"
     else
-        wsedit-header
+        zle reset-prompt
+        BUFFER[1,$wsedit_begin]=$'\n'"$header_text"$'\n'
+        BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
+        CURSOR=$((wsedit_begin+wsedit_pos))
     fi
-#    ws-debug WSEDIT_REFRESH wsedit_text=\""$wsedit_text"\" wsedit_pos=$wsedit_pos
-    BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
-    CURSOR=$((wsedit_begin+wsedit_pos))
 }
 
 # Switch to *editor mode* and open a file: ^KE
@@ -179,7 +174,7 @@ wsedit-exit() {
     wstext_updfnvar=$wstext_updfnvar_save
     wstext_posvar=$wstext_posvar_save
 
-    eval "$wstext_textvar=\"$wsedit_text\""
+    ws-defvar $wstext_textvar "$wsedit_text"
     eval "$wstext_posvar=\"$wsedit_pos\""
     ws-debug "$wstext_textvar -> $wsedit_text"
     ws-debug "$wstext_posvar -> $wsedit_pos"
@@ -189,6 +184,7 @@ wsedit-exit() {
     unset wsedit_pos
     zle -K $wsedit_saved_keymap
     $wstext_updfnvar
+    zle reset-prompt
 }
 
 # Close the currenpt file and save: ^KX (buffer empty)
@@ -201,6 +197,7 @@ bindkey -M wsedit "^KF" wsedit-fullscreen
 wsedit-fullscreen() {
     # toggle fullscreen mode
     wsedit_fullscreen=$(not $wsedit_fullscreen)
+    wsedit-refresh
 }
 
 
