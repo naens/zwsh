@@ -10,6 +10,8 @@ wsdfsave-run() {
     wsdialog-wsdfsave-run
 }
 
+# TODO: prefill file name
+
 # badfn
 wsdialog_wsdfsave_badfn_msg="Bad file name."
 
@@ -41,6 +43,11 @@ wsdfsave-accept() {
 }
 
 wsdfsave-restore() {
+    if [[ -n $wsdfsave_endfn ]]; then
+        $wsdfsave_endfn $1
+        unset wsdfsave_endfn
+    fi
+    unset wsdfsave_text
 }
 
 wsdfsave-fexists-yes() {

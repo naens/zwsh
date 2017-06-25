@@ -113,6 +113,9 @@ wsedit-header() {
         ostr=""
     fi
     local fn="<FILENAME>"
+    if [[ -n "$wsedit_fn" ]]; then
+        fn="$wsedit_fn"
+    fi
     local header_text=$(printf "%16s       L%05d  C%03d %s" \
                                $fn $ws_row $ws_col $ostr)
     BUFFER[1,$wsedit_begin]=$'\n'$header_text$'\n'
@@ -158,7 +161,7 @@ zle -N wsedit-exit
 bindkey -M wsedit "^Kd" wsedit-exit
 bindkey -M wsedit "^KD" wsedit-exit
 wsedit-exit() {
-    CURSOR=$(( $CURSOR - $wsedit_begin ))
+    CURSOR=$((CURSOR-wsedit_begin))
 #    if [[ $KEYMAP == "wseditblock" ]]; then
 #        kb=$(( $kb - $wsedit_begin ))
 #        if [[ -n $kk ]]; then
@@ -198,7 +201,6 @@ bindkey -M wsedit "^KF" wsedit-fullscreen
 wsedit-fullscreen() {
     # toggle fullscreen mode
     wsedit_fullscreen=$(not $wsedit_fullscreen)
-
 }
 
 
@@ -225,57 +227,90 @@ wsedit-kr-end() {
     fi
 }
 
-# TODO: * file functions: ^KE=open, ^KS=save, ^KO=copy
-bindkey -M wsedit "^Ke" undefined-key
-bindkey -M wsedit "^KE" undefined-key
-bindkey -M wsedit "^Ks" undefined-key
-bindkey -M wsedit "^KS" undefined-key
-bindkey -M wsedit "^Ko" undefined-key
-bindkey -M wsedit "^KO" undefined-key
-
-# TODO: * exit+close functions: ^KX=saving ^KQ=not-saving
-bindkey -M wsedit "^Kx" undefined-key
-bindkey -M wsedit "^KX" undefined-key
-bindkey -M wsedit "^Kq" undefined-key
-bindkey -M wsedit "^KQ" undefined-key
-
-# TODO: * enter+open functions: ^KE=replace ^KS=keep-and-save
-zle -N wskeys-replace
-bindkey -M wskeys "^Ke" wskeys-replace
-bindkey -M wskeys "^KE" wskeys-replace
-# replace current buffer with contents from file
-wskeys-replace() {
-    wsdialog-wsdfopen-run
-    wsdfopen_endfn=wstext-replace-enter
-    # TODO: test!!!
+# open file
+zle -N wsedit-open
+bindkey -M wsedit "^Ke" wsedit-open
+bindkey -M wsedit "^KE" wsedit-open
+wsedit-open() {
+    BUFFER=""
+    wsdfopen_endfn=wsedit-replace-end
+    wsdfopen-run
 }
 
-wstext-replace-enter() {
-    if [[ -n "$wsdfopen_text" ]]; then
-        wsedit_saved_keymap=$KEYMAP
-        wsedit_begin=0     # no header yet
-
-        # TODO: check if enter fullscreen mode or not
-        wsedit_fullscreen=false
-        zle -K wsedit
-
-        # save previous vars
-        wstext_textvar_save=$wstext_textvar
-        wstext_updfnvar_save=$wstext_updfnvar
-        wstext_posvar_save=$wstext_posvar
-
+wsedit-replace-end() {
+    if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfopen_fn"
         wsedit_text="$wsdfopen_text"
-        wsedit_pos=1
-
-        # define variables
-        wstext_textvar=wsedit_text
-        wstext_updfnvar=wsedit-refresh
-        wstext_posvar=wsedit_pos
     fi
 }
 
-bindkey -M wskeys "^Ks" undefined-key
-bindkey -M wskeys "^KS" undefined-key
+# save file
+zle -N wsedit-save
+bindkey -M wsedit "^Ks" wsedit-save
+bindkey -M wsedit "^KS" wsedit-save
+wsedit-save() {
+    BUFFER=""
+    wsdfsave_text="$wsedit_text"
+    wsdfsave-run
+}
+
+# save and close 
+zle -N wsedit-save-exit
+bindkey -M wsedit "^Kx" wsedit-save-exit
+bindkey -M wsedit "^KX" wsedit-save-exit
+wsedit-save-exit() {
+    BUFFER=""
+    wsdfsave_text="$wsedit_text"
+    wsdfsave_endfn=wsedit-save-exit-end
+    wsdfsave-run
+}
+
+wsedit-save-exit-end() {
+    wsedit_text=""
+    wsedit-exit
+}
+
+# exit without saving.  TODO: ask if need saving
+zle -N wsedit-quit
+bindkey -M wsedit "^Kq" wsedit-quit
+bindkey -M wsedit "^KQ" wsedit-quit
+wsedit-quit() {
+    wsedit_text=""
+    wsedit-exit
+}
+
+# replace buffer with contents from file and enter edit mode
+zle -N wskeys-replace
+bindkey -M wskeys "^Ke" wskeys-replace
+bindkey -M wskeys "^KE" wskeys-replace
+wskeys-replace() {
+    wsdialog-wsdfopen-run
+    wsdfopen_endfn=wstext-replace-enter
+}
+
+wstext-replace-enter() {
+    if [[ "$1" = "OK" ]]; then
+        ws_text="$wsdfopen_text"
+        wsedit_fn="$wsdfopen_fn"
+        ws-edit
+    fi
+}
+
+# save buffer contents and enter edit mode
+zle -N wskeys-save-edit
+bindkey -M wskeys "^Ks" wskeys-save-edit
+bindkey -M wskeys "^KS" wskeys-save-edit
+wskeys-save-edit() {
+    wsdfsave_text="$ws_text"
+    wsdfsave_endfn=wskeys-save-edit-end
+    wsdfsave-run
+}
+
+wskeys-save-edit-end() {
+    if [[ "$1" = "OK" ]]; then
+        ws-edit
+    fi
+}
 
 # TODO: * Find functions
 bindkey -M wsedit "^Qf" undefined-key

@@ -425,7 +425,7 @@ zle-line-pre-redraw () {
 }
 
 wskeys-pre-redraw() {
-#    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
-#    ws_curs=$CURSOR    
+    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
+    ws_curs=$CURSOR    
 #    ws-updfn # temporary
 }

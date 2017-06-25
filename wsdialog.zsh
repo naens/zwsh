@@ -42,10 +42,10 @@ wsdialog-l4keyfn() {
     if [[ -z "$wsdialog_l4mode" ]]; then
         wsdialog-ret-dial $dialog
     elif [[ "$wsdialog_l4mode" == "<accept>" ]]; then
-        wsdialog-close $dialog
+        wsdialog-close $dialog "OK"
     elif [[ "$wsdialog_l4mode" == "<cancel>" ]]; then
         unset wsdialog_text
-        wsdialog-close $dialog
+        wsdialog-close $dialog "NO"
     else
         wsdialog-rml4 $dialog
         ws-debug WSDIALOG_L4KEYFN: l4mode=$wsdialog_l4mode
@@ -65,6 +65,7 @@ wsdialog-del() {
 # exit dialog and restore variables
 wsdialog-close() {
     local dialog=$1
+    # status in $2
     local do_restore=wsdialog_${dialog}_restore
     wsline-exit "$dialog"
 
@@ -82,7 +83,7 @@ wsdialog-close() {
     wsdialog-unsetvars
 
     # call restore function
-    ${(P)do_restore}
+    ${(P)do_restore} $2
 }
 
 wsdialog-unsetvars() {
@@ -134,7 +135,7 @@ wsdialog-acceptfn() {
     if [[ -n $wsdialog_l4mode ]]; then
         wsdialog-l4run $dialog $wsdialog_l4mode
     else
-        wsdialog-close $dialog
+        wsdialog-close $dialog "OK"
     fi
 }
 
@@ -144,7 +145,7 @@ wsdialog-cancelfn() {
     ws-debug WSDIALOG_CANCELFN: dialog=$dialog
 
     unset wsdialog_text
-    wsdialog-close $dialog
+    wsdialog-close $dialog "NO"
 }
 
 # !!!cursor & highlight state save/restore by caller!!!
