@@ -35,8 +35,9 @@ Without implementing wsblock keybindings, finish wsedit mode:
  + [DONE} import from file
  + [DONE] exit saving / not saving / putting into buffer wsedit mode
  + [DONE] enter wsedit mode: using buffer / using file
- + add fullscreen mode and vertical scroll
- + delete & undelete: ws style
+ + [DONE] add fullscreen mode
+ + add vertical scroll
+ + add horizontal scroll
 
 ** wsblock
 Rewrite wsblock for edit, normal and wsline modes:
@@ -53,7 +54,8 @@ restore space if copying to edit or normal mode)
  + Directory aliases
  + Directory alias completion (alias completion + subpath completion)
 
-** project
+** global
+ + delete & undelete: ws style
  + organize files: wskeys <--> wstext
  + functions in wsfun, wstxtfun: remove unused / merge similar by making
 functions general
