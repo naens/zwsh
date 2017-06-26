@@ -421,6 +421,13 @@ wskeys-exec-to-prompt() {
     fi
 }
 
+zle -N wskeys-exit
+bindkey -M wskeys "^Kq" wskeys-exit
+bindkey -M wskeys "^KQ" wskeys-exit
+wskeys-exit() {
+    exit
+}
+
 bindkey -M wskeys "^Ql" wskwtest
 zle -N wskwtest
 wskwtest() {
