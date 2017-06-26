@@ -36,14 +36,27 @@ Without implementing wsblock keybindings, finish wsedit mode:
  + [DONE] exit saving / not saving / putting into buffer wsedit mode
  + [DONE] enter wsedit mode: using buffer / using file
  + add fullscreen mode and vertical scroll
+ + delete & undelete: ws style
 
 ** wsblock
 Rewrite wsblock for edit, normal and wsline modes:
  + review wsblock specifications, redefine behaviour, parameters, variables...
- + implement marks: places that move with the text: track position, column, line (also for wsline)
- + reimplement block functionality, on wsline, substitute CR's and LF's with a normal character, like space or a special substitution character (in order to restore space if copying to edit or normal mode)
+ + implement marks: places that move with the text: track position, column, line
+(also for wsline)
+ + reimplement block functionality, on wsline, substitute CR's and LF's with a
+normal character, like space or a special substitution character (in order to
+restore space if copying to edit or normal mode)
  + test on normal, edit and wsline modes
  + add column selection
+
+** prompt
+ + Directory aliases
+ + Directory alias completion (alias completion + subpath completion)
+
+** project
+ + organize files: wskeys <--> wstext
+ + functions in wsfun, wstxtfun: remove unused / merge similar by making
+functions general
 
 ** add superuser functionality
  + if no right to read/write, display superuser prompt 
