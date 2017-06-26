@@ -127,7 +127,12 @@ function collapse_pwd
 }
 
 setopt PROMPT_SUBST
-export PROMPT='$(collapse_pwd)>'
+if (($EUID != 0)); then
+    export PROMPT='$(collapse_pwd)>'
+else
+    export PROMPT='$(collapse_pwd)# '
+fi
+
 
 # options completion
 #setopt menu_complete
