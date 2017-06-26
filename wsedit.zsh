@@ -131,7 +131,6 @@ wsedit-refresh() {
                                $fn $ws_row $ws_col $ostr $wsedit_fullscreen)
     wsedit_begin=$(( ${#header_text} + 2 ))
 
-    # TODO: * when only fullscreen possible => automatic switch
     if $wsedit_fullscreen; then
         if [[ -n "$wsedit_yscroll" ]]; then
             wsedit_yscroll=0
@@ -145,6 +144,9 @@ wsedit-refresh() {
         local wsedit_yscroll=$(ws-get-scrollpos $tlines $slines $ws_row $wsedit_yscroll)
         local line_from=$wsedit_yscroll
         local line_to=$((line_from+$(ws-min $((tlines-wsedit_yscroll)) slines)))
+        local pos_from=$(wstxtfun-line2pos $((line_from+1)) "$wsedit_text")
+        # TODO: improve loop speed! using pos_from and the number of lines to display
+        #       count lines on '\n', total=$line_to-$line_from
         for i in {$((line_from+1))..$line_to}; do
             local pos=$(wstxtfun-line2pos $i "$wsedit_text")
             local len=$(wstxtfun-line-len $i "$wsedit_text")
