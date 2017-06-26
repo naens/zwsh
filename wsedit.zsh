@@ -111,6 +111,13 @@ wsedit-refresh() {
 
     local tlines=$(wstxtfun-nlines "$wsedit_text")
     local slines=$(tput lines)
+    local scols=$(tput cols)
+
+    # force fullscreen if too many lines
+    if ! $wsedit_fullscreen && [[ $tlines -ge $slines ]]; then
+        wsedit_fullscreen=true
+        wsedit_yscroll=$((tlines-slines-1))
+    fi
 
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
@@ -126,14 +133,40 @@ wsedit-refresh() {
 
     # TODO: * when only fullscreen possible => automatic switch
     if $wsedit_fullscreen; then
+        if [[ -n "$wsedit_yscroll" ]]; then
+            wsedit_yscroll=0
+        fi
         local prompt="$PROMPT"
         PROMPT=''
         zle reset-prompt
 
-        BUFFER[0,$wsedit_begin-1]="$header_text"$'\n'
-        BUFFER[wsedit_begin,${#BUFFER}]="$wsedit_text"
-        ws-insert-xtimes $((wsedit_begin+${#wsedit_text}-1)) $((slines-tlines-1)) $'\n@'
-        CURSOR=$((wsedit_begin+wsedit_pos-1))
+        BUFFER="$header_text"$'\n'
+        local buf=""
+        local wsedit_yscroll=$(ws-get-scrollpos $tlines $slines $ws_row $wsedit_yscroll)
+        local line_from=$wsedit_yscroll
+        local line_to=$((line_from+$(ws-min $((tlines-wsedit_yscroll)) slines)))
+        for i in {$((line_from+1))..$line_to}; do
+            local pos=$(wstxtfun-line2pos $i "$wsedit_text")
+            local len=$(wstxtfun-line-len $i "$wsedit_text")
+            buf+="$wsedit_text[pos,pos+len-1]"
+            for j in {1..$((scols-len-1))}; do
+                buf+=" "
+            done
+            if [[ $i -lt $line_to ]]; then
+                buf+="<"
+            else
+                buf+="^"
+            fi
+        done
+#        buf[wsedit_begin,${#buf}]="$wsedit_text"
+        for i in {1..$((slines-tlines-2))}; do
+            for j in {1..$((scols-1))}; do
+                buf+=" "
+            done
+            buf+="^"
+        done
+        BUFFER+="$buf"
+        CURSOR=$((wsedit_begin+scols*(ws_row-line_from-1)+ws_col-2))
         PROMPT="$prompt"
     else
         zle reset-prompt
@@ -230,14 +263,15 @@ bindkey -M wsedit "^Ke" wsedit-open
 bindkey -M wsedit "^KE" wsedit-open
 wsedit-open() {
     BUFFER=""
-    wsdfopen_endfn=wsedit-replace-end
+    wsdfopen_endfn=wsedit-open-end
     wsdfopen-run
 }
 
-wsedit-replace-end() {
+wsedit-open-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfopen_fn"
         wsedit_text="$wsdfopen_text"
+        wsedit_pos=0
     fi
 }
 
