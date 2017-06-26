@@ -253,8 +253,34 @@ wsedit-save() {
     fi
     BUFFER=""
     wsdfsave_text="$wsedit_text"
+    wsdfsave_endfn=wsedit-save-end
     wsdfsave-run
 }
+
+wsedit-save-end() {
+    if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfsave_fn"
+    fi
+}
+
+
+# save file as
+zle -N wsedit-save-as
+bindkey -M wsedit "^Ko" wsedit-save-as
+bindkey -M wsedit "^KO" wsedit-save-as
+wsedit-save-as() {
+    BUFFER=""
+    wsdfsave_text="$wsedit_text"
+    wsdfsave_endfn=wsedit-save-as-end
+    wsdfsave-run
+}
+
+wsedit-save-as-end() {
+    if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfsave_fn"
+    fi
+}
+
 
 # save and close 
 zle -N wsedit-save-exit
@@ -316,6 +342,7 @@ wskeys-save-edit() {
 
 wskeys-save-edit-end() {
     if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfsave_fn"
         ws-edit
     fi
 }

@@ -35,6 +35,7 @@ wsdfsave-accept() {
     elif [[ -e "$wsdialog_text" ]]; then
         wsdialog_l4mode=fexists
     elif wsdfsave-save "$wsdialog_text" "$wsdfsave_text"; then
+        wsdfsave_fn="$wsdialog_text"
         unset wsdialog_l4mode
     else
         wsdfsave-make-ewrite-msg
@@ -48,10 +49,12 @@ wsdfsave-restore() {
         unset wsdfsave_endfn
     fi
     unset wsdfsave_text
+    unset wsdfsave_fn
 }
 
 wsdfsave-fexists-yes() {
     if wsdfsave-save "$wsdialog_text" "$wsdfsave_text"; then
+        wsdfsave_fn="$wsdialog_text"
         wsdialog_l4mode="<accept>"
     else
         wsdfsave-savemake-ewrite-msg
