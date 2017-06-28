@@ -27,10 +27,8 @@ wstxtfun-yx-pos()
     local y=$1
     local x=$2
     local text="$3"
-    ws-debug y=$y x=$x
     local lp=$(wstxtfun-line2pos $y "$text")
     local len=$(wstxtfun-line-len $y "$text")
-    ws-debug y=$y x=$x lp=$lp len=$len
     if [[ $x -le $len ]]; then
         echo $((lp+x-2))
     else
@@ -152,18 +150,7 @@ wstxtfun-line2pos() {
 }
 
 wstxtfun-nlines() {
-    local text="$1"
-    local i=1
-    local count=1
-    local text_end=${#text}
-
-    while [[ $i -le $text_end ]]; do
-        if [[ "$text[i]" = $'\n' ]]; then
-            count=$((count+1))
-        fi
-        i=$((i+1))
-    done
-    echo $count
+    echo ${1:gs/\\n//} | wc -l # don't count fake new lines
 }
 
 wstxtfun-pos2line() {

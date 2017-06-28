@@ -92,7 +92,10 @@ ws-edit() {
     wstext_updfnvar_save=$wstext_updfnvar
     wstext_posvar_save=$wstext_posvar
 
+#    ws-defvar wsedit_text "${(P)wstext_textvar}"
+#    echo "${(P)wstext_textvar}" > /tmp/tmptmp1
     wsedit_text="${(P)wstext_textvar}"
+
     wsedit_pos=${(P)wstext_posvar}
 
     # define variables
@@ -104,21 +107,25 @@ ws-edit() {
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 wsedit-refresh() {
+    ws-debug WSEDIT_REFRESH: Enter
     local begin_old=$wsedit_begin
     local ws_row
     local ws_col
     read ws_row ws_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
+    ws-debug WSEDIT_REFRESH: 3
 
     local tlines=$(wstxtfun-nlines "$wsedit_text")
     local slines=$(tput lines)
     local scols=$(tput cols)
 
+    ws-debug WSEDIT_REFRESH: 4 tlines=$tlines
     # force fullscreen if too many lines
     if ! $wsedit_fullscreen && [[ $tlines -ge $slines ]]; then
         wsedit_fullscreen=true
         wsedit_yscroll=$((tlines-slines-1))
     fi
 
+    ws-debug WSEDIT_REFRESH: 5
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""
@@ -131,6 +138,7 @@ wsedit-refresh() {
                                $fn $ws_row $ws_col $ostr $wsedit_fullscreen)
     wsedit_begin=$(( ${#header_text} + 2 ))
 
+    ws-debug WSEDIT_REFRESH: If
     if $wsedit_fullscreen; then
         if [[ -n "$wsedit_yscroll" ]]; then
             wsedit_yscroll=0
@@ -143,15 +151,17 @@ wsedit-refresh() {
         local buf=""
         local wsedit_yscroll=$(ws-get-scrollpos $tlines $slines $ws_row $wsedit_yscroll)
         local line_from=$((wsedit_yscroll+1))
-        local line_to=$((line_from-1+$(ws-min $((tlines-wsedit_yscroll)) slines)))
-
+        local line_to=$((line_from-9+$(ws-min $((tlines-wsedit_yscroll)) slines)))
+        local tlen=${#wsedit_text}
+        ws-debug WSEDIT_REFRESH: slines=$slines scols=$scols line_from=$line_from line_to=$line_to
+    
         local i=$(wstxtfun-line2pos line_from "$wsedit_text")
         local line_len=0
         local line_counter=1
         while true; do
             local char=$wsedit_text[i]
-            if [[ "$char" = $'\n' || $i -gt ${#wsedit_text} ]]; then
-                for j in {1..$((scols-line_len-2))}; do
+            if [[ "$char" = $'\n' || $i -gt $tlen ]]; then
+                for j in {1..$((scols-line_len-1))}; do
                     buf+=" "
                 done
                 if [[ $line_counter -lt $line_to ]]; then
@@ -163,17 +173,23 @@ wsedit-refresh() {
                 line_len=0
                 line_counter=$((line_counter+1))
             else
+                buf+=$char
                 line_len=$((line_len+1))
             fi
-            buf+=$char
             i=$((i+1))
         done
-
-        for i in {1..$((slines-tlines-2))}; do
+        ws-debug WSEDIT_DEBUG: i=$i slines=$slines tlines=$tlines
+#        ws-debug "$buf"
+        i=1
+        local empty_lines=$((slines-tlines-8))
+        while [[ $i -le $empty_lines ]]; do
+#        for i in {1..$((slines-tlines-2))}; do
             for j in {1..$((scols-1))}; do
                 buf+=" "
             done
             buf+="^"
+            i=$((i+1))
+#            ws-debug bla $i
         done
         BUFFER+="$buf"
         CURSOR=$((wsedit_begin+scols*(ws_row-line_from)+ws_col-2))
@@ -184,6 +200,7 @@ wsedit-refresh() {
         BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
         CURSOR=$((wsedit_begin+wsedit_pos))
     fi
+    ws-debug WSEDIT_REFRESH: Exit
 }
 
 # Switch to *editor mode* and open a file: ^KE
@@ -281,6 +298,7 @@ wsedit-open-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfopen_fn"
         wsedit_text="$wsdfopen_text"
+
         wsedit_pos=0
     fi
 }
@@ -369,6 +387,7 @@ wskeys-replace() {
 wstext-replace-enter() {
     if [[ "$1" = "OK" ]]; then
         ws_text="$wsdfopen_text"
+        
         wsedit_fn="$wsdfopen_fn"
         ws-edit
     fi
