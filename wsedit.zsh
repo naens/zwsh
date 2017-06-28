@@ -1,23 +1,31 @@
 bindkey -N wsedit wskeys
 
-wsedit-pre-redraw() {
-    if [[ $CURSOR -le $wsedit_begin ]]; then
-        CURSOR=$wsedit_begin
-    fi
-    wsedit-refresh
-}
+#wsedit-pre-redraw() {
+#    if [[ $CURSOR -le $wsedit_begin ]]; then
+#        CURSOR=$wsedit_begin
+#    fi
+#    wsedit-refresh
+#}
 
 # Cursor Movement Functions
 zle -N wsedit-prev-line
 bindkey -M wsedit "^E" wsedit-prev-line
 wsedit-prev-line() {
-    wstext-prev-line
+    if [[ $wsedit_row -gt 1 ]]; then
+        wstext-prev-line
+    fi
 }
 
 zle -N wsedit-next-line
 bindkey -M wsedit "^X" wsedit-next-line
 wsedit-next-line() {
-    wstext-next-line
+    # TEMPORARY FIX
+    if [[ $((wsedit_row-wsedit_yscroll+1)) -ge $wsedit_slines ]]; then
+        wsedit_yscroll=$(ws-min $((wsedit_tlines-1)) $((wsedit_yscroll+1)))
+        wstext-next-line
+    elif [[ $wsedit_row -le $wsedit_tlines ]]; then
+        wstext-next-line
+    fi
 }
 
 bindkey -M wsedit "^R" undefined-key #TODO
@@ -38,8 +46,22 @@ wsedit-end-document() {
 }
 
 # Cursor Scroll Functions TODO: ^ W/^Z (scroll line)
-bindkey -M wsedit "^W" undefined-key
-bindkey -M wsedit "^Z" undefined-key
+zle -N wsedit-scroll-up
+bindkey -M wsedit "^W" wsedit-scroll-up
+wsedit-scroll-up() {
+    wsedit_yscroll=$(ws-max 0 $((wsedit_yscroll-1)))
+    wsedit-refresh
+}
+
+zle -N wsedit-scroll-down
+bindkey -M wsedit "^Z" wsedit-scroll-down
+wsedit-scroll-down() {
+    ws-debug WSEDIT_SCROLL_DOWN 1 yscroll=$wsedit_yscroll
+    wsedit_yscroll=$(ws-min $((wsedit_tlines-1)) $((wsedit_yscroll+1)))
+    ws-debug WSEDIT_SCROLL_DOWN 2 tlines=$wsedit_tlines yscroll=$wsedit_yscroll
+    wsedit-refresh
+    ws-debug WSEDIT_SCROLL_DOWN 3 yscroll=$wsedit_yscroll
+}
 
 # Cursor Screen Functions TODO: ^QE/^QX (begin/end screen)
 bindkey -M wsedit "^Qe" undefined-key
@@ -102,30 +124,26 @@ ws-edit() {
     wstext_textvar=wsedit_text
     wstext_updfnvar=wsedit-refresh
     wstext_posvar=wsedit_pos
+
+    wsedit-refresh
 }
 
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 wsedit-refresh() {
-    ws-debug WSEDIT_REFRESH: Enter
     local begin_old=$wsedit_begin
-    local ws_row
-    local ws_col
-    read ws_row ws_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
-    ws-debug WSEDIT_REFRESH: 3
+    read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
-    local tlines=$(wstxtfun-nlines "$wsedit_text")
-    local slines=$(tput lines)
-    local scols=$(tput cols)
+    wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
+    wsedit_slines=$(tput lines)
+    wsedit_scols=$(tput cols)
 
-    ws-debug WSEDIT_REFRESH: 4 tlines=$tlines
     # force fullscreen if too many lines
-    if ! $wsedit_fullscreen && [[ $tlines -ge $slines ]]; then
+    if ! $wsedit_fullscreen && [[ $wsedit_tlines -ge $wsedit_slines ]]; then
         wsedit_fullscreen=true
-        wsedit_yscroll=$((tlines-slines-1))
+        wsedit_yscroll=$((wsedit_tlines-wsedit_slines-1))
     fi
 
-    ws-debug WSEDIT_REFRESH: 5
     local ostr="Insert"
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""
@@ -135,12 +153,11 @@ wsedit-refresh() {
         fn="$wsedit_fn"
     fi
     local header_text=$(printf "%16s       L%05d  C%03d %s fullscreens=%s" \
-                               $fn $ws_row $ws_col $ostr $wsedit_fullscreen)
+                               $fn $wsedit_row $wsedit_col $ostr $wsedit_fullscreen)
     wsedit_begin=$(( ${#header_text} + 2 ))
 
-    ws-debug WSEDIT_REFRESH: If
     if $wsedit_fullscreen; then
-        if [[ -n "$wsedit_yscroll" ]]; then
+        if [[ -z "$wsedit_yscroll" ]]; then
             wsedit_yscroll=0
         fi
         local prompt="$PROMPT"
@@ -149,50 +166,55 @@ wsedit-refresh() {
 
         BUFFER="$header_text"$'\n'
         local buf=""
-        local wsedit_yscroll=$(ws-get-scrollpos $tlines $slines $ws_row $wsedit_yscroll)
+        wsedit_yscroll=$(ws-get-scrollpos $wsedit_tlines $wsedit_slines $((wsedit_row-1)) $wsedit_yscroll)
         local line_from=$((wsedit_yscroll+1))
-        local line_to=$((line_from-9+$(ws-min $((tlines-wsedit_yscroll)) slines)))
+        local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) wsedit_slines)))
         local tlen=${#wsedit_text}
-        ws-debug WSEDIT_REFRESH: slines=$slines scols=$scols line_from=$line_from line_to=$line_to
+#        ws-debug WSEDIT_REFRESH: tline=$wsedit_row tlines=$wsedit_tlines 
+#        ws-debug WSEDIT_REFRESH: slines=$wsedit_slines yscroll=$wsedit_yscroll
+#        ws-debug WSEDIT_REFRESH: line_from=$line_from line_to=$line_to
+        
     
         local i=$(wstxtfun-line2pos line_from "$wsedit_text")
         local line_len=0
         local line_counter=1
+#        ws-debug WSEDIT_REFRESH i from $i
         while true; do
             local char=$wsedit_text[i]
             if [[ "$char" = $'\n' || $i -gt $tlen ]]; then
-                for j in {1..$((scols-line_len-1))}; do
+ #               ws-debug nl on $i count $line_counter
+                for j in {1..$((wsedit_scols-line_len-2))}; do
                     buf+=" "
                 done
-                if [[ $line_counter -lt $line_to ]]; then
-                    buf+="<"
+                if [[ $line_counter -lt $((line_to-line_from)) ]]; then
+                    buf+=" <"
+                elif [[ $line_counter -eq $wsedit_tlines ]]; then
+                    buf+=" ^"
+                    break
                 else
-                    buf+="^"
+                    buf+="<" #DOESN'T WORK!
                     break
                 fi
                 line_len=0
                 line_counter=$((line_counter+1))
             else
-                buf+=$char
+                buf+="$char"
                 line_len=$((line_len+1))
             fi
             i=$((i+1))
         done
-        ws-debug WSEDIT_DEBUG: i=$i slines=$slines tlines=$tlines
-#        ws-debug "$buf"
+ #       ws-debug WSEDIT_REFRESH buf lines $line_counter
         i=1
-        local empty_lines=$((slines-tlines-8))
+        local empty_lines=$((wsedit_slines-wsedit_tlines-8))
         while [[ $i -le $empty_lines ]]; do
-#        for i in {1..$((slines-tlines-2))}; do
-            for j in {1..$((scols-1))}; do
-                buf+=" "
+            for j in {1..$((wsedit_scols-1))}; do
+                buf+="."
             done
             buf+="^"
             i=$((i+1))
-#            ws-debug bla $i
         done
         BUFFER+="$buf"
-        CURSOR=$((wsedit_begin+scols*(ws_row-line_from)+ws_col-2))
+        CURSOR=$((wsedit_begin+wsedit_scols*(wsedit_row-line_from)+wsedit_col-2))
         PROMPT="$prompt"
     else
         zle reset-prompt
@@ -200,7 +222,6 @@ wsedit-refresh() {
         BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
         CURSOR=$((wsedit_begin+wsedit_pos))
     fi
-    ws-debug WSEDIT_REFRESH: Exit
 }
 
 # Switch to *editor mode* and open a file: ^KE
