@@ -19,11 +19,10 @@ wsdialog-add() {
         local funcsvar=wsdialog_${dialog}_${l4mode}_funcs
         declare -A funcs
         funcs=(${(@Pkv)funcsvar})
-        for kk in "${(@k)funcs}"; do
-            func=$funcs[$kk]
+        for key func in "${(@kv)funcs}"; do
             local funname=wsdialog_${dialog}_${l4mode}_${func}
             zle -N $funname
-            bindkey -M $l4mname $kk $funname
+            bindkey -M $l4mname $key $funname
             eval "$funname() { wsdialog-l4keyfn $dialog $func }"
         done
     done
