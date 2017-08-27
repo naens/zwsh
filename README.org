@@ -31,11 +31,14 @@ not used in the main application, which could be useful in future versions.
 
 ** wsedit
 Without implementing wsblock keybindings, finish wsedit mode:
- + [DONE} keybindings
- + [DONE} import from file
+ + [DONE] keybindings
+ + [DONE] import from file
  + [DONE] exit saving / not saving / putting into buffer wsedit mode
  + [DONE] enter wsedit mode: using buffer / using file
  + [DONE] add fullscreen mode
+ + fullscreen mode
+   - switch with keybinding
+   - only fullscreen possible when file with too many lines
  + add vertical scroll
  + add horizontal scroll
 
