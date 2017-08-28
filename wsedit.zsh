@@ -192,8 +192,7 @@ wsedit-refresh() {
                     buf+=" ^"
                     break
                 else
-                    buf+="<" #DOESN'T WORK!
-                    break
+                    buf+=" <"
                 fi
                 line_len=0
                 line_counter=$((line_counter+1))
@@ -278,7 +277,7 @@ bindkey -M wsedit "^KF" wsedit-fullscreen
 wsedit-fullscreen() {
     # toggle fullscreen mode
     wsedit_fullscreen=$(not $wsedit_fullscreen)
-#    wsedit-refresh
+    wsedit-refresh
 }
 
 
