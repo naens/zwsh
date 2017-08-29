@@ -2,13 +2,13 @@
 wsdialog-add() {
     local dialog=$1
     local mname=wsdialog_${dialog}_line
-    ws-debug WSDIALOG_ADD: \"$dialog\"
+#    ws-debug WSDIALOG_ADD: \"$dialog\"
     local modesvar=wsdialog_${dialog}_modes
     local modes=(${(P)modesvar})
     for l4mode in $modes; do
         local l4mname=wsdialog_${dialog}_${l4mode}_l4
         bindkey -N "$l4mname"
-        ws-debug WSDIALOG_ADD: create l4mode: \"$l4mname\"
+#        ws-debug WSDIALOG_ADD: create l4mode: \"$l4mname\"
 
         # bind cancel line4 function
         zle -N wsdialog_${dialog}-ret-dial
@@ -37,7 +37,7 @@ wsdialog-l4keyfn() {
     local l4keyfn=$2
 
     $l4keyfn    # defines $wsdialog_l4mode
-    ws-debug WSDIALOG_L4KEYFN: dialog=$dialog l4keyfn=$l4keyfn m=$wsdialog_l4mode
+#    ws-debug WSDIALOG_L4KEYFN: dialog=$dialog l4keyfn=$l4keyfn m=$wsdialog_l4mode
     if [[ -z "$wsdialog_l4mode" ]]; then
         wsdialog-ret-dial $dialog
     elif [[ "$wsdialog_l4mode" == "<accept>" ]]; then
@@ -47,7 +47,7 @@ wsdialog-l4keyfn() {
         wsdialog-close $dialog "NO"
     else
         wsdialog-rml4 $dialog
-        ws-debug WSDIALOG_L4KEYFN: l4mode=$wsdialog_l4mode
+#        ws-debug WSDIALOG_L4KEYFN: l4mode=$wsdialog_l4mode
         wsdialog-l4run $dialog $wsdialog_l4mode
     fi
 }
@@ -105,11 +105,11 @@ wsdialog-l4run() {
     local dialog=$1
     local l4mode=$2
     local end=$((wsdialog_start+wsdialog_len))
-    ws-debug WSDIALOG_L4RUN: l4mode=$l4mode
+#    ws-debug WSDIALOG_L4RUN: l4mode=$l4mode
 
     wsdialog_prel4save_cursor=$CURSOR
     wsdialog_prel4save_highlight=($region_highlight)
-    ws-debug WSDIALOG_L4RUN: save prel4-highlight=$region_highlight
+#    ws-debug WSDIALOG_L4RUN: save prel4-highlight=$region_highlight
 
     # display line4 and move cursor
     local l4rtv=wsdialog_${dialog}_${l4mode}_msg
@@ -128,7 +128,7 @@ wsdialog-acceptfn() {
     local dialog=$1
     local do_accept=wsdialog_${dialog}_accept
     local textvar=wsline_wsdialog_${dialog}_text
-    ws-debug WSDIALOG_ACCEPTFN: dialog=$dialog
+#    ws-debug WSDIALOG_ACCEPTFN: dialog=$dialog
     wsdialog_text="${(P)textvar}"
     ${(P)do_accept}     # defines $wsdialog_l4mode
     if [[ -n $wsdialog_l4mode ]]; then
@@ -141,7 +141,7 @@ wsdialog-acceptfn() {
 # close everything and call restore
 wsdialog-cancelfn() {
     local dialog=$1
-    ws-debug WSDIALOG_CANCELFN: dialog=$dialog
+#    ws-debug WSDIALOG_CANCELFN: dialog=$dialog
 
     unset wsdialog_text
     wsdialog-close $dialog "NO"
@@ -201,13 +201,13 @@ wsdialog-run() {
 # remove dialog l4
 wsdialog-rml4() {
     local dialog=$1
-    ws-debug WSDIALOG_RML4: dialog=\"$dialog\"
+#    ws-debug WSDIALOG_RML4: dialog=\"$dialog\"
 
     # remove old line4
     BUFFER[wsdialog_l4start,wsdialog_l4start+wsdialog_l4len+1]=""
 
     # restore region highlight
-    ws-debug WSDIALOG_RML4: prel4-highlight=$wsdialog_prel4save_highlight
+#    ws-debug WSDIALOG_RML4: prel4-highlight=$wsdialog_prel4save_highlight
     region_highlight=($wsdialog_prel4save_highlight)
 
     # restores dialog cursor
