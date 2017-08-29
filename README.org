@@ -41,6 +41,9 @@ Without implementing wsblock keybindings, finish wsedit mode:
    - only fullscreen possible when file with too many lines
  + add vertical scroll
  + add horizontal scroll
+ + add pipe mode: command that reads pipe and displays it in editor
+ + add command mode: command with argument a file name: reads and displays
+ in editor
 
 ** wsblock
 Rewrite wsblock for edit, normal and wsline modes:
