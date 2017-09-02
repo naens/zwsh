@@ -12,18 +12,45 @@ zle -N wsedit-prev-line
 bindkey -M wsedit "^E" wsedit-prev-line
 wsedit-prev-line() {
     if [[ $wsedit_row -gt 1 ]]; then
-        wstext-prev-line
+        wstext-jump-lines -1 $wsedit_tlines
     fi
 }
 
 zle -N wsedit-next-line
 bindkey -M wsedit "^X" wsedit-next-line
 wsedit-next-line() {
-    wstext-next-line
+    wstext-jump-lines 1 $wsedit_tlines
 }
 
-bindkey -M wsedit "^R" undefined-key #TODO
-bindkey -M wsedit "^C" undefined-key #TODO
+zle -N wsedit-prev-screen
+bindkey -M wsedit "^R" wsedit-prev-screen
+wsedit-prev-screen() {
+    if [[ $wsedit_row -lt $wsedit_slines ]]; then
+        wstext-start-document
+    elif [[ $wsedit_row -lt $((1.5*wsedit_slines)) ]]; then
+        wsedit_yscroll=0
+        wstext-jump-lines $((1-wsedit_slines)) $wsedit_tlines true
+    else
+        wsedit_yscroll=$((wsedit_yscroll-wsedit_slines))
+        wstext-jump-lines $((-wsedit_slines)) $wsedit_tlines true
+    fi
+}
+
+zle -N wsedit-next-screen
+bindkey -M wsedit "^C" wsedit-next-screen
+wsedit-next-screen() {
+#    ws-debug WSEDIT_NEXT_SCREEN row=$wsedit_row tlines=$wsedit_tlines \
+#                                slines=$wsedit_slines yscroll=$wsedit_yscroll
+    if [[ $wsedit_tlines -gt $((wsedit_row+wsedit_slines)) ]]; then
+        wsedit_yscroll=$((wsedit_yscroll+wsedit_slines))
+        wstext-jump-lines $wsedit_slines $wsedit_tlines true
+    elif [[ $wsedit_tlines -gt $wsedit_slines ]]; then
+        wsedit_yscroll=$((wsedit_yscroll+wsedit_tlines-wsedit_row))
+        wstext-jump-lines $((wsedit_tlines-wsedit_row)) $wsedit_tlines true
+    else
+        wstext-jump-lines $((wsedit_tlines-wsedit_row)) $wsedit_tlines true
+    fi
+}
 
 zle -N wsedit-start-document
 bindkey -M wsedit "^Qr" wsedit-start-document
@@ -52,7 +79,7 @@ wsedit-scroll-up() {
     fi
 
     if [[ $((wsedit_yscroll+wsedit_slines-1)) -lt $wsedit_row ]]; then
-        wstext-prev-line
+        wstext-jump-lines -1 $wsedit_tlines
     else
         wsedit-refresh
     fi
@@ -67,7 +94,7 @@ wsedit-scroll-down() {
     fi
 
     if [[ $wsedit_yscroll -ge $wsedit_row ]]; then
-        wsedit-next-line
+        wstext-jump-lines 1 $wsedit_tlines
     else
         wsedit-refresh
     fi
