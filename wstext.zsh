@@ -61,41 +61,36 @@ wstext-line-end() {
     wstext-upd
 }
 
-# goto previous line (same position if possible)
-wstext-prev-line() {
+wstext-jump-lines() {
     local pos=${(P)wstext_posvar}
     local text="${(P)wstext_textvar}"
     local text_end=${#text}
+    local jump=$1
+    local nlines=$2
+    local line_begin=$3
 
     local ws_row
     local ws_col
     read ws_row ws_col <<< $(wstxtfun-pos $pos "$text")
 
-    local new_row=$((ws_row-1))
-    local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
-    eval "$wstext_posvar=$new_pos"
-    wstext-upd
-}
+    local new_row=$((ws_row+jump))
+    if [[ $new_row -lt 0 ]]; then
+        ws-debug WSTEXT_JUMP_LINES: BAD ARGUMENT: jump back too big: jump=$jump
+        new_row=0
+    elif [[ $new_row -gt $nlines ]]; then
+        ws-debug WSTEXT_JUMP_LINES: BAD ARGUMENT: jump forward too big: jump=$jump
+        new_row=$nlines
+    fi
 
-# goto next line (same position if possible)
-wstext-next-line() {
-    local pos=${(P)wstext_posvar}
-    local text="${(P)wstext_textvar}"
-    local text_end=${#text}
-
-    local ws_row
-    local ws_col
-    read ws_row ws_col <<< $(wstxtfun-pos $pos "$text")
-
-    local nlines=$(wstxtfun-nlines "$text")
-    local new_row=$((ws_row+1))
+    if [[ -n $line_begin ]]; then
+        ws_col=1
+    fi
     if [[ $nlines -ge $new_row ]]; then
         local new_pos=$(wstxtfun-yx-pos $new_row $ws_col "$text")
         eval "$wstext_posvar=$new_pos"
         wstext-upd
     fi
 }
-
 
 # Sentence functions (end-of-sentence: dot-space-space or dot-newline)
 wstext-prev-sentence() {
