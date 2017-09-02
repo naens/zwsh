@@ -101,10 +101,25 @@ wsedit-scroll-down() {
 }
 
 # Cursor Screen Functions TODO: ^QE/^QX (begin/end screen)
-bindkey -M wsedit "^Qe" undefined-key
-bindkey -M wsedit "^QE" undefined-key
-bindkey -M wsedit "^Qx" undefined-key
-bindkey -M wsedit "^QX" undefined-key
+zle -N wsedit-begin-screen
+bindkey -M wsedit "^Qe" wsedit-begin-screen
+bindkey -M wsedit "^QE" wsedit-begin-screen
+wsedit-begin-screen() {
+    wstext-jump-lines $((wsedit_yscroll-wsedit_row+1)) $wsedit_tlines true
+}
+
+zle -N wsedit-end-screen
+bindkey -M wsedit "^Qx" wsedit-end-screen
+bindkey -M wsedit "^QX" wsedit-end-screen
+wsedit-end-screen() {
+    local row=$((wsedit_yscroll+wsedit_slines-1))
+    if [[ $row -ge $wsedit_tlines ]]; then
+        row=$wsedit_tlines
+    fi
+
+    wsedit_pos=$(wstxtfun-line-last-pos $row "$wsedit_text" ${#wsedit_text})
+    wsedit-refresh
+}
 
 # Insert Keys
 zle -N wsedit-newline
@@ -173,8 +188,8 @@ wsedit-refresh() {
     read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
     wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
-#    wsedit_slines=$(tput lines)
-    wsedit_slines=8
+    wsedit_slines=$(tput lines)
+#    wsedit_slines=8
     wsedit_scols=$(($(tput cols)))
     local step=$((wsedit_scols<20?1:wsedit_scols<40?5:wsedit_scols<60?10:20))
 
