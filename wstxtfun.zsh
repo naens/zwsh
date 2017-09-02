@@ -183,6 +183,19 @@ wstxtfun-line-len() {
     echo $((i-begin))
 }
 
+wstxtfun-line-last-pos() {
+    local line=$1
+    local text="$2"
+    local text_end=${#text}
+
+    local begin=$(wstxtfun-line2pos $line "$text")
+    local i=$begin
+    while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
+        i=$((i+1))
+    done
+    echo $((i-1))
+}
+
 
 # sentence functions
 wstxtfun-prev-sentence() {
