@@ -64,8 +64,8 @@ restore space if copying to edit or normal mode)
 ** global
  + delete & undelete: ws style
  + organize files: wskeys <--> wstext
- + functions in wsfun, wstxtfun: remove unused / merge similar by making
-functions general
+ + functions in wsfun, wstxtfun: remove unused / merge similar by making functions general
+ + refresh on screen resize
 
 ** add superuser functionality
  + if no right to read/write, display superuser prompt 
