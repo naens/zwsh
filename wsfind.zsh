@@ -15,9 +15,10 @@ ws-find() {
     zle history-incremental-search-backward $ws_search
 }
 
-zle -N wsblock-find
-bindkey -M wsblock "^Qf" wsblock-find
-bindkey -M wsblock "^QF" wsblock-find
+# TODO: find block
+#zle -N wsblock-find
+#bindkey -M wsblock "^Qf" wsblock-find
+#bindkey -M wsblock "^QF" wsblock-find
 wsblock-find() {
     if [[ -n $kk ]]; then
         ws_search=$wsblock_text

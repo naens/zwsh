@@ -102,8 +102,33 @@ ws-next-paragraph() {
 }
 
 ws-updfn() {
-    BUFFER="$ws_text"
-    CURSOR=$ws_curs
+    if [[ -n "$wsblock_vis" ]]; then
+        local text="$ws_text"
+        local curs=$ws_curs
+        if [[ -n "$wsblock_kb" ]]; then
+            text=$text[1,wsblock_kb]"<B>"$text[wsblock_kb+1,${#text}]
+            if [[ $curs -ge $wsblock_kb ]]; then
+                curs=$((curs+3))
+            fi
+        fi
+        if [[ -n "$wsblock_kk" ]]; then
+            kk_pos=$wsblock_kk
+            if [[ -n "$wsblock_kb" && "$wsblock_kb" -le $kk_pos ]]; then
+                kk_pos=$((kk_pos+3))
+                ws-debug kk-pos=$kk_pos
+            fi
+            text=$text[1,kk_pos]"<K>"$text[kk_pos+1,${#text}]
+            if [[ $curs -ge $kk_pos ]]; then
+                curs=$((curs+3))
+            fi
+        fi
+        BUFFER="$text"
+        CURSOR=$curs
+    else
+        BUFFER="$ws_text"
+        CURSOR=$ws_curs
+    fi
+    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
 }
 
 zle -N ws-start-doc
@@ -263,11 +288,6 @@ ws-del-paragraph() {
     wstext-del-paragraph
 }
 
-
-# Block Keys
-#zle -N ws-kb
-#bindkey -M wskeys "^Kb" ws-kb
-#bindkey -M wskeys "^KB" ws-kb
 
 zle -N ws-insert-saved
 bindkey -M wskeys "^Kc" ws-insert-saved
@@ -444,7 +464,10 @@ zle-line-pre-redraw() {
 }
 
 wskeys-pre-redraw() {
-    ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
-    ws_curs=$CURSOR    
-#    ws-updfn # temporary
+    # TODO: fix fix fix
+    if [[ -z "$wsblock_vis" ]]; then
+        ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
+        ws_curs=$CURSOR    
+        ws-updfn # temporary
+    fi
 }

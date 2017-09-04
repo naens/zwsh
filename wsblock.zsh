@@ -1,27 +1,18 @@
-# KEY BINDINGS DEFINED IN THIS FILE
-# =================================
-# ^N=split-line(new-line-after-point)
+### KEYBINDINGS ###
 # ^KB=mark-begin
 # ^KK=mark-end
 # ^KC=copy
 # ^KV=move
 # ^KY=delete
-# ^KW=save to file (in wskw.zsh)
-# ^R=up-screen
-# ^C=down-screen
-# ^U=undo
-# ^6=redo (zle redo)
+# ^KW=save to file
+# ^KH=hide block
+# ^KN=column mode
 
-bindkey -N wsblock wskeys
-# TODO:  * edit mode functions must be in separate file
-#        * update kr and kw modes: remove, avoid keybinding conflicts
-#        * bind saved selection to killring, insert:
-#                    + on block insert (if not edited)
-#                    + on wsblock exit
-#        * killring: no selection: insert last and select
-#                    selection: forward/back keys replace selection
-#                               with killring contents
-
+### VARIABLES ###
+# $wsblock_kb: position of <B>
+# $wsblock_kk: position of <K>
+# $wsblock_col: defined if column mode on
+# $wsblock_vis: defined if block is in visible mode
 
 ## FUNCTIONS
 wsblock-cursupd() {
@@ -34,15 +25,13 @@ wsblock-cursupd() {
     fi
 }
 
-wsblock-leave-mode() {
+wsblock-leave() {
     unset kb
     unset kk
     unset region_highlight
     unset kw
     ws_saved=$wsblock_text
     unset wsblock_text
-    zle -K wskeys
-#    zle -M "unset kb, return to wskeys mode"
 }
 
 wsblock-upd() {
@@ -51,10 +40,8 @@ wsblock-upd() {
 	kkend=$(( ${#BUFFER} - $kk ))
 	wsblock_text=$BUFFER[$(( $kb + 1 )),$kk]
 	region_highlight=("$kb $kk standout")
-#	zle -M "kb=$kb kbend=$kbend curs=$CURSOR kk=$kk kkend=$kkend"
     else
 	region_highlight=("$kb $(( $kb + 3)) standout")
-	#    zle -M "kb=$kb kbend=$kbend curs=$CURSOR"
     fi
 }
 
@@ -116,30 +103,6 @@ bindkey -M wsblock "^F" wsblock-forward-word
 wsblock-forward-word() {
     zle forward-word
     wsblock-cursupd
-}
-
-
-## EDITING: INSERTION
-wsblock-insert-string() {
-    local string="$1"
-    local curs=$CURSOR
-    if [[ -z $kk ]]; then	# state with <B>
-	if [[ $curs -le $kb ]]; then
-	    kb=$(( $kb + ${#string} ))
-	    LBUFFER+="$string"
-	elif [[ $curs -gt $(( $kb + 2 )) ]]; then
-	    LBUFFER+="$string"
-	fi
-    else			# state with selection
-	LBUFFER+="$string"
-	if [[ $curs -lt $kb ]]; then
-	    kb=$(( $kb + ${#string} ))
-	fi
-	if [[ $curs -lt $kk ]]; then
-	    kk=$(( $kk + ${#string} ))
-	fi
-    fi
-    wsblock-upd
 }
 
 # insert character
@@ -260,64 +223,42 @@ wsblock-delline-left() {
     wsblock-delupd
 }
 
-# TODO: connect to killring OR save latest selection on accept/interrupt
+zle -N ws-kb
+bindkey -M wskeys "^Kb" ws-kb
+bindkey -M wskeys "^KB" ws-kb
 ws-kb() {
-    zle -K wsblock
-    if [[ -n $kk ]]; then
-	unset kk
-	unset kb
-	unset kw
-	unset region_highlight
-    fi
-    if [[ -z $kb ]]; then
-	kb=$CURSOR
-	LBUFFER+="<B>"
-	kbend=$(( ${#BUFFER} - $kb ))
-	CURSOR=$(( $kb + 3 ))
-	unset kk
-	unset kw
-    elif [[ $CURSOR -ge $kb && $CURSOR -le $(( $kb + 3 )) ]]; then
-	BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
-	CURSOR=$kb
-	wsblock-leave-mode
-	return
+    local pos=${(P)wstext_posvar}
+    if [[ -n "$wsblock_vis" && -n "$wsblock_kb" && "$wsblock_kb" -eq $pos ]]; then
+        unset wsblock_kb
+        if [[ -z "$wsblock_kk" ]]; then
+            unset wsblock_vis
+        fi
     else
-	if [[ $CURSOR -gt $kb ]]; then
-	    CURSOR=$(( $CURSOR - 3 ))
-	fi
-	BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
-	kb=$CURSOR
-	kbend=$(( ${#BUFFER} - $kb ))
-	LBUFFER+="<B>"
-	CURSOR=$(( $kb + 3 ))
+        wsblock_kb=$pos
+        wsblock_vis=true
     fi
-    wsblock-upd
+    ws-debug WS_KB: kb=$wsblock_kb
+    # if $wsblock_col is undefined, leave undefined (by default column mode off)
+    wstext-upd
 }
 
 zle -N ws-kk
-bindkey -M wsblock "^Kk" ws-kk
-bindkey -M wsblock "^KK" ws-kk
+bindkey -M wskeys "^Kk" ws-kk
+bindkey -M wskeys "^KK" ws-kk
 ws-kk() {
-    if [[ -z $kk ]]; then
-	if [[ $CURSOR -ge $kb && $CURSOR -le $(( $kb + 3 )) ]]; then
-	    BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
-	    
-	    CURSOR=$kb
-	    wsblock-leave-mode
-	    return
-	fi
-	if [[ $CURSOR -gt $kb ]]; then
-	    CURSOR=$(( $CURSOR - 3 ))
-	fi
-	BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
-    fi
-    if [[ $kb -gt $CURSOR ]]; then
-	kk=$kb
-	kb=$CURSOR
+    local pos=${(P)wstext_posvar}
+    if [[ -n "$wsblock_vis" && -n "$wsblock_kk" && "$wsblock_kk" -eq $pos ]]; then
+        unset wsblock_kk
+        if [[ -z "$wsblock_kb" ]]; then
+            unset wsblock_vis
+        fi
     else
-	kk=$CURSOR
+        wsblock_kk=$pos
+        wsblock_vis=true
     fi
-    wsblock-upd
+    ws-debug WS_KK: kk=$wsblock_kk
+    # if $wsblock_col is undefined, leave undefined (by default column mode off)
+    wstext-upd
 }
 
 zle -N ws-kc
