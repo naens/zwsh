@@ -101,12 +101,20 @@ ws-next-paragraph() {
     wstext-next-paragraph
 }
 
+#    if [[ -n $kk ]]; then
+#        region_highlight=("$kb $kk standout")
+#    else
+#        region_highlight=("$kb $(( $kb + 3)) standout")
+#    fi
+
+
 ws-updfn() {
     if [[ -n "$wsblock_vis" ]]; then
         local text="$ws_text"
         local curs=$ws_curs
         if [[ -n "$wsblock_kb" ]]; then
             text=$text[1,wsblock_kb]"<B>"$text[wsblock_kb+1,${#text}]
+            region_highlight=("$wsblock_kb $((wsblock_kb+3)) standout")
             if [[ $curs -ge $wsblock_kb ]]; then
                 curs=$((curs+3))
             fi
@@ -118,6 +126,7 @@ ws-updfn() {
                 ws-debug kk-pos=$kk_pos
             fi
             text=$text[1,kk_pos]"<K>"$text[kk_pos+1,${#text}]
+            region_highlight+=("$kk_pos $((kk_pos+3)) standout")
             if [[ $curs -ge $kk_pos ]]; then
                 curs=$((curs+3))
             fi
