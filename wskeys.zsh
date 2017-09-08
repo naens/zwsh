@@ -4,6 +4,8 @@
 bindkey -N wskeys
 bindkey -M wskeys -R " "-"~" self-insert
 
+declare -A ws_marks_array
+
 zle -N zle-line-init
 # init: on display of new line
 zle-line-init() {
@@ -17,12 +19,14 @@ zle-line-init() {
     unset region_highlight
     unset ws_text
     unset ws_curs
+    unset ws_marks
     zle -K wskeys
 
     # name of the variable containing the text
     wstext_textvar=ws_text
     wstext_updfnvar=ws-updfn
     wstext_posvar=ws_curs
+    wstext_marksvar=ws_marks_array
 
     ws_text="$BUFFER"
     ws_curs=$CURSOR    
@@ -107,8 +111,12 @@ ws-next-paragraph() {
 #        region_highlight=("$kb $(( $kb + 3)) standout")
 #    fi
 
-
+# TODO: use marks for wsblock kb and kk!!!
 ws-updfn() {
+    local b_pos=${ws_marks_array[B]}
+    local k_pos=${ws_marks_array[K]}
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos
+
     if [[ -n "$wsblock_vis" ]]; then
         local text="$ws_text"
         local curs=$ws_curs
@@ -137,7 +145,7 @@ ws-updfn() {
         BUFFER="$ws_text"
         CURSOR=$ws_curs
     fi
-    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
+#    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
 }
 
 zle -N ws-start-doc
