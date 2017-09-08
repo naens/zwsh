@@ -61,12 +61,21 @@ restore space if copying to edit or normal mode)
  + Directory aliases
  + Directory alias completion (alias completion + subpath completion)
 
-** global
- + implement the array of marks in the text
+** Marks
 Marks are points in text which have a name and are moved when text get
 inserted or deleted (they don't get deleted with the text, if a selection
 containing a mark is deleted, the mark is moved to the beginning of the
 selection. ~<B>~ and ~<K>~ are marks.
+
+*** Implementation of Marks
+Marks have a name and a location, they are associated with a location in
+text and can move when text is deleted or inserted.
+
+Marks are stored in an array (wstext_marks), where each element is a pair name
+position.
+
+** global
+ + implement the array of marks in the text
  + delete & undelete: ws style
  + organize files: wskeys <--> wstext
  + functions in wsfun, wstxtfun: remove unused / merge similar by making
