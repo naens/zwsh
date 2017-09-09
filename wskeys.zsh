@@ -29,7 +29,8 @@ zle-line-init() {
     wstext_marksvar=ws_marks_array
 
     ws_text="$BUFFER"
-    ws_curs=$CURSOR    
+    ws_curs=$CURSOR
+    ws_marks_array=()
 }
 
 # History keys
@@ -115,7 +116,7 @@ ws-next-paragraph() {
 ws-updfn() {
     local b_pos=${ws_marks_array[B]}
     local k_pos=${ws_marks_array[K]}
-    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs
 
     if [[ -n "$wsblock_vis" ]]; then
         local text="$ws_text"
