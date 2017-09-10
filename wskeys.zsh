@@ -116,36 +116,48 @@ ws-next-paragraph() {
 ws-updfn() {
     local b_pos=${ws_marks_array[B]}
     local k_pos=${ws_marks_array[K]}
-    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs vis=$wsblock_vis
 
     if [[ -n "$wsblock_vis" ]]; then
         local text="$ws_text"
         local curs=$ws_curs
-        if [[ -n "$wsblock_kb" ]]; then
-            text=$text[1,wsblock_kb]"<B>"$text[wsblock_kb+1,${#text}]
-            region_highlight=("$wsblock_kb $((wsblock_kb+3)) standout")
-            if [[ $curs -ge $wsblock_kb ]]; then
+        if [[ -n "$b_pos" && -n "$k_pos" && $k_pos -gt $b_pos ]]; then
+            region_highlight=("$b_pos $k_pos standout")
+        elif [[ -n "$b_pos" && -z "$k_pos" ]]; then
+            text=$text[1,b_pos]"<B>"$text[b_pos+1,${#text}]
+            region_highlight=("$b_pos $((b_pos+3)) standout")
+            if [[ $curs -ge $b_pos ]]; then
                 curs=$((curs+3))
             fi
-        fi
-        if [[ -n "$wsblock_kk" ]]; then
-            kk_pos=$wsblock_kk
-            if [[ -n "$wsblock_kb" && "$wsblock_kb" -le $kk_pos ]]; then
-                kk_pos=$((kk_pos+3))
-                ws-debug kk-pos=$kk_pos
-            fi
-            text=$text[1,kk_pos]"<K>"$text[kk_pos+1,${#text}]
-            region_highlight+=("$kk_pos $((kk_pos+3)) standout")
-            if [[ $curs -ge $kk_pos ]]; then
+        elif [[ -n "$k_pos" && -z "$b_pos" ]]; then
+            text=$text[1,k_pos]"<K>"$text[k_pos+1,${#text}]
+            region_highlight=("$k_pos $((k_pos+3)) standout")
+            if [[ $curs -ge $k_pos ]]; then
                 curs=$((curs+3))
+            fi
+        elif [[ $b_pos -eq $kpos ]]; then
+            text=$text[1,b_pos]"<B><K>"$text[b_pos+1,${#text}]
+            region_highlight=("$b_pos $((b_pos+6)) standout")
+            if [[ $curs -ge $b_pos ]]; then
+                curs=$((curs+6))
+            fi
+        else # b > k
+            text=$text[1,k_pos]"<K>"$text[k_pos+1,b_pos]"<B>"$text[b_pos+1,${#text}]
+            region_highlight=("$k_pos $((k_pos+3)) standout" \
+                              "$((b_pos+3)) $((b_pos+6)) standout")
+            if [[ $curs -ge $b_pos && $curs -lt $k_pos ]]; then
+                curs=$((curs+3))
+            elif [[ $curs -ge $b_pos && $curs -ge $k_pos ]]; then
+                curs=$((curs+6))
             fi
         fi
         BUFFER="$text"
         CURSOR=$curs
     else
+        region_highlight=()
         BUFFER="$ws_text"
         CURSOR=$ws_curs
-    fi
+   fi
 #    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
 }
 

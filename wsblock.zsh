@@ -229,27 +229,18 @@ bindkey -M wskeys "^KB" ws-kb
 ws-kb() {
     local pos=${(P)wstext_posvar}
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
-#    ws-debug WS_KB: "echo \${${wstext_marksvar}[B]}"
-#    ws-debug WS_KB: b_pos=$b_pos
-    if [[ -n "$b_pos" && "$b_pos" -eq $pos ]]; then
+    local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+    if [[ -n "$wsblock_vis" && -n "$b_pos" && "$b_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[B]"
-#        ws-debug WS_KB: "unset ${wstext_marksvar}"'[B]'
+        if [[ -z "$k_pos" ]]; then
+            unset wsblock_vis
+        fi
     else
     	eval "${wstext_marksvar}[B]=$pos"
-#    	ws-debug WS_KB: setting "${wstext_marksvar}[B]=$pos"
+        wsblock_vis=true
     fi
-#    if [[ -n "$wsblock_vis" && -n "$wsblock_kb" && "$wsblock_kb" -eq $pos ]]; then
-#        unset wsblock_kb
-#        if [[ -z "$wsblock_kk" ]]; then
-#            unset wsblock_vis
-#        fi
-#    else
-#        wsblock_kb=$pos
-#        wsblock_vis=true
-#    fi
-#    ws-debug WS_KB: kb=$wsblock_kb
     # if $wsblock_col is undefined, leave undefined (by default column mode off)
-#    wstext-upd
+    wstext-upd
 }
 
 zle -N ws-kk
@@ -257,24 +248,19 @@ bindkey -M wskeys "^Kk" ws-kk
 bindkey -M wskeys "^KK" ws-kk
 ws-kk() {
     local pos=${(P)wstext_posvar}
+    local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    if [[ -n "$k_pos" && "$k_pos" -eq $pos ]]; then
+    if [[ -n "$wsblock_vis" && -n "$k_pos" && "$k_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[K]"
+        if [[ -z "$b_pos" ]]; then
+            unset wsblock_vis
+        fi
     else
     	eval "${wstext_marksvar}[K]=$pos"
+        wsblock_vis=true
     fi
-#    if [[ -n "$wsblock_vis" && -n "$wsblock_kk" && "$wsblock_kk" -eq $pos ]]; then
-#        unset wsblock_kk
-#        if [[ -z "$wsblock_kb" ]]; then
-#            unset wsblock_vis
-#        fi
-#    else
-#        wsblock_kk=$pos
-#        wsblock_vis=true
-#    fi
-#    ws-debug WS_KK: kk=$wsblock_kk
 #    # if $wsblock_col is undefined, leave undefined (by default column mode off)
-#    wstext-upd
+    wstext-upd
 }
 
 zle -N ws-kc
