@@ -51,7 +51,8 @@ Rewrite wsblock for edit, normal and wsline modes:
  + [DONE]review wsblock specifications, redefine behaviour, parameters, variables...
  + [DONE]implement marks: places that move with the text: track position, column, line
 (also for wsline)
- + [DONE] column selection
+ + column selection
+ + wsedit: right border wsblock
  + insert and move blocks
  + reimplement block functionality, on wsline, substitute CR's and LF's with a
 normal character, like space or a special substitution character (in order to
