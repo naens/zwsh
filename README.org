@@ -48,26 +48,29 @@ Without implementing wsblock keybindings, finish wsedit mode:
 
 ** wsblock
 Rewrite wsblock for edit, normal and wsline modes:
- + review wsblock specifications, redefine behaviour, parameters, variables...
- + implement marks: places that move with the text: track position, column, line
+ + [DONE]review wsblock specifications, redefine behaviour, parameters, variables...
+ + [DONE]implement marks: places that move with the text: track position, column, line
 (also for wsline)
+ + [DONE] column selection
+ + insert and move blocks
  + reimplement block functionality, on wsline, substitute CR's and LF's with a
 normal character, like space or a special substitution character (in order to
 restore space if copying to edit or normal mode)
  + test on normal, edit and wsline modes
- + add column selection
 
 ** prompt
  + Directory aliases
  + Directory alias completion (alias completion + subpath completion)
 
 ** Marks
+[DONE]
 Marks are points in text which have a name and are moved when text get
 inserted or deleted (they don't get deleted with the text, if a selection
 containing a mark is deleted, the mark is moved to the beginning of the
 selection. ~<B>~ and ~<K>~ are marks.
 
 *** Implementation of Marks
+[DONE]
 Marks have a name and a location, they are associated with a location in
 text and can move when text is deleted or inserted.
 
@@ -75,7 +78,7 @@ Marks are stored in an array (wstext_marks), where each element is a pair name
 position.
 
 ** global
- + implement the array of marks in the text
+ + [DONE] implement the array of marks in the text
  + delete & undelete: ws style
  + organize files: wskeys <--> wstext
  + functions in wsfun, wstxtfun: remove unused / merge similar by making
