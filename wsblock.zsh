@@ -230,14 +230,15 @@ ws-kb() {
     local pos=${(P)wstext_posvar}
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    if [[ -n "$wsblock_vis" && -n "$b_pos" && "$b_pos" -eq $pos ]]; then
+    local vis=${(P)wstext_blockvis}
+    if [[ -n "$vis" && -n "$b_pos" && "$b_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[B]"
         if [[ -z "$k_pos" ]]; then
-            unset wsblock_vis
+            eval "unset $wstext_blockvis"
         fi
     else
     	eval "${wstext_marksvar}[B]=$pos"
-        wsblock_vis=true
+        eval "$wstext_blockvis=true"
     fi
     # if $wsblock_col is undefined, leave undefined (by default column mode off)
     wstext-upd
@@ -250,16 +251,32 @@ ws-kk() {
     local pos=${(P)wstext_posvar}
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    if [[ -n "$wsblock_vis" && -n "$k_pos" && "$k_pos" -eq $pos ]]; then
+    local vis=${(P)wstext_blockvis}
+    if [[ -n "$vis" && -n "$k_pos" && "$k_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[K]"
         if [[ -z "$b_pos" ]]; then
-            unset wsblock_vis
+            eval "unset $wstext_blockvis"
         fi
     else
     	eval "${wstext_marksvar}[K]=$pos"
-        wsblock_vis=true
+        eval "$wstext_blockvis=true"
     fi
 #    # if $wsblock_col is undefined, leave undefined (by default column mode off)
+    wstext-upd
+}
+
+zle -N ws-kh
+bindkey -M wskeys "^Kh" ws-kh
+bindkey -M wskeys "^KH" ws-kh
+ws-kh() {
+    local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+    local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+    local vis=${(P)wstext_blockvis}
+    if [[ -n "$vis" ]]; then
+        eval "unset $wstext_blockvis"
+    elif [[ -n "$b_pos" || -n "$k_pos" ]]; then
+        eval "$wstext_blockvis=true"
+    fi
     wstext-upd
 }
 

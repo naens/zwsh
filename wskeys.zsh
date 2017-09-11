@@ -20,6 +20,7 @@ zle-line-init() {
     unset ws_text
     unset ws_curs
     unset ws_marks
+    unset ws_blockvis
     zle -K wskeys
 
     # name of the variable containing the text
@@ -27,6 +28,7 @@ zle-line-init() {
     wstext_updfnvar=ws-updfn
     wstext_posvar=ws_curs
     wstext_marksvar=ws_marks_array
+    wstext_blockvis=ws_blockvis
 
     ws_text="$BUFFER"
     ws_curs=$CURSOR
@@ -116,9 +118,10 @@ ws-next-paragraph() {
 ws-updfn() {
     local b_pos=${ws_marks_array[B]}
     local k_pos=${ws_marks_array[K]}
-    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs vis=$wsblock_vis
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs vis=$ws_blockvis \
+                       text=\""$ws_text"\"
 
-    if [[ -n "$wsblock_vis" ]]; then
+    if [[ -n "$ws_blockvis" ]]; then
         local text="$ws_text"
         local curs=$ws_curs
         if [[ -n "$b_pos" && -n "$k_pos" && $k_pos -gt $b_pos ]]; then
@@ -135,7 +138,7 @@ ws-updfn() {
             if [[ $curs -ge $k_pos ]]; then
                 curs=$((curs+3))
             fi
-        elif [[ $b_pos -eq $kpos ]]; then
+        elif [[ $b_pos -eq $k_pos ]]; then
             text=$text[1,b_pos]"<B><K>"$text[b_pos+1,${#text}]
             region_highlight=("$b_pos $((b_pos+6)) standout")
             if [[ $curs -ge $b_pos ]]; then
@@ -495,7 +498,7 @@ zle-line-pre-redraw() {
 
 wskeys-pre-redraw() {
     # TODO: fix fix fix
-    if [[ -z "$wsblock_vis" ]]; then
+    if [[ -z "$ws_blockvis" ]]; then
         ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
         ws_curs=$CURSOR    
         ws-updfn # temporary
