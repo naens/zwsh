@@ -4,7 +4,7 @@
 bindkey -N wskeys
 bindkey -M wskeys -R " "-"~" self-insert
 
-declare -A ws_marks_array
+declare -A ws_marks
 
 zle -N zle-line-init
 # init: on display of new line
@@ -19,7 +19,7 @@ zle-line-init() {
     unset region_highlight
     unset ws_text
     unset ws_curs
-    unset ws_marks
+    ws_marks=()
     unset ws_blockvis
     zle -K wskeys
 
@@ -27,12 +27,12 @@ zle-line-init() {
     wstext_textvar=ws_text
     wstext_updfnvar=ws-updfn
     wstext_posvar=ws_curs
-    wstext_marksvar=ws_marks_array
-    wstext_blockvis=ws_blockvis
+    wstext_marksvar=ws_marks
+    wstext_blockvisvar=ws_blockvis
+    unset wstext_blockcolmodevar
 
     ws_text="$BUFFER"
     ws_curs=$CURSOR
-    ws_marks_array=()
 }
 
 # History keys
@@ -116,10 +116,10 @@ ws-next-paragraph() {
 
 # TODO: use marks for wsblock kb and kk!!!
 ws-updfn() {
-    local b_pos=${ws_marks_array[B]}
-    local k_pos=${ws_marks_array[K]}
-    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs vis=$ws_blockvis \
-                       text=\""$ws_text"\"
+    local b_pos=${ws_marks[B]}
+    local k_pos=${ws_marks[K]}
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs \
+                       vis=$ws_blockvis text=\""$ws_text"\"
 
     if [[ -n "$ws_blockvis" ]]; then
         local text="$ws_text"
@@ -174,7 +174,7 @@ zle -N ws-end-doc
 bindkey -M wskeys "^C" ws-end-doc
 ws-end-doc() {
     local text="${(P)wstext_textvar}"
-    eval "$wstext_poscar=${#text}"
+    eval "$wstext_posvar=${#text}"
 }
 
 bindkey -M wskeys "^Q^[" undefined-key
