@@ -47,73 +47,73 @@ wsblock-upd() {
 
 
 ## CURSOR
-zle -N wsblock-up-line-or-history
-bindkey -M wsblock "^E" wsblock-up-line-or-history
+#zle -N wsblock-up-line-or-history
+#bindkey -M wsblock "^E" wsblock-up-line-or-history
 wsblock-up-line-or-history() {
     zle up-line-or-history
     wsblock-cursupd 1
 }
 
-zle -N wsblock-down-line-or-history
-bindkey -M wsblock "^X" wsblock-down-line-or-history
+#zle -N wsblock-down-line-or-history
+#bindkey -M wsblock "^X" wsblock-down-line-or-history
 wsblock-down-line-or-history() {
     zle down-line-or-history
     wsblock-cursupd
 }
 
-zle -N wsblock-backward-char
-bindkey -M wsblock "^S" wsblock-backward-char
+#zle -N wsblock-backward-char
+#bindkey -M wsblock "^S" wsblock-backward-char
 wsblock-backward-char() {
     zle backward-char
     wsblock-cursupd 1
 }
 
-zle -N wsblock-forward-char
-bindkey -M wsblock "^D" wsblock-forward-char
+#zle -N wsblock-forward-char
+#bindkey -M wsblock "^D" wsblock-forward-char
 wsblock-forward-char() {
     zle forward-char
     wsblock-cursupd
 }
 
-zle -N wsblock-beginning-of-line
-bindkey -M wsblock "^Qs" wsblock-beginning-of-line
-bindkey -M wsblock "^QS" wsblock-beginning-of-line
+#zle -N wsblock-beginning-of-line
+#bindkey -M wsblock "^Qs" wsblock-beginning-of-line
+#bindkey -M wsblock "^QS" wsblock-beginning-of-line
 wsblock-beginning-of-line() {
     zle beginning-of-line
     wsblock-cursupd 1
 }
 
-zle -N wsblock-end-of-line
-bindkey -M wsblock "^Qd" wsblock-end-of-line
-bindkey -M wsblock "^QD" wsblock-end-of-line
+#zle -N wsblock-end-of-line
+#bindkey -M wsblock "^Qd" wsblock-end-of-line
+#bindkey -M wsblock "^QD" wsblock-end-of-line
 wsblock-end-of-line() {
     zle end-of-line
     wsblock-cursupd
 }
 
-zle -N wsblock-backward-word
-bindkey -M wsblock "^A" wsblock-backward-word
+#zle -N wsblock-backward-word
+#bindkey -M wsblock "^A" wsblock-backward-word
 wsblock-backward-word() {
     zle backward-word
     wsblock-cursupd 1
 }
 
-zle -N wsblock-forward-word
-bindkey -M wsblock "^F" wsblock-forward-word
+#zle -N wsblock-forward-word
+#bindkey -M wsblock "^F" wsblock-forward-word
 wsblock-forward-word() {
     zle forward-word
     wsblock-cursupd
 }
 
 # insert character
-zle -N wsblock-self-insert
-bindkey -M wsblock -R " "-"~" wsblock-self-insert
+#zle -N wsblock-self-insert
+#bindkey -M wsblock -R " "-"~" wsblock-self-insert
 wsblock-self-insert() {
     wsblock-insert-string $KEYS
 }
 
-zle -N wsblock-accept
-bindkey -M wsblock "^M" wsblock-accept
+#zle -N wsblock-accept
+#bindkey -M wsblock "^M" wsblock-accept
 wsblock-accept() {
     if [[ -z $kk ]]; then
         BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
@@ -124,8 +124,8 @@ wsblock-accept() {
 }
 
 # insert line
-zle -N wsblock-split-line
-bindkey -M wsblock "^N" wsblock-split-line
+#zle -N wsblock-split-line
+#bindkey -M wsblock "^N" wsblock-split-line
 wsblock-split-line() {
     wsblock-insert-string \\$'\n'
 }
@@ -177,47 +177,47 @@ wsblock-delupd() { # update $kb, $kk, $kkend, $block text after delete
 }
 
 # delete char
-zle -N wsblock-delchar
-bindkey -M wsblock "^G" wsblock-delchar
+#zle -N wsblock-delchar
+#bindkey -M wsblock "^G" wsblock-delchar
 wsblock-delchar() {
     zle delete-char-or-list
     wsblock-delupd
 }
 
-zle -N wsblock-backdelchar
-bindkey -M wsblock "^H" wsblock-backdelchar
-bindkey -M wsblock "^?" wsblock-backdelchar
+#zle -N wsblock-backdelchar
+#bindkey -M wsblock "^H" wsblock-backdelchar
+#bindkey -M wsblock "^?" wsblock-backdelchar
 wsblock-backdelchar() {
     zle backward-delete-char
     wsblock-delupd
 }
 
 # delete word
-zle -N wsblock-delword-right
-bindkey -M wsblock "^T" wsblock-delword-right
+#zle -N wsblock-delword-right
+#bindkey -M wsblock "^T" wsblock-delword-right
 wsblock-delword-right() {
     zle kill-word
     wsblock-delupd
 }
 
 # delete line
-zle -N wsblock-delline
-bindkey -M wsblock "^Y" wsblock-delline
+#zle -N wsblock-delline
+#bindkey -M wsblock "^Y" wsblock-delline
 wsblock-delline() {
     zle kill-whole-line
     wsblock-delupd
 }
 
-zle -N wsblock-delline-right
-bindkey -M wsblock "^Qy" wsblock-delline-right
-bindkey -M wsblock "^QY" wsblock-delline-right
+#zle -N wsblock-delline-right
+#bindkey -M wsblock "^Qy" wsblock-delline-right
+#bindkey -M wsblock "^QY" wsblock-delline-right
 wsblock-delline-right() {
     zle kill-line
     wsblock-delupd
 }
 
-zle -N wsblock-delline-left
-bindkey -M wsblock "^Q^H" wsblock-delline-left
+#zle -N wsblock-delline-left
+#bindkey -M wsblock "^Q^H" wsblock-delline-left
 wsblock-delline-left() {
     zle backward-kill-line
     wsblock-delupd
@@ -251,15 +251,15 @@ ws-kk() {
     local pos=${(P)wstext_posvar}
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    local vis=${(P)wstext_blockvis}
+    local vis=${(P)wstext_blockvisvar}
     if [[ -n "$vis" && -n "$k_pos" && "$k_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[K]"
         if [[ -z "$b_pos" ]]; then
-            eval "unset $wstext_blockvis"
+            eval "unset $wstext_blockvisvar"
         fi
     else
     	eval "${wstext_marksvar}[K]=$pos"
-        eval "$wstext_blockvis=true"
+        eval "$wstext_blockvisvar=true"
     fi
 #    # if $wsblock_col is undefined, leave undefined (by default column mode off)
     wstext-upd
@@ -271,27 +271,42 @@ bindkey -M wskeys "^KH" ws-kh
 ws-kh() {
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    local vis=${(P)wstext_blockvis}
+    local vis=${(P)wstext_blockvisvar}
     if [[ -n "$vis" ]]; then
-        eval "unset $wstext_blockvis"
+        eval "unset $wstext_blockvisvar"
     elif [[ -n "$b_pos" || -n "$k_pos" ]]; then
-        eval "$wstext_blockvis=true"
+        eval "$wstext_blockvisvar=true"
     fi
     wstext-upd
 }
 
-zle -N ws-kc
-bindkey -M wsblock "^Kc" ws-kc
-bindkey -M wsblock "^KC" ws-kc
+zle -N ws-kn
+bindkey -M wskeys "^Kn" ws-kn
+bindkey -M wskeys "^KN" ws-kn
+ws-kn() {
+    local vis = ${(P)wstext_blockvisvar}
+    if [[ -n "$vis"  && -n "$wstext_blockcolmodevar" ]]; then
+        local colmode = ${(P)wstext_blockcolmodevar}
+        if [[ -n "$colmode" ]]; then
+            eval "unset $wstext_blockcolmodevar"
+        else
+            eval "$wstext_blockcolmodevar=true"
+        fi
+    fi
+}
+
+#zle -N ws-kc
+#bindkey -M wsblock "^Kc" ws-kc
+#bindkey -M wsblock "^KC" ws-kc
 ws-kc() {
     local curs=$CURSOR
     wsblock-insert-string $wsblock_text
     CURSOR=$curs
 }
 
-zle -N ws-kv
-bindkey -M wsblock "^Kv" ws-kv
-bindkey -M wsblock "^KV" ws-kv
+#zle -N ws-kv
+#bindkey -M wsblock "^Kv" ws-kv
+#bindkey -M wsblock "^KV" ws-kv
 ws-kv() {
     if [ $CURSOR -ge $kb -a $CURSOR -lt $kk ]; then
 	CURSOR=$kb
@@ -311,9 +326,9 @@ ws-kv() {
 }
 
 # write selection to file
-zle -N ws-kw
-bindkey -M wsblock "^Kw" ws-kw
-bindkey -M wsblock "^KW" ws-kw
+#zle -N ws-kw
+#bindkey -M wsblock "^Kw" ws-kw
+#bindkey -M wsblock "^KW" ws-kw
 ws-kw() {
     if [[ -n $kk ]]; then
 #        ws-kwfn
@@ -321,9 +336,9 @@ ws-kw() {
     fi
 }
 
-zle -N ws-ky
-bindkey -M wsblock "^Ky" ws-ky
-bindkey -M wsblock "^KY" ws-ky
+#zle -N ws-ky
+#bindkey -M wsblock "^Ky" ws-ky
+#bindkey -M wsblock "^KY" ws-ky
 ws-ky() {
     if [[ $CURSOR -ge $kk ]]; then
 	local len=$(( $kk - $kb ))
@@ -335,23 +350,23 @@ ws-ky() {
     wsblock-leave-mode
 }
 
-zle -N wsblock-qb
-bindkey -M wsblock "^Qb" wsblock-qb
-bindkey -M wsblock "^QB" wsblock-qb
+#zle -N wsblock-qb
+#bindkey -M wsblock "^Qb" wsblock-qb
+#bindkey -M wsblock "^QB" wsblock-qb
 wsblock-qb() {
     CURSOR=$kb
 }
 
-zle -N wsblock-qk
-bindkey -M wsblock "^Qk" wsblock-qk
-bindkey -M wsblock "^QK" wsblock-qk
+#zle -N wsblock-qk
+#bindkey -M wsblock "^Qk" wsblock-qk
+#bindkey -M wsblock "^QK" wsblock-qk
 wsblock-qk() {
     CURSOR=$kk
 }
 
-zle -N wsblock-kr
-bindkey -M wsblock "^Kr" wsblock-kr
-bindkey -M wsblock "^KR" wsblock-kr
+#zle -N wsblock-kr
+#bindkey -M wsblock "^Kr" wsblock-kr
+#bindkey -M wsblock "^KR" wsblock-kr
 wsblock-kr() {
     ws-krfn
     wskr_insert="wsblock-kr-insert"
