@@ -147,35 +147,35 @@ wsedit-tab() {
 zle -N ws-edit
 bindkey -M wskeys "^Kd" ws-edit
 bindkey -M wskeys "^KD" ws-edit
-#bindkey -M wsblock "^Kd" ws-edit
-#bindkey -M wsblock "^KD" ws-edit
 ws-edit() {
     wsedit_saved_keymap=$KEYMAP
     wsedit_begin=0     # no header yet
 
-    # TODO: check if enter fullscreen mode or not
     wsedit_fullscreen=false
-#    if [[ $KEYMAP == "wsblock" ]]; then
-#        skip
-#    else
-        zle -K wsedit
-#    fi
+    zle -K wsedit
 
     # save previous vars
     wstext_textvar_save=$wstext_textvar
     wstext_updfnvar_save=$wstext_updfnvar
     wstext_posvar_save=$wstext_posvar
+    wstext_marksvar_save=$wstext_marksvar
+    wstext_blockvisvar_save=$wstext_blockvisvar
+    wstext_blockcolmodevar_save=$wstext_blockcolmodevar
 
-#    ws-defvar wsedit_text "${(P)wstext_textvar}"
-#    echo "${(P)wstext_textvar}" > /tmp/tmptmp1
+    # copy values from previous mode
     wsedit_text="${(P)wstext_textvar}"
-
     wsedit_pos=${(P)wstext_posvar}
+    wsedit_marks=(${(P)wstext_marksvar})
+    wsedit_blockvis=${(P)wstext_blockvisvar}
+    wsedit_blockcolmode=${(P)wstext_blockcalmodevar}
 
-    # define variables
+    # define 'var' variables
     wstext_textvar=wsedit_text
     wstext_updfnvar=wsedit-refresh
     wstext_posvar=wsedit_pos
+    wstext_marksvar=wsedit_marks
+    wstext_blockvisvar=wsedit_blockvis
+    wstext_blockcolmodevar=wsedit_blockcolmode
 
     wsedit-refresh
 }
@@ -183,7 +183,14 @@ ws-edit() {
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 wsedit-refresh() {
-#    ws-debug WSEDIT_REFRESH
+    # wsblock variables
+    local b_pos=${wsedit_marks[B]}
+    local k_pos=${wsedit_marks[K]}
+    # $wsedit_blockvis: defined if block visible
+    # $wsedit_blockcolmode: defined if column mode
+    ws-debug WSEDIT_REFRESH b_pos=$b_pos k_pos=$k_pos \
+            vis=$wsedit_blockvis col=$wsedit_blockcolmode
+
     local begin_old=$wsedit_begin
     read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
@@ -356,19 +363,26 @@ wsedit-exit() {
 #    fi
 #    BUFFER[1,$wsedit_begin]=""
 
-    # define variables
+    # restore previous variables
     wstext_textvar=$wstext_textvar_save
     wstext_updfnvar=$wstext_updfnvar_save
     wstext_posvar=$wstext_posvar_save
+    wstext_marksvar=$wstext_marksvar_save
+    wstext_blockvisvar=$wstext_blockvisvar_save
+    wstext_blockcolmodevar=$wstext_blockcolmodevar_save
 
     ws-defvar $wstext_textvar "$wsedit_text"
     eval "$wstext_posvar=\"$wsedit_pos\""
-    ws-debug "$wstext_textvar -> $wsedit_text"
-    ws-debug "$wstext_posvar -> $wsedit_pos"
+    eval "$wstext_marksvar=($wsedit_marksvar)"
+    eval "$wstext_blockvisvar=$wsedit_blockvis"
+    eval "$wstext_blockcolmodevar=$wsedit_blockcolmode"
 
     unset wsedit_begin
     unset wsedit_text
     unset wsedit_pos
+    unset wsedit_marksvar_array
+    unset wsedit_blockvis
+    unset wsedit_blockcolmode
     zle -K $wsedit_saved_keymap
     $wstext_updfnvar
     zle reset-prompt
