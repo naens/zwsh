@@ -142,6 +142,8 @@ wsedit-tab() {
     wstext-insert $'\t'
 }
 
+declare -A wsedit_marks
+
 # Switch main to editor mode key bindings
 # Switch to editor mode: ^KD
 zle -N ws-edit
@@ -165,7 +167,7 @@ ws-edit() {
     # copy values from previous mode
     wsedit_text="${(P)wstext_textvar}"
     wsedit_pos=${(P)wstext_posvar}
-    wsedit_marks=(${(P)wstext_marksvar})
+    wsedit_marks=(${(Pkv)wstext_marksvar})
     wsedit_blockvis=${(P)wstext_blockvisvar}
     wsedit_blockcolmode=${(P)wstext_blockcalmodevar}
 
@@ -190,13 +192,22 @@ wsedit-refresh() {
     # $wsedit_blockcolmode: defined if column mode
     ws-debug WSEDIT_REFRESH b_pos=$b_pos k_pos=$k_pos \
             vis=$wsedit_blockvis col=$wsedit_blockcolmode
+    if [[ -n "$b_pos" ]]; then
+        read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $b_pos "$wsedit_text")
+        ws-debug WSEDIT_REFRESH brow=$wsedit_brow bcol=$wsedit_bcol
+    fi
+    if [[ -n "$k_pos" ]]; then
+        read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $k_pos "$wsedit_text")
+        ws-debug WSEDIT_REFRESH krow=$wsedit_krow kcol=$wsedit_kcol
+    fi
+    region_highlight=()
 
     local begin_old=$wsedit_begin
     read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
     wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
     wsedit_slines=$(tput lines)
-#    wsedit_slines=8
+
     wsedit_scols=$(($(tput cols)))
     local step=$((wsedit_scols<20?1:wsedit_scols<40?5:wsedit_scols<60?10:20))
 
@@ -373,7 +384,7 @@ wsedit-exit() {
 
     ws-defvar $wstext_textvar "$wsedit_text"
     eval "$wstext_posvar=\"$wsedit_pos\""
-    eval "$wstext_marksvar=($wsedit_marksvar)"
+    eval "$wstext_marksvar=(${(kv)wsedit_marks})"
     eval "$wstext_blockvisvar=$wsedit_blockvis"
     eval "$wstext_blockcolmodevar=$wsedit_blockcolmode"
 
