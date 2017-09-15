@@ -230,15 +230,15 @@ ws-kb() {
     local pos=${(P)wstext_posvar}
     local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    local vis=${(P)wstext_blockvis}
+    local vis=${(P)wstext_blockvisvar}
     if [[ -n "$vis" && -n "$b_pos" && "$b_pos" -eq $pos ]]; then
         unset "${wstext_marksvar}[B]"
         if [[ -z "$k_pos" ]]; then
-            eval "unset $wstext_blockvis"
+            eval "unset $wstext_blockvisvar"
         fi
     else
     	eval "${wstext_marksvar}[B]=$pos"
-        eval "$wstext_blockvis=true"
+        eval "$wstext_blockvisvar=true"
     fi
     # if $wsblock_col is undefined, leave undefined (by default column mode off)
     wstext-upd
