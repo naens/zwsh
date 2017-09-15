@@ -182,6 +182,27 @@ ws-edit() {
     wsedit-refresh
 }
 
+line_highlight() {
+    local lnchr=$1    #character with which the line begins
+    local line=$2     #line number in same point of view as row variables
+    local width=$3
+    local xscroll=$4
+    local brow=$5
+    local bcol=$6
+    local krow=$7
+    local kcol=$8
+    local colmode=$9
+    ws-debug WSEDIT_LINE_HIGHLIGHT: lnchr=$lnchr line=$line width=$width \
+                                    colmode=$colmode xscroll=$xscroll
+    ws-debug WSEDIT_LINE_HIGHLIGHT: brow=$brow bcol=$bcol krow=$krow kcol=$kcol
+
+    # testing highlight for minimal case: primitive column mode
+    if [[ $xscroll -eq 0 && -n "$bcol" && -n "$kcol" \
+          && $bcol -lt $kcol && $line -ge $brow && $line -le $krow ]]; then
+        echo "$((lnchr+bcol-1)) $((lnchr+kcol-1)) standout"
+    fi
+}
+
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 wsedit-refresh() {
@@ -195,10 +216,16 @@ wsedit-refresh() {
     if [[ -n "$b_pos" ]]; then
         read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $b_pos "$wsedit_text")
         ws-debug WSEDIT_REFRESH brow=$wsedit_brow bcol=$wsedit_bcol
+    else
+        unset wsedit_brow
+        unset wsedit_bcol
     fi
     if [[ -n "$k_pos" ]]; then
         read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $k_pos "$wsedit_text")
         ws-debug WSEDIT_REFRESH krow=$wsedit_krow kcol=$wsedit_kcol
+    else
+        unset wsedit_krow
+        unset wsedit_kcol
     fi
     region_highlight=()
 
@@ -274,6 +301,8 @@ wsedit-refresh() {
         local x_from=$wsedit_xscroll
         local x_to=$((x_from+wsedit_scols-1))
         local x=0
+        local lnchr=${#BUFFER}
+        local reg=()
         while true; do
 #            ws-debug i=$i x=$x x_to=$x_to scols=$wsedit_scols \
 #                         line_len=$line_len tlen=$tlen
@@ -293,6 +322,17 @@ wsedit-refresh() {
                 fi
             elif [[ "$char" = $'\n' || $i -gt $tlen ]]; then
 #                ws-debug nl i=$i x=$x scols=$wsedit_scols line_len=$line_len
+                if [[ -n "$wsedit_blockvis" ]]; then
+                
+                    local r=$(line_highlight $lnchr $((line_counter+line_from-1)) \
+                            $wsedit_scols $wsedit_xscroll \
+                           "$wsedit_brow" "$wsedit_bcol" "$wsedit_krow" "$wsedit_kcol" \
+                           "$wsedit_blockcolmode")
+                    ws-debug r=$r
+                    reg+=("$r")
+                    
+                fi
+                lnchr=$((lnchr+wsedit_scols))
                 if [[ $wsedit_scols -gt $line_len ]]; then
                     for j in {1..$((wsedit_scols-line_len-1))}; do
                         buf+=" "
@@ -329,6 +369,9 @@ wsedit-refresh() {
             i=$((i+1))
         done
         BUFFER+="$buf"
+        region_highlight=($reg)
+        ws-debug reg="$reg"
+        ws-debug region_highlight="$region_highlight"
         local curs_y=$((wsedit_row-line_from))
         local curs_x=$((wsedit_col-1-x_from))
         if [[ $curs_x -lt 0 ]]; then
