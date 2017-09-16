@@ -60,6 +60,10 @@ restore space if copying to edit or normal mode)
  + test on normal, edit and wsline modes
 
 *** wsedit and wsblock
+ + describe ws tab behaviour (! screen edge, horizontal scroll...)
+!!! use tab size variable/constant instead of 8 (?can it be changed in
+options? if so test different sizes)
+ + implement tab in fullscreen mode
  + when column mode is off, behaviour same as normal mode
  + column mode works only in wsedit mode
  + column mode is column select and column paste
