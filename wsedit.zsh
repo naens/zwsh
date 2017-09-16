@@ -182,24 +182,49 @@ ws-edit() {
     wsedit-refresh
 }
 
+# converts display position to position in string
+dpos2spos() {
+    local pos=$1
+    local text="$2"
+    local text_len=${#text}
+    if [[ $pos -le $text_len ]]; then
+        i=0 # count display characters
+        j=0 # count string characters
+        while [[ $i -lt $pos ]]; do
+            if [[ "$text[j]" = $'\t' ]]; then
+                i=$((i+8-i%8))
+            elif [[ ! "$text[j]" = $'\n' ]]; then
+                i=$((i+1))
+            fi
+            j=$((j+1))
+        done
+        echo $i
+    fi
+}
+
 line_highlight() {
     local lnchr=$1    #character with which the line begins
-    local line=$2     #line number in same point of view as row variables
-    local width=$3
-    local xscroll=$4
-    local brow=$5
-    local bcol=$6
-    local krow=$7
-    local kcol=$8
-    local colmode=$9
-    ws-debug WSEDIT_LINE_HIGHLIGHT: lnchr=$lnchr line=$line width=$width \
+    local text="$2"
+    local nline=$3    #line number in same point of view as row variables
+    local width=$4
+    local xscroll=$5
+    local brow=$6
+    local bcol=$7
+    local bscol=$(dpos2spos $bcol "$text")
+    local krow=$8
+    local kcol=$9
+    local kscol=$(dpos2spos $kcol "$text")
+    local colmode=${10}
+    ws-debug WSEDIT_LINE_HIGHLIGHT: lnchr=$lnchr text=$text
+    ws-debug WSEDIT_LINE_HIGHLIGHT: nline=$nline width=$width \
                                     colmode=$colmode xscroll=$xscroll
-    ws-debug WSEDIT_LINE_HIGHLIGHT: brow=$brow bcol=$bcol krow=$krow kcol=$kcol
+    ws-debug WSEDIT_LINE_HIGHLIGHT: brow=$brow bcol=$bcol bscol=$bscol \
+                                    krow=$krow kcol=$kcol kscol=$kscol
 
     # testing highlight for minimal case: primitive column mode
     if [[ $xscroll -eq 0 && -n "$bcol" && -n "$kcol" \
-          && $bcol -lt $kcol && $line -ge $brow && $line -le $krow ]]; then
-        echo "$((lnchr+bcol-1)) $((lnchr+kcol-1)) standout"
+          && $bcol -lt $kcol && $nline -ge $brow && $nline -le $krow ]]; then
+        echo "$((lnchr+bscol-1)) $((lnchr+kscol-1)) standout"
     fi
 }
 
@@ -303,6 +328,7 @@ wsedit-refresh() {
         local x=0
         local lnchr=${#BUFFER}
         local reg=()
+        # TODO: support tabs? => lines of different lengths?
         while true; do
 #            ws-debug i=$i x=$x x_to=$x_to scols=$wsedit_scols \
 #                         line_len=$line_len tlen=$tlen
@@ -323,10 +349,11 @@ wsedit-refresh() {
             elif [[ "$char" = $'\n' || $i -gt $tlen ]]; then
 #                ws-debug nl i=$i x=$x scols=$wsedit_scols line_len=$line_len
                 if [[ -n "$wsedit_blockvis" ]]; then
-                
-                    local r=$(line_highlight $lnchr $((line_counter+line_from-1)) \
+                    local r=$(line_highlight $lnchr "$wsedit_text[i-line_len,i]" \
+                            $((line_counter+line_from-1)) \
                             $wsedit_scols $wsedit_xscroll \
-                           "$wsedit_brow" "$wsedit_bcol" "$wsedit_krow" "$wsedit_kcol" \
+                           "$wsedit_brow" "$wsedit_bcol" \
+                           "$wsedit_krow" "$wsedit_kcol" \
                            "$wsedit_blockcolmode")
                     ws-debug r=$r
                     reg+=("$r")
