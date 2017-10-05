@@ -41,6 +41,10 @@ Without implementing wsblock keybindings, finish wsedit mode:
    - only fullscreen possible when file with too many lines
  + [DONE] add vertical scroll
  + [DONE] add horizontal scroll
+ + support tabs of different lengths
+ + save file: if known, prefill (+ same for main mode), clear file name on
+ zle-init
+ + not always refresh on load file
 
 ** CLI tools
  * pipe mode: command that reads pipe and displays it in editor
@@ -99,7 +103,11 @@ functions general
  + refresh on screen resize
  + write wiki documentation
  + use wiki for todo lists
+ + make it possible to separate editable (history, settings) part of the
+ application from the executable in order to install a usable version for
+ usage and have another for testing.
 
 ** add superuser functionality
  + if no right to read/write, display superuser prompt 
  + when opening read only file: add to status bar (? disallow editing ?)
+
