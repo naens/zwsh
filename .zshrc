@@ -16,6 +16,8 @@ compinit
 
 # zsh ws theme
 
+tabs -8        # use standard tabs for this theme
+
 # set terminal options
 stty -ixon
 
