@@ -230,6 +230,7 @@ line_highlight() {
 
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
+# TODO: restructure function
 wsedit-refresh() {
     # wsblock variables
     local b_pos=${wsedit_marks[B]}
