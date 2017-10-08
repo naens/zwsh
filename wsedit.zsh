@@ -162,6 +162,7 @@ ws-edit() {
     wstext_posvar_save=$wstext_posvar
     wstext_marksvar_save=$wstext_marksvar
     wstext_blockvisvar_save=$wstext_blockvisvar
+    ws-debug wstext_blockvisvar=$wstext_blockvisvar
     wstext_blockcolmodevar_save=$wstext_blockcolmodevar
 
     # copy values from previous mode
@@ -169,7 +170,7 @@ ws-edit() {
     wsedit_pos=${(P)wstext_posvar}
     wsedit_marks=(${(Pkv)wstext_marksvar})
     wsedit_blockvis=${(P)wstext_blockvisvar}
-    wsedit_blockcolmode=${(P)wstext_blockcalmodevar}
+    wsedit_blockcolmode=${(P)wstext_blockcolmodevar}
 
     # define 'var' variables
     wstext_textvar=wsedit_text
@@ -436,17 +437,6 @@ bindkey -M wsedit "^Kd" wsedit-exit
 bindkey -M wsedit "^KD" wsedit-exit
 wsedit-exit() {
     CURSOR=$((CURSOR-wsedit_begin))
-#    if [[ $KEYMAP == "wseditblock" ]]; then
-#        kb=$(( $kb - $wsedit_begin ))
-#        if [[ -n $kk ]]; then
-#            kk=$(( $kk - $wsedit_begin ))
-#        fi
-#        zle -K wsblock
-#        wsblock-upd
-#    else
-#        zle -K $wsedit_saved_keymap
-#    fi
-#    BUFFER[1,$wsedit_begin]=""
 
     # restore previous variables
     wstext_textvar=$wstext_textvar_save
@@ -460,7 +450,9 @@ wsedit-exit() {
     eval "$wstext_posvar=\"$wsedit_pos\""
     eval "$wstext_marksvar=(${(kv)wsedit_marks})"
     eval "$wstext_blockvisvar=$wsedit_blockvis"
-    eval "$wstext_blockcolmodevar=$wsedit_blockcolmode"
+    if [[ -n "$wstext_blockcolmodevar" ]]; then
+        eval "$wstext_blockcolmodevar=$wsedit_blockcolmode"
+    fi
 
     unset wsedit_begin
     unset wsedit_text
