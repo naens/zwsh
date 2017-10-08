@@ -1,0 +1,1 @@
+mkdir -pv /opt/zwsh && cp -v *.zsh /opt/zwsh && echo "set ZWSHDIR to /opt/zwsh"

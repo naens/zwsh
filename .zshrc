@@ -1,9 +1,14 @@
-# TEMP: directory
-#dir=$(dirname $0)
-if [[ -n $ZDOTDIR ]]; then
-    dir=$ZDOTDIR
+# ZWSHDIR: directory of the program part, read-only
+if [[ -n "$ZWSHDIR" ]]; then
+    srcdir="$ZWSHDIR"
 else
-    dir="~"
+    echo "no ZWSHDIR variable available"
+    return
+fi
+
+if [[ ! -d "$ZWSHDIR" ]]; then
+    echo "no ZWSHDIR=$ZWSHDIR directory"
+    return
 fi
 
 # completion settings
@@ -42,41 +47,37 @@ stty erase '^H'
 zmodload zsh/pcre
 
 # global variables and functions
-. $dir/wsfun.zsh
+. $srcdir/wsfun.zsh
 
 # text navigation functions
-. $dir/wstxtfun.zsh
+. $srcdir/wstxtfun.zsh
 
 # wstext
-. $dir/wstext.zsh
+. $srcdir/wstext.zsh
 
 # bind ws keys
-. $dir/wskeys.zsh
+. $srcdir/wskeys.zsh
 
 # line mode
-. $dir/wsline.zsh
+. $srcdir/wsline.zsh
 
 # dialog mode
-. $dir/wsdialog.zsh
+. $srcdir/wsdialog.zsh
 	    
 # ws block functions
-. $dir/wsblock.zsh
+. $srcdir/wsblock.zsh
 
 # file for ^KW binding functions and file writing
-. $dir/wsdfsave.zsh
+. $srcdir/wsdfsave.zsh
 
 # file for ^KR binding functions and file import
-. $dir/wsdfopen.zsh
+. $srcdir/wsdfopen.zsh
 
 # ws find key bindings
-. $dir/wsfind.zsh
+. $srcdir/wsfind.zsh
 
 # ws editor mode
-. $dir/wsedit.zsh
-
-# load tests
-. $dir/tests/wsline-test.zsh
-. $dir/tests/wsdialog-test.zsh
+. $srcdir/wsedit.zsh
 
 # special folders
 typeset -A zw_special_folders
