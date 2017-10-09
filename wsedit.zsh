@@ -229,6 +229,36 @@ line_highlight() {
     fi
 }
 
+# Refresh functions: modify buffer variable
+# * make header
+# * make part
+# * make full
+
+wsedit-mkhdr() {
+    local ostr="Insert"
+    if [[ $ZLE_STATE == *overwrite* ]]; then
+        ostr=""
+    fi
+    local fn="<FILENAME>"
+    if [[ -n "$wsedit_fn" ]]; then
+        fn="$wsedit_fn"
+    fi
+    local header_text=$(printf "\n%16s       L%05d  C%03d %s fullscreens=%s" \
+                               $fn $wsedit_row $wsedit_col $ostr $wsedit_fullscreen)
+    wsedit_begin=$(( ${#header_text} + 2 ))
+    BUFFER="$header_text"
+}
+
+wsedit-mkprt() {
+    zle reset-prompt
+    BUFFER+=$'\n'"$wsedit_text"
+    CURSOR=$((wsedit_begin+wsedit_pos-1))
+}
+
+wsedit-mkful() {
+    pos=$1
+}
+
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
 # TODO: restructure function
@@ -276,17 +306,7 @@ wsedit-refresh() {
         wsedit_yscroll=$((wsedit_tlines-wsedit_slines-1))
     fi
 
-    local ostr="Insert"
-    if [[ $ZLE_STATE == *overwrite* ]]; then
-        ostr=""
-    fi
-    local fn="<FILENAME>"
-    if [[ -n "$wsedit_fn" ]]; then
-        fn="$wsedit_fn"
-    fi
-    local header_text=$(printf "%16s       L%05d  C%03d %s fullscreens=%s" \
-                               $fn $wsedit_row $wsedit_col $ostr $wsedit_fullscreen)
-    wsedit_begin=$(( ${#header_text} + 2 ))
+    wsedit-mkhdr
 
     if $wsedit_fullscreen; then
         if [[ -z "$wsedit_yscroll" ]]; then
@@ -296,7 +316,6 @@ wsedit-refresh() {
         PROMPT=''
         zle reset-prompt
 
-        BUFFER="$header_text"$'\n'
         local buf=""
         if [[ $((wsedit_row-1)) -lt $wsedit_yscroll ]]; then
             wsedit_yscroll=$((wsedit_row-1))
@@ -402,8 +421,6 @@ wsedit-refresh() {
         done
         BUFFER+="$buf"
         region_highlight=($reg)
-        ws-debug reg="$reg"
-        ws-debug region_highlight="$region_highlight"
         local curs_y=$((wsedit_row-line_from))
         local curs_x=$((wsedit_col-1-x_from))
         if [[ $curs_x -lt 0 ]]; then
@@ -416,10 +433,7 @@ wsedit-refresh() {
         CURSOR=$((wsedit_begin+wsedit_scols*curs_y+curs_x-1))
         PROMPT="$prompt"
     else
-        zle reset-prompt
-        BUFFER[1,$wsedit_begin]=$'\n'"$header_text"$'\n'
-        BUFFER[wsedit_begin+1,${#BUFFER}]="$wsedit_text"
-        CURSOR=$((wsedit_begin+wsedit_pos))
+        wsedit-mkprt
     fi
 }
 
