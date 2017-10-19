@@ -106,8 +106,10 @@ functions general
  + make it possible to separate editable (history, settings) part of the
  application from the executable in order to install a usable version for
  usage and have another for testing.
+ + On delete char/word before double-quote when it's the last character: it is
+ also deleted.
+ + Take into account ~$PS1~ when going up/down
 
 ** add superuser functionality
  + if no right to read/write, display superuser prompt 
  + when opening read only file: add to status bar (? disallow editing ?)
-

@@ -289,13 +289,13 @@ wsedit-refresh() {
     fi
     region_highlight=()
 
-    local begin_old=$wsedit_begin
     read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
     wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
-    wsedit_slines=$(tput lines)
 
+    wsedit_slines=$(tput lines)
     wsedit_scols=$(($(tput cols)))
+
     local step=$((wsedit_scols<20?1:wsedit_scols<40?5:wsedit_scols<60?10:20))
 
     wsedit_slines=$((wsedit_slines - 1))
@@ -303,7 +303,7 @@ wsedit-refresh() {
     # force fullscreen if too many lines
     if ! $wsedit_fullscreen && [[ $wsedit_tlines -ge $wsedit_slines ]]; then
         wsedit_fullscreen=true
-        wsedit_yscroll=$((wsedit_tlines-wsedit_slines-1))
+        wsedit_yscroll=$((wsedit_tlines-wsedit_slines-1))    # ???? TODO:REMOVE?
     fi
 
     wsedit-mkhdr
@@ -421,16 +421,17 @@ wsedit-refresh() {
         done
         BUFFER+="$buf"
         region_highlight=($reg)
-        local curs_y=$((wsedit_row-line_from))
-        local curs_x=$((wsedit_col-1-x_from))
+        # y and x on the text part of the screen
+        local curs_y=$(( wsedit_row - line_from ))
+        local curs_x=$(( wsedit_col - 1 - x_from ))
         if [[ $curs_x -lt 0 ]]; then
             curs_x=0
         fi
-        if [[ $curs_x -gt $((wsedit_scols-1)) ]]; then
-            curs_x=$((wsedit_scols-1))
+        if [[ $curs_x -gt $(( wsedit_scols - 1 )) ]]; then
+            curs_x=$(( wsedit_scols - 1 ))
         fi
 #        ws-debug curs_y=$curs_y curs_x=$curs_x
-        CURSOR=$((wsedit_begin+wsedit_scols*curs_y+curs_x-1))
+        CURSOR=$(( wsedit_begin + wsedit_scols * curs_y + curs_x - 1 ))
         PROMPT="$prompt"
     else
         wsedit-mkprt
