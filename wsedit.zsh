@@ -250,22 +250,16 @@ wsedit-mkhdr() {
 }
 
 wsedit-mkprt() {
+    # wsblock variables
+    local b_pos=${wsedit_marks[B]}
+    local k_pos=${wsedit_marks[K]}
+
     zle reset-prompt
     BUFFER+=$'\n'"$wsedit_text"
     CURSOR=$((wsedit_begin+wsedit_pos-1))
 }
 
 wsedit-mkful() {
-    pos=$1
-}
-
-# overwrite area between 0 and $wsedit_begin with an updated header
-# update $wsedit_begin to match the next character after the header
-# TODO: restructure function
-# TODO: separate: make-header, make-partscreen, make-fullscreen
-# TODO: restructure each function in manageable size
-# TODO: fullscreen: allow tabs
-wsedit-refresh() {
     # wsblock variables
     local b_pos=${wsedit_marks[B]}
     local k_pos=${wsedit_marks[K]}
@@ -275,40 +269,20 @@ wsedit-refresh() {
             vis=$wsedit_blockvis col=$wsedit_blockcolmode
     if [[ -n "$b_pos" ]]; then
         read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $b_pos "$wsedit_text")
-        ws-debug WSEDIT_REFRESH brow=$wsedit_brow bcol=$wsedit_bcol
     else
         unset wsedit_brow
         unset wsedit_bcol
     fi
     if [[ -n "$k_pos" ]]; then
         read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $k_pos "$wsedit_text")
-        ws-debug WSEDIT_REFRESH krow=$wsedit_krow kcol=$wsedit_kcol
     else
         unset wsedit_krow
         unset wsedit_kcol
     fi
-    region_highlight=()
-
-    read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
-
-    wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
-
-    wsedit_slines=$(tput lines)
-    wsedit_scols=$(($(tput cols)))
 
     local step=$((wsedit_scols<20?1:wsedit_scols<40?5:wsedit_scols<60?10:20))
 
-    wsedit_slines=$((wsedit_slines - 1))
 
-    # force fullscreen if too many lines
-    if ! $wsedit_fullscreen && [[ $wsedit_tlines -ge $wsedit_slines ]]; then
-        wsedit_fullscreen=true
-        wsedit_yscroll=$((wsedit_tlines-wsedit_slines-1))    # ???? TODO:REMOVE?
-    fi
-
-    wsedit-mkhdr
-
-    if $wsedit_fullscreen; then
         if [[ -z "$wsedit_yscroll" ]]; then
             wsedit_yscroll=0
         fi
@@ -326,36 +300,29 @@ wsedit-refresh() {
         local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) \
                                               $((wsedit_slines-1)))))
         local tlen=${#wsedit_text}
-#        ws-debug WSEDIT_REFRESH: tline=$wsedit_row tlines=$wsedit_tlines \
-#                                 slines=$wsedit_slines yscroll=$wsedit_yscroll \
-#                                 line_from=$line_from line_to=$line_to
-        
     
         local i=$(wstxtfun-line2pos line_from "$wsedit_text")
         local line_len=0
         local line_counter=1
-#        ws-debug WSEDIT_REFRESH i from $i
+
         if [[ -z "$wsedit_xscroll" ]]; then
             wsedit_xscroll=0
         fi
         local p=$((wsedit_col-1))
-#        ws-debug WSEDIT_REFRESH: p=$p xscroll=$wsedit_xscroll \
-#                                 step=$step scols=$wsedit_scols
+
         if [[ $p -lt $wsedit_xscroll ]]; then
             wsedit_xscroll=$(( (p-1)-(p-1)%step ))
         elif [[ $p -gt $((wsedit_xscroll+wsedit_scols-2)) ]]; then
             wsedit_xscroll=$(( (p-wsedit_scols+1)-(p-wsedit_scols+1)%step+step ))
         fi
-#        ws-debug WSEDIT_REFRESH: wsedit_xscroll=$wsedit_xscroll
+
         local x_from=$wsedit_xscroll
         local x_to=$((x_from+wsedit_scols-1))
         local x=0
         local lnchr=${#BUFFER}
         local reg=()
-        # TODO: support tabs? => lines of different lengths?
+
         while true; do
-#            ws-debug i=$i x=$x x_to=$x_to scols=$wsedit_scols \
-#                         line_len=$line_len tlen=$tlen
             local char=$wsedit_text[i]
             if [[ $x -eq $x_to ]]; then
                 buf+="+"
@@ -365,13 +332,11 @@ wsedit-refresh() {
                     i=$((i+1))
                 done
                 if [[ $i -gt $tlen ]]; then
-                    ws-debug break: i=$i
                     break
                 else
                     line_counter=$((line_counter+1))
                 fi
             elif [[ "$char" = $'\n' || $i -gt $tlen ]]; then
-#                ws-debug nl i=$i x=$x scols=$wsedit_scols line_len=$line_len
                 if [[ -n "$wsedit_blockvis" ]]; then
                     local r=$(line_highlight $lnchr "$wsedit_text[i-line_len,i]" \
                             $((line_counter+line_from-1)) \
@@ -379,7 +344,6 @@ wsedit-refresh() {
                            "$wsedit_brow" "$wsedit_bcol" \
                            "$wsedit_krow" "$wsedit_kcol" \
                            "$wsedit_blockcolmode")
-                    ws-debug r=$r
                     reg+=("$r")
                     
                 fi
@@ -401,9 +365,7 @@ wsedit-refresh() {
                 line_len=0
                 x=-1
                 line_counter=$((line_counter+1))
-#                ws-debug WSEDIT_REFRESH: line_counter=$line_counter
             elif [[ $x -ge $x_from && $x -lt $x_to ]]; then
-#                ws-debug ch i=$i x=$x x_from=$x_from x_to=$x_to
                 buf+="$char"
                 line_len=$((line_len+1))
             fi
@@ -430,9 +392,35 @@ wsedit-refresh() {
         if [[ $curs_x -gt $(( wsedit_scols - 1 )) ]]; then
             curs_x=$(( wsedit_scols - 1 ))
         fi
-#        ws-debug curs_y=$curs_y curs_x=$curs_x
+
         CURSOR=$(( wsedit_begin + wsedit_scols * curs_y + curs_x - 1 ))
         PROMPT="$prompt"
+}
+
+# overwrite area between 0 and $wsedit_begin with an updated header
+# update $wsedit_begin to match the next character after the header
+# TODO: restructure function
+# TODO: separate: make-header, make-partscreen, make-fullscreen
+# TODO: restructure each function in manageable size
+# TODO: fullscreen: allow tabs
+wsedit-refresh() {
+    read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
+
+    wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
+
+    region_highlight=()
+
+    wsedit_slines=$(($(tput lines) - 1))
+    wsedit_scols=$(($(tput cols)))
+
+    if ! $wsedit_fullscreen && [[ $wsedit_tlines -ge $wsedit_slines ]]; then
+        wsedit_fullscreen=true
+    fi
+
+    wsedit-mkhdr
+
+    if $wsedit_fullscreen; then
+        wsedit-mkful
     else
         wsedit-mkprt
     fi
