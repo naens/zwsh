@@ -249,14 +249,59 @@ wsedit-mkhdr() {
     BUFFER="$header_text"
 }
 
-wsedit-mkprt() {
-    # wsblock variables
+
+wsedit-marks-order() {
     local b_pos=${wsedit_marks[B]}
     local k_pos=${wsedit_marks[K]}
 
-    zle reset-prompt
-    BUFFER+=$'\n'"$wsedit_text"
-    CURSOR=$((wsedit_begin+wsedit_pos-1))
+    if [[ -n "$b_pos" && -n "$k_pos" ]]; then
+        if [[ $b_pos -eq $k_pos ]]; then
+            echo B K
+        elif [[ $b_pos -lt $k_pos ]]; then
+            echo B K +
+        else
+            echo K B
+        fi
+    elif [[ -n "$b_pos" ]]; then
+        echo B
+    elif [[ -n "$k_pos" ]]; then
+        echo K
+    fi
+}
+
+wsedit-mkprt() {
+    local marks=($(wsedit-marks-order))
+
+    if [[ ${#marks} -eq 3 ]]; then
+        local from=$((wsedit_begin+wsedit_marks[B]-1))
+        local to=$((wsedit_begin+wsedit_marks[K]-1))
+        BUFFER+=$'\n'"$wsedit_text"
+        CURSOR=$((wsedit_begin+wsedit_pos-1))
+        region_highlight=("$from $to standout")
+    else
+        local i=1
+        local pos=0
+        local buf=""
+        local reg=()
+        local sft=$wsedit_begin
+        local csft=$wsedit_begin
+        while [[ $i -le ${#marks} ]]; do
+            local next_letter=${marks[i]}
+            local next_break=$wsedit_marks[$next_letter]
+            buf+=$wsedit_text[pos,next_break]"<"$next_letter">"
+            reg+=("$((sft+next_break-1)) $((sft+next_break+3-1)) standout")
+            sft=$((sft+3))
+            if [[ $wsedit_pos -ge $next_break ]]; then
+                csft=$((csft+3))
+            fi
+            pos=$((next_break+1))
+            i=$((i+1))
+        done
+        buf+=$wsedit_text[pos,${#wsedit_text}]
+        region_highlight=($reg)
+        BUFFER+=$'\n'"$buf"
+        CURSOR=$((csft+wsedit_pos-1))
+    fi
 }
 
 wsedit-mkful() {
@@ -424,6 +469,7 @@ wsedit-refresh() {
     else
         wsedit-mkprt
     fi
+    ws-debug WSEDIT_REFRESH: region_highlight="$region_highlight"
 }
 
 # Switch to *editor mode* and open a file: ^KE
