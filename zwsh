@@ -3,12 +3,12 @@ if [[ -n "$ZWSHDIR" ]]; then
     srcdir="$ZWSHDIR"
 else
     echo "no ZWSHDIR variable available"
-    return
+    exit
 fi
 
 if [[ ! -d "$ZWSHDIR" ]]; then
     echo "no ZWSHDIR=$ZWSHDIR directory"
-    return
+    exit
 fi
 
 # completion settings
