@@ -228,6 +228,7 @@ ws-bracketed-paste() {
 
 # Delete keys: char
 zle -N ws-del-char-left
+bindkey -M wskeys "^?" ws-del-char-left
 bindkey -M wskeys "^H" ws-del-char-left
 ws-del-char-left() {
     wstext-del-char-left
