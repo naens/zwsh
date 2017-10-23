@@ -305,6 +305,13 @@ wsedit-mkprt() {
 }
 
 wsedit-mkful() {
+    ws-debug WSEDIT_MKFUL: row=$wsedit_row col=$wsedit_col \
+                           slines=$wsedit_slines scols=$wsedit_scols \
+                           tlines=$wsedit_tlines
+
+
+    ## define wsedit variables ##
+
     # wsblock variables
     local b_pos=${wsedit_marks[B]}
     local k_pos=${wsedit_marks[K]}
@@ -325,47 +332,54 @@ wsedit-mkful() {
         unset wsedit_kcol
     fi
 
+    ws-debug WSEDIT_MKFUL: brow=$wsedit_brow bcol=$wsedit_bcol \
+                           krow=$wsedit_krow kcol=$wsedit_kcol
+
+
+    # wsedit scroll variables
+    if [[ -z "$wsedit_yscroll" ]]; then
+        wsedit_yscroll=0
+    fi
+    if [[ $((wsedit_row-1)) -lt $wsedit_yscroll ]]; then
+        wsedit_yscroll=$((wsedit_row-1))
+    elif [[ $((wsedit_row)) -ge $((wsedit_yscroll+wsedit_slines-1)) ]]; then
+        wsedit_yscroll=$((wsedit_row-wsedit_slines+1))
+    fi
+
     local step=$((wsedit_scols<20?1:wsedit_scols<40?5:wsedit_scols<60?10:20))
+    if [[ -z "$wsedit_xscroll" ]]; then
+        wsedit_xscroll=0
+    fi
+    local p=$((wsedit_col-1))
 
+    if [[ $p -lt $wsedit_xscroll ]]; then
+        wsedit_xscroll=$(( (p-1)-(p-1)%step ))
+    elif [[ $p -gt $((wsedit_xscroll+wsedit_scols-2)) ]]; then
+        wsedit_xscroll=$(( (p-wsedit_scols+1)-(p-wsedit_scols+1)%step+step ))
+    fi
 
-        if [[ -z "$wsedit_yscroll" ]]; then
-            wsedit_yscroll=0
-        fi
-        local prompt="$PROMPT"
-        PROMPT=''
-        zle reset-prompt
+    ws-debug yscroll=$wsedit_yscroll xscroll=$wsedit_xscroll step=$step
 
-        local buf=""
-        if [[ $((wsedit_row-1)) -lt $wsedit_yscroll ]]; then
-            wsedit_yscroll=$((wsedit_row-1))
-        elif [[ $((wsedit_row)) -ge $((wsedit_yscroll+wsedit_slines-1)) ]]; then
-            wsedit_yscroll=$((wsedit_row-wsedit_slines+1))
-        fi
-        local line_from=$((wsedit_yscroll+1))
-        local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) \
+    ## local variables ##
+    local prompt="$PROMPT"
+    PROMPT=''
+    zle reset-prompt
+
+    local buf=""
+    local line_from=$((wsedit_yscroll+1))
+    local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) \
                                               $((wsedit_slines-1)))))
-        local tlen=${#wsedit_text}
+    local tlen=${#wsedit_text}
     
-        local i=$(wstxtfun-line2pos line_from "$wsedit_text")
-        local line_len=0
-        local line_counter=1
+    local i=$(wstxtfun-line2pos line_from "$wsedit_text")
+    local line_len=0
+    local line_counter=1
 
-        if [[ -z "$wsedit_xscroll" ]]; then
-            wsedit_xscroll=0
-        fi
-        local p=$((wsedit_col-1))
-
-        if [[ $p -lt $wsedit_xscroll ]]; then
-            wsedit_xscroll=$(( (p-1)-(p-1)%step ))
-        elif [[ $p -gt $((wsedit_xscroll+wsedit_scols-2)) ]]; then
-            wsedit_xscroll=$(( (p-wsedit_scols+1)-(p-wsedit_scols+1)%step+step ))
-        fi
-
-        local x_from=$wsedit_xscroll
-        local x_to=$((x_from+wsedit_scols-1))
-        local x=0
-        local lnchr=${#BUFFER}
-        local reg=()
+    local x_from=$wsedit_xscroll
+    local x_to=$((x_from+wsedit_scols-1))
+    local x=0
+    local lnchr=$wsedit_begin
+    local reg=()
 
         while true; do
             local char=$wsedit_text[i]
