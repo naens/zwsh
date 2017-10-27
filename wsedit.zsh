@@ -312,7 +312,7 @@ wsedit-mkful() {
 
     ## define wsedit variables ##
 
-    # wsblock variables
+    # wsblock variables #
     local b_pos=${wsedit_marks[B]}
     local k_pos=${wsedit_marks[K]}
     # $wsedit_blockvis: defined if block visible
@@ -336,7 +336,7 @@ wsedit-mkful() {
                            krow=$wsedit_krow kcol=$wsedit_kcol
 
 
-    # wsedit scroll variables
+    # wsedit scroll variables #
     if [[ -z "$wsedit_yscroll" ]]; then
         wsedit_yscroll=0
     fi
