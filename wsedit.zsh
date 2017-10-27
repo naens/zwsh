@@ -361,99 +361,122 @@ wsedit-mkful() {
     ws-debug yscroll=$wsedit_yscroll xscroll=$wsedit_xscroll step=$step
 
     ## local variables ##
-    local prompt="$PROMPT"
-    PROMPT=''
-    zle reset-prompt
+#    local prompt="$PROMPT"
+#    PROMPT=''
+#    zle reset-prompt
 
-    local buf=""
+#    local buf=""
     local line_from=$((wsedit_yscroll+1))
     local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) \
                                               $((wsedit_slines-1)))))
-    local tlen=${#wsedit_text}
+#    local tlen=${#wsedit_text}
     
-    local i=$(wstxtfun-line2pos line_from "$wsedit_text")
-    local line_len=0
-    local line_counter=1
+#    local i=$(wstxtfun-line2pos line_from "$wsedit_text")
+#    local line_len=0
+#    local line_counter=1
 
     local x_from=$wsedit_xscroll
     local x_to=$((x_from+wsedit_scols-1))
     local x=0
-    local lnchr=$wsedit_begin
-    local reg=()
+#    local lnchr=$wsedit_begin
+#    local reg=()
 
-        while true; do
-            local char=$wsedit_text[i]
-            if [[ $x -eq $x_to ]]; then
-                buf+="+"
-                line_len=0
-                x=-1
-                while [[ ! "$wsedit_text[i]" = $'\n' && $i -le $tlen ]]; do
-                    i=$((i+1))
-                done
-                if [[ $i -gt $tlen ]]; then
-                    break
-                else
-                    line_counter=$((line_counter+1))
-                fi
-            elif [[ "$char" = $'\n' || $i -gt $tlen ]]; then
-                if [[ -n "$wsedit_blockvis" ]]; then
-                    local r=$(line_highlight $lnchr "$wsedit_text[i-line_len,i]" \
-                            $((line_counter+line_from-1)) \
-                            $wsedit_scols $wsedit_xscroll \
-                           "$wsedit_brow" "$wsedit_bcol" \
-                           "$wsedit_krow" "$wsedit_kcol" \
-                           "$wsedit_blockcolmode")
-                    reg+=("$r")
-                    
-                fi
-                lnchr=$((lnchr+wsedit_scols))
-                if [[ $wsedit_scols -gt $line_len ]]; then
-                    for j in {1..$((wsedit_scols-line_len-1))}; do
-                        buf+=" "
-                    done
-                fi
-                if [[ $line_counter -le $((line_to-line_from)) ]]; then
-                    buf+="<"
-                elif [[ $((line_counter+wsedit_yscroll)) -eq $wsedit_tlines ]]; then
-                    buf+="^"
-                    break
-                else
-                    buf+="<"
-                    break
-                fi
-                line_len=0
-                x=-1
-                line_counter=$((line_counter+1))
-            elif [[ $x -ge $x_from && $x -lt $x_to ]]; then
-                buf+="$char"
-                line_len=$((line_len+1))
-            fi
-            i=$((i+1))
-            x=$((x+1))
-        done
-        i=1
-        local empty_lines=$((wsedit_slines-wsedit_tlines-1))
-        while [[ $i -le $empty_lines ]]; do
-            for j in {1..$((wsedit_scols-1))}; do
-                buf+="."
-            done
-            buf+="^"
-            i=$((i+1))
-        done
-        BUFFER+="$buf"
-        region_highlight=($reg)
-        # y and x on the text part of the screen
-        local curs_y=$(( wsedit_row - line_from ))
-        local curs_x=$(( wsedit_col - 1 - x_from ))
-        if [[ $curs_x -lt 0 ]]; then
-            curs_x=0
-        fi
-        if [[ $curs_x -gt $(( wsedit_scols - 1 )) ]]; then
-            curs_x=$(( wsedit_scols - 1 ))
-        fi
+    # TODO: by-line loop: line_from..line_to
+    ws-debug WSEDIT_MKFUL: line_from=$line_from line_to=$line_to
+    local curr_pos=$(wstxtfun-line2pos $line_from "$wsedit_text")
+    local i=$line_from
+    while [[ $i -le $line_to ]]; do
+        ws-debug WSEDIT_MKFUL: i=$i
 
-        CURSOR=$(( wsedit_begin + wsedit_scols * curs_y + curs_x - 1 ))
-        PROMPT="$prompt"
+        # isolate current line
+        local i_text=""
+        if [[ $i -lt $line_to ]]; then
+            local next_pos=$(wstxtfun-line2pos $((i+1)) "$wsedit_text")
+            i_text=$wsedit_text[curr_pos,next_pos-2]
+            ws-debug WSEDIT_MKFUL: i=$i curr_pos=$curr_pos next_pos=$next_pos
+            curr_pos=$next_pos
+        else
+            i_text=$wsedit_text[curr_pos,${#wsedit_text}]
+            ws-debug WSEDIT_MKFUL: last line: i=$i
+        fi
+        ws-debug WSEDIT_MKFUL: i=$i i_text=\"$i_text\"
+        i=$((i+1))
+    done
+
+#    PROMPT="$prompt"
+#        while true; do
+#            local char=$wsedit_text[i]
+#            if [[ $x -eq $x_to ]]; then
+#                buf+="+"
+#                line_len=0
+#                x=-1
+#                while [[ ! "$wsedit_text[i]" = $'\n' && $i -le $tlen ]]; do
+#                    i=$((i+1))
+#                done
+#                if [[ $i -gt $tlen ]]; then
+#                    break
+#                else
+#                    line_counter=$((line_counter+1))
+#                fi
+#            elif [[ "$char" = $'\n' || $i -gt $tlen ]]; then
+#                if [[ -n "$wsedit_blockvis" ]]; then
+#                    local r=$(line_highlight $lnchr "$wsedit_text[i-line_len,i]" \
+#                            $((line_counter+line_from-1)) \
+#                            $wsedit_scols $wsedit_xscroll \
+#                           "$wsedit_brow" "$wsedit_bcol" \
+#                           "$wsedit_krow" "$wsedit_kcol" \
+#                           "$wsedit_blockcolmode")
+#                    reg+=("$r")
+#                    
+#                fi
+#                lnchr=$((lnchr+wsedit_scols))
+#                if [[ $wsedit_scols -gt $line_len ]]; then
+#                    for j in {1..$((wsedit_scols-line_len-1))}; do
+#                        buf+=" "
+#                    done
+#                fi
+#                if [[ $line_counter -le $((line_to-line_from)) ]]; then
+#                    buf+="<"
+#                elif [[ $((line_counter+wsedit_yscroll)) -eq $wsedit_tlines ]]; then
+#                    buf+="^"
+#                    break
+#                else
+#                    buf+="<"
+#                    break
+#                fi
+#                line_len=0
+#                x=-1
+#                line_counter=$((line_counter+1))
+#            elif [[ $x -ge $x_from && $x -lt $x_to ]]; then
+#                buf+="$char"
+#                line_len=$((line_len+1))
+#            fi
+#            i=$((i+1))
+#            x=$((x+1))
+#        done
+#        i=1
+#        local empty_lines=$((wsedit_slines-wsedit_tlines-1))
+#        while [[ $i -le $empty_lines ]]; do
+#            for j in {1..$((wsedit_scols-1))}; do
+#                buf+="."
+#            done
+#            buf+="^"
+#            i=$((i+1))
+#        done
+#        BUFFER+="$buf"
+#        region_highlight=($reg)
+#        # y and x on the text part of the screen
+#        local curs_y=$(( wsedit_row - line_from ))
+#        local curs_x=$(( wsedit_col - 1 - x_from ))
+#        if [[ $curs_x -lt 0 ]]; then
+#            curs_x=0
+#        fi
+#        if [[ $curs_x -gt $(( wsedit_scols - 1 )) ]]; then
+#            curs_x=$(( wsedit_scols - 1 ))
+#        fi
+#
+#        CURSOR=$(( wsedit_begin + wsedit_scols * curs_y + curs_x - 1 ))
+#        PROMPT="$prompt"
 }
 
 # overwrite area between 0 and $wsedit_begin with an updated header
