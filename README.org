@@ -74,10 +74,16 @@ options? if so test different sizes)
  + tabs are seen as 8 spaces
 Tabs are included if partially included on the left side, but on the right
 they are included only if selected completely.
+ + launch wsedit as an application (runable command / script)
+ + pipe to runable command: read text from standard input and put into
+wsedit.
+ 
 
 ** prompt
  + Directory aliases
  + Directory alias completion (alias completion + subpath completion)
+ + Fix directory aliases
+ + jump to alias without ~cd~
 
 ** Marks
 [DONE]
