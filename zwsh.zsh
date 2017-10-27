@@ -11,6 +11,16 @@ if [[ ! -d "$ZWSHDIR" ]]; then
     exit
 fi
 
+# debug file: contains the definition debug output file name
+# If such file does not exist, do not use debuging.
+# This file is gitignored in order to prevent useless file modifications and
+# commits.
+# See function zwdbg in wsfun for information on switch on and off
+# debugging.
+if [[ -f "$srcdir/wsdebug-tty.zsh" ]]; then
+    source "$srcdir/wsdebug-tty.zsh"
+fi
+
 # completion settings
 zstyle ':completion:*:default' menu no-select
 #unsetopt auto_menu

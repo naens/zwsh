@@ -167,10 +167,49 @@ ws-printvar() {
 # debug
 ws-debug() {
     local debug_string="$@"
-#    ws_debugfile=/dev/pts/3
-    ws_debugfile=/dev/null
-    echo "$debug_string" > "$ws_debugfile"
+    if [[ -n "$ws_debugfile" ]]; then
+        if [[ ! -f "$ws_debugfile ]]; then
+           unset ws_debugfile
+        else
+            echo "$debug_string" > "$ws_debugfile"
+        fi
+    fi
 }
+
+# switch debug on and off from command line
+zwdbg() {
+    local param=$1
+    local debvar="ws_debugfile"
+    local debugfn="$srcdir/wsdebug-tty.zsh"
+    if [[ -z "$param" ]]; then
+        if [[ ! -f "$debugfn" ]]; then
+            param=on
+            echo setting zw debug on
+        else
+            local debug_file=$(cat "$debugfn")
+            if [[ "$debug_file" = "$debvar=/dev/null" ]]; then
+                param=on
+                echo setting zw debug on
+            else
+                echo debug_file="$debug_file"
+                param=off
+                echo setting zw debug off
+            fi
+        fi
+    fi
+    local outfn=""
+    if [[ "$param" = on ]]; then
+        outfn=$(tty)
+    elif [[ "$param" = off ]]; then
+        outfn=/dev/null
+    else
+        echo usage $0 '<on|off>'
+        return
+    fi
+    echo "$debvar=$outfn" > "$debugfn"
+    source "$debugfn"
+}
+
 
 ws-min() {
     if [[ "$1" -lt "$2" ]]; then
