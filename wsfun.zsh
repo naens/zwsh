@@ -168,8 +168,9 @@ ws-printvar() {
 ws-debug() {
     local debug_string="$@"
     if [[ -n "$ws_debugfile" ]]; then
-        if [[ ! -f "$ws_debugfile ]]; then
-           unset ws_debugfile
+        if [[ ! -w "$ws_debugfile" ]]; then
+            echo debug file not exist: $ws_debugfile
+            unset ws_debugfile
         else
             echo "$debug_string" > "$ws_debugfile"
         fi
@@ -191,7 +192,7 @@ zwdbg() {
                 param=on
                 echo setting zw debug on
             else
-                echo debug_file="$debug_file"
+                echo debug_file: \""$debug_file"\"
                 param=off
                 echo setting zw debug off
             fi
@@ -207,6 +208,7 @@ zwdbg() {
         return
     fi
     echo "$debvar=$outfn" > "$debugfn"
+#    eval "$debvar=$outfn"
     source "$debugfn"
 }
 
