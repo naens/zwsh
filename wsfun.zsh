@@ -169,7 +169,6 @@ ws-debug() {
     local debug_string="$@"
     if [[ -n "$ws_debugfile" ]]; then
         if [[ ! -w "$ws_debugfile" ]]; then
-            echo debug file not exist: $ws_debugfile
             unset ws_debugfile
         else
             echo "$debug_string" > "$ws_debugfile"
