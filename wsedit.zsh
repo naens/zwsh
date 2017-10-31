@@ -153,6 +153,9 @@ ws-edit() {
     wsedit_saved_keymap=$KEYMAP
     wsedit_begin=0     # no header yet
 
+    # don't know if it can be changed, if so, must be replaced
+    wsedit_tabwidth=8
+
     wsedit_fullscreen=false
     zle -K wsedit
 
@@ -321,16 +324,24 @@ wsedit-mkful() {
             vis=$wsedit_blockvis col=$wsedit_blockcolmode
     if [[ -n "$b_pos" ]]; then
         read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $b_pos "$wsedit_text")
+        local bp=$(wstxtfun-line-start $b_pos "$wsedit_text")
+        wsedit_bcol=$(wstxtfun-real-col $wsedit_bcol $wsedit_tabwidth \
+        		 "$wsedit_text[$bp,${#wsedit_text}]")
     else
         unset wsedit_brow
         unset wsedit_bcol
     fi
     if [[ -n "$k_pos" ]]; then
         read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $k_pos "$wsedit_text")
+        local kp=$(wstxtfun-line-start $kpos "$wsedit_text")
+        wsedit_kcol=$(wstxtfun-real-col $wsedit_kcol $wsedit_tabwidth \
+        		 "$wsedit_text[$kp,${#wsedit_text}]")
     else
         unset wsedit_krow
         unset wsedit_kcol
     fi
+ 
+    # TODO: convert bcol and kcol to columns on display (expand tabs)
 
     ws-debug WSEDIT_MKFUL: brow=$wsedit_brow bcol=$wsedit_bcol \
                            krow=$wsedit_krow kcol=$wsedit_kcol
@@ -386,20 +397,23 @@ wsedit-mkful() {
     local curr_pos=$(wstxtfun-line2pos $line_from "$wsedit_text")
     local i=$line_from
     while [[ $i -le $line_to ]]; do
-        ws-debug WSEDIT_MKFUL: i=$i
+#        ws-debug WSEDIT_MKFUL: i=$i
 
-        # isolate current line
+        # get text line
         local i_text=""
         if [[ $i -lt $line_to ]]; then
             local next_pos=$(wstxtfun-line2pos $((i+1)) "$wsedit_text")
             i_text=$wsedit_text[curr_pos,next_pos-2]
-            ws-debug WSEDIT_MKFUL: i=$i curr_pos=$curr_pos next_pos=$next_pos
-            curr_pos=$next_pos
+#            ws-debug WSEDIT_MKFUL: i=$i curr_pos=$curr_pos next_pos=$next_pos
         else
             i_text=$wsedit_text[curr_pos,${#wsedit_text}]
-            ws-debug WSEDIT_MKFUL: last line: i=$i
+#            ws-debug WSEDIT_MKFUL: last line: i=$i
         fi
-        ws-debug WSEDIT_MKFUL: i=$i i_text=\"$i_text\"
+        ws-debug WSEDIT_MKFUL: i=$i pos=$curr_pos i_text=\"$i_text\"
+
+	# make line as it will be displayed
+
+        curr_pos=$next_pos
         i=$((i+1))
     done
 
