@@ -121,6 +121,24 @@ wstxtfun-line-start() {
     echo $i
 }
 
+
+wstxtfun-real-col() {
+    local col=$1
+    local tabwidth=$2
+    local text="$3"
+    local res=1
+    #123456781234567812345678
+    #..........X<--->
+    for i in {1..$col}; do
+    	if [[ "$text[i]" = $'\t' ]]; then
+    	    res=$((res+tabwidth-res%tabwidth))
+    	else
+    	    res=$((res+1))
+    	fi
+    done
+    echo $res
+}
+
 wstxtfun-line-end() {
     local pos=$1
     local text="$2"
