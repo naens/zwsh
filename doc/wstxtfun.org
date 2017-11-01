@@ -1,0 +1,65 @@
+#+TITLE: wstxtfun unit
+* About this module
+This module contains general utilities for working with text, such as
+finding a row/column given a position in text or the position of the start
+of the current line.
+
+This unit is used by different functions and can be used in different
+places.
+
+* Function description
+
+** wstxtfun-pos
+
+** wstxtfun-yx-pos
+
+** wstxtfun-prev-printable
+
+** wstxtfun-next-printable
+
+** wstxtfun-prev-word
+
+** wstxtfun-next-word
+
+** wstxtfun-end-word
+
+** wstxtfun-line-start
+
+** wstxtfun-real-col
+
+*** Parameters
+ + *pos*: position in text
+ + *tabwidth*: the width of the tab
+ + *text*: text
+	
+*** Description
+Get the position the cursor would have if tabs are expanded to spaces.  A
+newline character resets the character count for the line.
+
+** Return value
+Returns the position the of the cursor it tabs were expanded.  If *pos*
+argument is greater than the length of the text input, then the position of
+the last character of the text is returned.
+
+
+** wstxtfun-line-end
+
+** wstxtfun-line2pos
+
+** wstxtfun-nlines
+
+** wstxtfun-pos2line
+
+** wstxtfun-line-len
+
+** wstxtfun-line-last-pos
+
+** wstxtfun-prev-sentence
+
+** wstxtfun-next-sentence
+
+** wstxtfun-sentence-pos
+
+** wstxtfun-prev-paragraph
+
+** wstxtfun-next-paragraph
