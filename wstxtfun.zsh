@@ -126,12 +126,17 @@ wstxtfun-real-col() {
     local col=$1
     local tabwidth=$2
     local text="$3"
+    local textlen=${#text}
+    if [[ "$col" -gt $textlen ]]; then
+        echo $textlen
+        return
+    fi
     local res=0
-    #123456781234567812345678
-    #..........X<--->
     for i in {1..$col}; do
     	if [[ "$text[i]" = $'\t' ]]; then
     	    res=$((res+tabwidth-res%tabwidth))
+    	elif [[ "$text[i]" = $'\n' ]]; then
+    	    res=0
     	else
     	    res=$((res+1))
     	fi
