@@ -5,7 +5,7 @@ finding a row/column given a position in text or the position of the start
 of the current line.
 
 This unit is used by different functions and can be used in different
-places.
+places.  These functions return values through echo, by printing into stdin.
 
 * Function description
 
@@ -36,10 +36,10 @@ places.
 Get the position the cursor would have if tabs are expanded to spaces.  A
 newline character resets the character count for the line.
 
-** Return value
-Returns the position the of the cursor it tabs were expanded.  If *pos*
+*** Return value
+Prints the position the of the cursor it tabs were expanded.  If *pos*
 argument is greater than the length of the text input, then the position of
-the last character of the text is returned.
+the last character of the text is printed.
 
 
 ** wstxtfun-line-end
