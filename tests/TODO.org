@@ -1,0 +1,101 @@
+#+TITLE: Tasks to be done for tests
+
+* Introduction
+
+Each function must be described and tested (if needed).
+
+* Modules
+
+** TODO wsblock
+
+
+** TODO wsdfopen
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsdfsave
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsdialog
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsedit
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsfind
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsfun
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wskeys
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wsline
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wstext
+ - [ ] list functions
+ - [ ] document functions
+ - [ ] test functions
+
+** TODO wstxtfun
+ - [X] list functions
+ - [-] document functions
+   - [ ] wstxtfun-pos
+   - [ ] wstxtfun-yx-pos
+   - [ ] wstxtfun-prev-printable
+   - [ ] wstxtfun-next-printable
+   - [ ] wstxtfun-prev-word
+   - [ ] wstxtfun-next-word
+   - [ ] wstxtfun-end-word
+   - [ ] wstxtfun-line-start
+   - [X] wstxtfun-real-col
+   - [ ] wstxtfun-line-end
+   - [ ] wstxtfun-line2pos
+   - [ ] wstxtfun-nlines
+   - [ ] wstxtfun-pos2line
+   - [ ] wstxtfun-line-len
+   - [ ] wstxtfun-line-last-pos
+   - [ ] wstxtfun-prev-sentence
+   - [ ] wstxtfun-next-sentence
+   - [ ] wstxtfun-sentence-pos
+   - [ ] wstxtfun-prev-paragraph
+   - [ ] wstxtfun-next-paragraph
+ - [-] test functions
+   - [ ] wstxtfun-pos
+   - [ ] wstxtfun-yx-pos
+   - [ ] wstxtfun-prev-printable
+   - [ ] wstxtfun-next-printable
+   - [ ] wstxtfun-prev-word
+   - [ ] wstxtfun-next-word
+   - [ ] wstxtfun-end-word
+   - [ ] wstxtfun-line-start
+   - [X] wstxtfun-real-col
+   - [ ] wstxtfun-line-end
+   - [ ] wstxtfun-line2pos
+   - [ ] wstxtfun-nlines
+   - [ ] wstxtfun-pos2line
+   - [ ] wstxtfun-line-len
+   - [ ] wstxtfun-line-last-pos
+   - [ ] wstxtfun-prev-sentence
+   - [ ] wstxtfun-next-sentence
+   - [ ] wstxtfun-sentence-pos
+   - [ ] wstxtfun-prev-paragraph
+   - [ ] wstxtfun-next-paragraph
+
