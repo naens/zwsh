@@ -341,8 +341,6 @@ wsedit-mkful() {
         unset wsedit_kcol
     fi
  
-    # TODO: convert bcol and kcol to columns on display (expand tabs)
-
     ws-debug WSEDIT_MKFUL: brow=$wsedit_brow bcol=$wsedit_bcol \
                            krow=$wsedit_krow kcol=$wsedit_kcol
 
@@ -392,10 +390,16 @@ wsedit-mkful() {
 #    local lnchr=$wsedit_begin
 #    local reg=()
 
-    # TODO: by-line loop: line_from..line_to
     ws-debug WSEDIT_MKFUL: line_from=$line_from line_to=$line_to
     local curr_pos=$(wstxtfun-line2pos $line_from "$wsedit_text")
     local i=$line_from
+
+    # By-line loop
+    # for each line
+    # + get line to display (expand tabs and blocks)
+    # + add to buffer from x_from to x_to
+    # + add block from x_from to x_to
+    # + add space and end of line character
     while [[ $i -le $line_to ]]; do
 #        ws-debug WSEDIT_MKFUL: i=$i
 
