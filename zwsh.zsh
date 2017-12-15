@@ -135,9 +135,9 @@ function collapse_pwd
 
 setopt PROMPT_SUBST
 if (($EUID != 0)); then
-    export PROMPT='$(collapse_pwd)>'
+    export PROMPT=$'\n''$(collapse_pwd)>'
 else
-    export PROMPT='$(collapse_pwd)# '
+    export PROMPT=$'\n''$(collapse_pwd)# '
 fi
 
 
