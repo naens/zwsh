@@ -135,9 +135,9 @@ function collapse_pwd
 
 setopt PROMPT_SUBST
 if (($EUID != 0)); then
-    export PROMPT=$'\n''$(collapse_pwd)>'
+    export PROMPT='$(collapse_pwd)>'
 else
-    export PROMPT=$'\n''$(collapse_pwd)# '
+    export PROMPT='$(collapse_pwd)# '
 fi
 
 
@@ -153,5 +153,11 @@ HISTFILE=~/.zsh_history
 # Remember about a years worth of history (AWESOME)
 SAVEHIST=10000
 HISTSIZE=10000
+
+# Load user file
+userfile=~/.zwrc
+if [[ -f $userfile ]]; then
+    . $userfile
+fi
 
 bindkey -A wskeys main
