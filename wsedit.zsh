@@ -398,10 +398,10 @@ wsedit-mkful() {
     # for each line
     # + get line to display (expand tabs and blocks)
     # + add to buffer from x_from to x_to
-    # + add block from x_from to x_to
+    # + add block highlight from x_from to x_to
     # + add space and end of line character
     while [[ $i -le $line_to ]]; do
-#        ws-debug WSEDIT_MKFUL: i=$i
+        ws-debug WSEDIT_MKFUL: i=$i pos=$curr_pos
 
         # get text line
         local i_text=""
@@ -409,15 +409,21 @@ wsedit-mkful() {
             local next_pos=$(wstxtfun-line2pos $((i+1)) "$wsedit_text")
             i_text=$wsedit_text[curr_pos,next_pos-2]
 #            ws-debug WSEDIT_MKFUL: i=$i curr_pos=$curr_pos next_pos=$next_pos
+            curr_pos=$next_pos
         else
             i_text=$wsedit_text[curr_pos,${#wsedit_text}]
 #            ws-debug WSEDIT_MKFUL: last line: i=$i
         fi
-        ws-debug WSEDIT_MKFUL: i=$i pos=$curr_pos i_text=\"$i_text\"
+        ws-debug WSEDIT_MKFUL: i_text=\"$i_text\"
 
-	# make line as it will be displayed
+        # make line as it will be displayed
 
-        curr_pos=$next_pos
+        # add line to buffer
+
+        # add highlight
+
+        # add right margin end of line characters
+
         i=$((i+1))
     done
 
