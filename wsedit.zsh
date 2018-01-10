@@ -310,15 +310,40 @@ wsedit-mkprt() {
 # transform line for display on screen:
 # -> expand tabs
 # -> add <B> / <K> when if needed
+# insert <B> / <K>:
+#   if block visible AND brow,krow = current AND
+#       if only one, but not the other
+#       in normal mode: if bpos >= kpos
+#       in column mode: if bcol >= kcol
 wsedit-make-line() {
     local text="$1"
+    local row=$2
     local result=""
     local i=1
     local len=${#text}
-    # $wsedit_tabwidth
+    local showbk="false"
+    if [[ "$wsedit_blockvis" = "true" ]]; then
+        if [[ -n $wsedit_bcol && -z $wsedit_kcol ]]; then
+            showbk=true 
+        elif [[ -z $wsedit_bcol && -n $wsedit_kcol ]]; then
+            showbk=true 
+        elif [[ -n $wsedit_bcol && -n $wsedit_kcol ]]; then
+            if [[ "$wsedit_blockcolmode" = "true" ]]; then
+                local bpos=${wsedit_marks[B]}
+                local kpos=${wsedit_marks[K]}
+                if [[ $bpos -ge $kpos ]]; then
+                    showbk=true
+                fi
+            else
+                if [[ $wsedit_bcol -ge $wsedit_kcol ]]; then
+                    showbk=true
+                fi
+            fi
+        fi
+    fi
+    ws-debug WSEDIT_MAKE_LINE: showbk=$showbk
     while [[ $i -le $len ]]; do
         if [[ $text[i] = $'\t' ]]; then
-            # insert 8-i%8 tabs
             repeat $((wsedit_tabwidth-i%wsedit_tabwidth)) result+=' '
         fi
         result+=$text[i]
@@ -437,7 +462,7 @@ wsedit-mkful() {
         ws-debug WSEDIT_MKFUL: i_text=\"$i_text\"
 
         # make line as it will be displayed
-        i_text=$(wsedit-make-line "$i_text")
+        i_text=$(wsedit-make-line "$i_text" $i)
 
         # add line to buffer
 
