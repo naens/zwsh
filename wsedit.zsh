@@ -307,6 +307,26 @@ wsedit-mkprt() {
     fi
 }
 
+# transform line for display on screen:
+# -> expand tabs
+# -> add <B> / <K> when if needed
+wsedit-make-line() {
+    local text="$1"
+    local result=""
+    local i=1
+    local len=${#text}
+    # $wsedit_tabwidth
+    while [[ $i -le $len ]]; do
+        if [[ $text[i] = $'\t' ]]; then
+            # insert 8-i%8 tabs
+            repeat $((wsedit_tabwidth-i%wsedit_tabwidth)) result+=' '
+        fi
+        result+=$text[i]
+        i=$((i+1))
+    done
+    echo "$result"
+}
+
 wsedit-mkful() {
     ws-debug WSEDIT_MKFUL: row=$wsedit_row col=$wsedit_col \
                            slines=$wsedit_slines scols=$wsedit_scols \
@@ -417,6 +437,7 @@ wsedit-mkful() {
         ws-debug WSEDIT_MKFUL: i_text=\"$i_text\"
 
         # make line as it will be displayed
+        i_text=$(wsedit-make-line "$i_text")
 
         # add line to buffer
 
