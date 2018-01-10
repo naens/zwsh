@@ -459,11 +459,11 @@ wstext-delete() {
     wstext-marks-move-delete $from $((to-from+1))
 
     if [[ $from -eq 0 ]]; then
-        if [[ $to -lt $((text_len-1)) ]]; then
+        if [[ $to -lt $((text_len)) ]]; then
             ws-defvar $wstext_textvar "$text[to+1,text_len]"
         fi
     else
-        if [[ $to -eq $((text_len-1)) ]]; then
+        if [[ $to -eq $((text_len)) ]]; then
             ws-defvar $wstext_textvar "$text[1,from-1]"
         else
             ws-defvar $wstext_textvar "$text[1,from-1]$text[to+1,text_len]"
