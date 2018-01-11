@@ -254,20 +254,20 @@ wsedit-mkhdr() {
 
 
 wsedit-marks-order() {
-    local b_pos=${wsedit_marks[B]}
-    local k_pos=${wsedit_marks[K]}
+    local bpos=${wsedit_marks[B]}
+    local kpos=${wsedit_marks[K]}
 
-    if [[ -n "$b_pos" && -n "$k_pos" ]]; then
-        if [[ $b_pos -eq $k_pos ]]; then
+    if [[ -n "$bpos" && -n "$kpos" ]]; then
+        if [[ $bpos -eq $kpos ]]; then
             echo B K
-        elif [[ $b_pos -lt $k_pos ]]; then
+        elif [[ $bpos -lt $kpos ]]; then
             echo B K +
         else
             echo K B
         fi
-    elif [[ -n "$b_pos" ]]; then
+    elif [[ -n "$bpos" ]]; then
         echo B
-    elif [[ -n "$k_pos" ]]; then
+    elif [[ -n "$kpos" ]]; then
         echo K
     fi
 }
@@ -321,30 +321,48 @@ wsedit-make-line() {
     local result=""
     local i=1
     local len=${#text}
-    local showbk="false"
+    ws-debug WSEDIT_MAKE_LINE: text="$text" row="$row" len="$len"
+
+    # showb,showk = <B>,<K> should be displayed
+    local showb="false"
+    local showk="false"
     if [[ "$wsedit_blockvis" = "true" ]]; then
         if [[ -n $wsedit_bcol && -z $wsedit_kcol ]]; then
-            showbk=true 
+            showb="true"
         elif [[ -z $wsedit_bcol && -n $wsedit_kcol ]]; then
-            showbk=true 
+            showk="true"
         elif [[ -n $wsedit_bcol && -n $wsedit_kcol ]]; then
             if [[ "$wsedit_blockcolmode" = "true" ]]; then
                 local bpos=${wsedit_marks[B]}
                 local kpos=${wsedit_marks[K]}
                 if [[ $bpos -ge $kpos ]]; then
-                    showbk=true
+                    showb="true"
+                    showk="true"
                 fi
             else
                 if [[ $wsedit_bcol -ge $wsedit_kcol ]]; then
-                    showbk=true
+                    showb="true"
+                    showk="true"
                 fi
             fi
         fi
     fi
-    ws-debug WSEDIT_MAKE_LINE: showbk=$showbk
+
+#    ws-debug WSEDIT_MAKE_LINE: showb=$showb showk=$showk row=$row brow=$wsedit_brow krow=$wsedit_krow
+
     while [[ $i -le $len ]]; do
         if [[ $text[i] = $'\t' ]]; then
             repeat $((wsedit_tabwidth-i%wsedit_tabwidth)) result+=' '
+        fi
+        if [[ "$showb" = "true" && $row -eq $wsedit_brow
+          && $i -eq $wsedit_bcol ]]; then
+            result+="<B>"
+#            ws-debug WSEDIT_MAKE_LINE: '<B>' res=$result
+        fi
+        if [[ "$showk" = "true" && $row -eq $wsedit_krow 
+          && $i -eq $wsedit_kcol ]]; then
+            result+="<K>"
+#            ws-debug WSEDIT_MAKE_LINE: '<K>' res=$result
         fi
         result+=$text[i]
         i=$((i+1))
@@ -361,26 +379,27 @@ wsedit-mkful() {
     ## define wsedit variables ##
 
     # wsblock variables #
-    local b_pos=${wsedit_marks[B]}
-    local k_pos=${wsedit_marks[K]}
+    local bpos=${wsedit_marks[B]}
+    local kpos=${wsedit_marks[K]}
     # $wsedit_blockvis: defined if block visible
     # $wsedit_blockcolmode: defined if column mode
-    ws-debug WSEDIT_REFRESH b_pos=$b_pos k_pos=$k_pos \
+    ws-debug WSEDIT_REFRESH bpos=$bpos kpos=$kpos \
             vis=$wsedit_blockvis col=$wsedit_blockcolmode
-    if [[ -n "$b_pos" ]]; then
-        read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $b_pos "$wsedit_text")
-        local bp=$(wstxtfun-line-start $b_pos "$wsedit_text")
+    if [[ -n "$bpos" ]]; then
+        read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $bpos "$wsedit_text")
+        local bp=$(wstxtfun-line-start $bpos "$wsedit_text")
         wsedit_bcol=$(wstxtfun-real-col $wsedit_bcol $wsedit_tabwidth \
-        		 "$wsedit_text[$bp,${#wsedit_text}]")
+        		 "$wsedit_text[bp,${#wsedit_text}]")
     else
         unset wsedit_brow
         unset wsedit_bcol
     fi
-    if [[ -n "$k_pos" ]]; then
-        read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $k_pos "$wsedit_text")
+    if [[ -n "$kpos" ]]; then
+        read wsedit_krow wsedit_kcol <<< $(wstxtfun-pos $kpos "$wsedit_text")
         local kp=$(wstxtfun-line-start $kpos "$wsedit_text")
+        ws-debug "WSEDIT_MKFUL[!!]: wsedit_text=\"$wsedit_text\""
         wsedit_kcol=$(wstxtfun-real-col $wsedit_kcol $wsedit_tabwidth \
-        		 "$wsedit_text[$kp,${#wsedit_text}]")
+        		 "$wsedit_text[kp,${#wsedit_text}]")
     else
         unset wsedit_krow
         unset wsedit_kcol
@@ -459,10 +478,10 @@ wsedit-mkful() {
             i_text=$wsedit_text[curr_pos,${#wsedit_text}]
 #            ws-debug WSEDIT_MKFUL: last line: i=$i
         fi
-        ws-debug WSEDIT_MKFUL: i_text=\"$i_text\"
 
         # make line as it will be displayed
         i_text=$(wsedit-make-line "$i_text" $i)
+        ws-debug WSEDIT_MKFUL: i_text="\"$i_text\""
 
         # add line to buffer
 
