@@ -502,6 +502,6 @@ wskeys-pre-redraw() {
     if [[ -z "$ws_blockvis" ]]; then
         ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
         ws_curs=$CURSOR    
-        ws-updfn # temporary
+#        ws-updfn # temporary
     fi
 }
