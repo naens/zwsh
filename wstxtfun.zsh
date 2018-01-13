@@ -129,11 +129,12 @@ wstxtfun-real-col() {
     local textlen=${#text}
     if [[ "$col" = 0 ]]; then
     	echo 0
+        ws-debug WSTXTFUN_REAL_COL_A: col=$col res=0
     	return
     fi
     if [[ "$col" -gt $textlen ]]; then
         echo $textlen
-#        ws-debug WSTXTFUN_REAL_COL:early col=$col res=$textlen
+        ws-debug WSTXTFUN_REAL_COL_B: col=$col res=$textlen
         return
     fi
     local res=0
@@ -146,7 +147,7 @@ wstxtfun-real-col() {
     	    res=$((res+1))
     	fi
     done
-#    ws-debug WSTXTFUN_REAL_COL col=$col res=$res
+    ws-debug WSTXTFUN_REAL_COL_C col=$col res=$res
     echo $res
 }
 
