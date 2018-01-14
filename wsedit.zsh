@@ -307,25 +307,11 @@ wsedit-mkprt() {
     fi
 }
 
-# transform line for display on screen:
-# -> expand tabs
-# -> add <B> / <K> when if needed
-# insert <B> / <K>:
-#   if block visible AND brow,krow = current AND
-#       if only one, but not the other
-#       in normal mode: if bpos >= kpos
-#       in column mode: if bcol >= kcol
-wsedit-make-line() {
-    local text="$1"
-    local row=$2
-    local result=""
-    local len=${#text}
-#    ws-debug WSEDIT_MAKE_LINE: text="$text" row="$row" len="$len"
+wsedit-showbk() {
+    local row=$1
     local bpos=${wsedit_marks[B]}
     local kpos=${wsedit_marks[K]}
-    ws-debug WSEDIT_MAKE_LINE bpos=$bpos kpos=$kpos
 
-    # showb,showk = <B>,<K> should be displayed
     local showb="false"
     local showk="false"
     if [[ "$wsedit_blockvis" = "true" ]]; then
@@ -335,8 +321,6 @@ wsedit-make-line() {
             showk="true"
         elif [[ -n $wsedit_bcol && -n $wsedit_kcol ]]; then
             if [[ "$wsedit_blockcolmode" = "true" ]]; then
-                local bpos=${wsedit_marks[B]}
-                local kpos=${wsedit_marks[K]}
                 if [[ $bpos -ge $kpos ]]; then
                     showb="true"
                     showk="true"
@@ -349,26 +333,37 @@ wsedit-make-line() {
             fi
         fi
     fi
+    echo $showb $showk
+}
 
-#    ws-debug WSEDIT_MAKE_LINE: showb=$showb showk=$showk row=$row brow=$wsedit_brow krow=$wsedit_krow
+# transform line for display on screen:
+# -> expand tabs
+# -> add <B> / <K> when if needed
+# insert <B> / <K>:
+#   if block visible AND brow,krow = current AND
+#       if only one, but not the other
+#       in normal mode: if bpos >= kpos
+#       in column mode: if bcol >= kcol
+wsedit-make-line() {
+    local row=$1
+    local showb=$2
+    local showk=$3
+    local text="$4"
+    local result=""
+    local len=${#text}
 
     local i=0
     while [[ $i -le $len ]]; do # +1 to allow <B>/<K> after
-    	if [[ "$row" = "$wsedit_brow" ]]; then
-#            ws-debug char=$text[i] i=$i wsedit_bcol=$wsedit_bcol
-        fi
         if [[ $text[i+1] = $'\t' ]]; then
             repeat $((wsedit_tabwidth-i%wsedit_tabwidth)) result+=' '
         fi
         if [[ "$showb" = "true" && $row -eq $wsedit_brow
           && $i -eq $wsedit_bcol ]]; then
             result+="<B>"
-#            ws-debug WSEDIT_MAKE_LINE: '<B>' res=$result
         fi
         if [[ "$showk" = "true" && $row -eq $wsedit_krow 
           && $i -eq $wsedit_kcol ]]; then
             result+="<K>"
-#            ws-debug WSEDIT_MAKE_LINE: '<K>' res=$result
         fi
         if [[ $i -lt $len ]]; then
             result+=$text[i+1]
@@ -414,8 +409,8 @@ wsedit-mkful() {
         unset wsedit_kcol
     fi
  
-    ws-debug WSEDIT_MKFUL_3: brow=$wsedit_brow bcol=$wsedit_bcol \
-                           krow=$wsedit_krow kcol=$wsedit_kcol
+#    ws-debug WSEDIT_MKFUL_3: brow=$wsedit_brow bcol=$wsedit_bcol \
+#                           krow=$wsedit_krow kcol=$wsedit_kcol
 
 
     # wsedit scroll variables #
@@ -463,7 +458,6 @@ wsedit-mkful() {
 #    local lnchr=$wsedit_begin
 #    local reg=()
 
-#    ws-debug WSEDIT_MKFUL: line_from=$line_from line_to=$line_to
     local curr_pos=$(wstxtfun-line2pos $line_from "$wsedit_text")
     local i=$line_from
 
@@ -474,40 +468,64 @@ wsedit-mkful() {
     # + add block highlight from x_from to x_to
     # + add space and end of line character
     local sbuf=""
+    local curs=0
+    local screen_pos=$((${#BUFFER}+1))
     while [[ $i -le $line_to ]]; do
-#        ws-debug WSEDIT_MKFUL: i=$i pos=$curr_pos
-
         # get text line
         local i_text=""
         if [[ $i -lt $line_to ]]; then
             local next_pos=$(wstxtfun-line2pos $((i+1)) "$wsedit_text")
             i_text=$wsedit_text[curr_pos,next_pos-2]
-#            ws-debug WSEDIT_MKFUL: i=$i curr_pos=$curr_pos next_pos=$next_pos
-            curr_pos=$next_pos
         else
             i_text=$wsedit_text[curr_pos,${#wsedit_text}]
-#            ws-debug WSEDIT_MKFUL: last line: i=$i
+        fi
+
+        # calculate cursor row on screen
+        if [[ "$i" -eq "$wsedit_row" ]]; then
+            local col=$((wsedit_pos-curr_pos+1))
+            pos=$(wstxtfun-real-col $col $wsedit_tabwidth "$i_text")
+            if [[ $col -lt $x_from ]]; then
+                pos=0
+            fi
+            screen_pos=$((screen_pos+pos))
+        fi
+
+        # set position of <B> and <K> on the line
+        read showb showk <<< $(wsedit-showbk $i)
+        if [[ "$showb" = "true" && "$wsedit_bcol" -lt "$curs_pos"  ]]; then
+            curs=$((curs+3))
+        fi
+        if [[ "$showk" = "true" && "$wsedit_kcol" -lt "$curs_pos"  ]]; then
+            curs=$((curs+3))
         fi
 
         # make line as it will be displayed
-        i_text=$(wsedit-make-line "$i_text" $i)
-        ws-debug WSEDIT_MKFUL: i_text="\"$i_text\""
+        i_text=$(wsedit-make-line $i $showb $showk "$i_text")
 
         # add line to buffer
         local line_len=${#i_text}
         local line_rlen=$((x_from>line_len?0:line_len-x_from))
         local display_len=$((line_rlen>wsedit_scols?wsedit_scols:line_rlen))
         local sub_text=$i_text[x_from,x_from+display_len]
-        sbuf+="$sub_text"$'\n'
-        
+        sbuf+="$sub_text" # $'\n'
 
         # add highlight
 
         # add right margin end of line characters
+        if [[ $line_len -lt $((wsedit_scols-1)) ]]; then
+            repeat $((wsedit_scols-line_len-1)) sbuf+='_'
+            sbuf+='#'
+        fi
 
+        if [[ $i -lt $wsedit_row ]] then
+            screen_pos=$((screen_pos+wsedit_scols))
+        fi
+        curr_pos=$next_pos
         i=$((i+1))
     done
-    BUFFER+=$'\n'"$sbuf"$'\n'
+
+    BUFFER+=$'\n'"$sbuf"
+    CURSOR=$screen_pos
 
 #    PROMPT="$prompt"
 #        while true; do
