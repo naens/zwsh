@@ -284,14 +284,15 @@ zle -N ws-kn
 bindkey -M wskeys "^Kn" ws-kn
 bindkey -M wskeys "^KN" ws-kn
 ws-kn() {
-    local vis = ${(P)wstext_blockvisvar}
+    local vis=${(P)wstext_blockvisvar}
     if [[ -n "$vis"  && -n "$wstext_blockcolmodevar" ]]; then
-        local colmode = ${(P)wstext_blockcolmodevar}
+        local colmode=${(P)wstext_blockcolmodevar}
         if [[ -n "$colmode" ]]; then
             eval "unset $wstext_blockcolmodevar"
         else
             eval "$wstext_blockcolmodevar=true"
         fi
+        wstext-upd
     fi
 }
 

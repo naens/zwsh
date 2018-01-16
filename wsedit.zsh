@@ -21,7 +21,7 @@ bindkey -M wsedit "^E" wsedit-prev-line
 wsedit-jump-lines-keepcol() {
     local n=$1
 
-    read showb showk <<< $(wsedit-showbk $wsedit_row)
+    read showb showk showblock <<< $(wsedit-showbk $wsedit_row)
 
     local src_shift=0
     # calculate the shift on the source line
@@ -342,6 +342,8 @@ wsedit-mkprt() {
     fi
 }
 
+# tells whether <B>, <K> should be displayed on the row
+# and whether this line should be highlighted
 wsedit-showbk() {
     local row=$1
     local bpos=${wsedit_marks[B]}
@@ -349,24 +351,27 @@ wsedit-showbk() {
 
     local showb="false"
     local showk="false"
+    local showblock="false"
     if [[ "$wsedit_blockvis" = "true" ]]; then
-    	ws-debug a wsedit_bcol=$wsedit_bcol
         if [[ -n $wsedit_bcol && -z $wsedit_kcol ]]; then
-    	ws-debug b
             showb="true"
         elif [[ -z $wsedit_bcol && -n $wsedit_kcol ]]; then
             showk="true"
         elif [[ -n $wsedit_bcol && -n $wsedit_kcol ]]; then
-    	ws-debug c
             if [[ "$wsedit_blockcolmode" = "true" ]]; then
-                if [[ $bpos -ge $kpos ]]; then
+                if [[ $wsedit_bcol -ge $wsedit_kcol
+                  || $wsedit_brow -gt $wsedit_krow ]]; then
                     showb="true"
                     showk="true"
+                elif [[ $row -ge $wsedit_brow && $row -le $wsedit_krow ]]; then
+                    showblock="true"
                 fi
             else
                 if [[ $bpos -ge $kpos ]]; then
                     showb="true"
                     showk="true"
+                elif [[ $row -ge $wsedit_brow && $row -le $wsedit_krow ]]; then
+                    showblock="true"
                 fi
             fi
         fi
@@ -377,7 +382,7 @@ wsedit-showbk() {
     if [[ $wsedit_krow -ne $row ]]; then
         showk="false"
     fi
-    echo $showb $showk
+    echo $showb $showk $showblock
 }
 
 # transform line for display on screen:
@@ -549,7 +554,8 @@ wsedit-mkful() {
         fi
 
         # set position of <B> and <K> on the line
-        read showb showk <<< $(wsedit-showbk $i)
+        read showb showk showblock <<< $(wsedit-showbk $i)
+        ws-debug WSEDIT_MKFUL: showb=$showb showk=$showk showblock=$showblock
         ws-debug WSEDIT_MKFUL i=$i showb=$showb showk=$showk
         local bshift=0
         if [[ "$showb" = "true" ]]; then
@@ -558,7 +564,7 @@ wsedit-mkful() {
                 bshift=3
             fi
             local screen_bcol=$((line_start+bcol-x_from+bshift))
-            reg+=("$screen_bcol $((screen_bcol+3)) $newcurs standout")
+            reg+=("$screen_bcol $((screen_bcol+3)) standout")
             if [[ $wsedit_row -eq $brow
               && $bcol -le $real_col ]]; then
                 curs=$((curs+3))
@@ -566,7 +572,7 @@ wsedit-mkful() {
         fi
         if [[ "$showk" = "true" ]]; then
             local screen_kcol=$((line_start+kcol-x_from))
-            reg+=("$screen_kcol $((screen_kcol+3)) $newcurs standout")
+            reg+=("$screen_kcol $((screen_kcol+3)) standout")
             if [[ $wsedit_row -eq $krow
               && $kcol -le $real_col ]]; then
                 curs=$((curs+3))
@@ -575,15 +581,44 @@ wsedit-mkful() {
 
         # make line as it will be displayed
         i_text=$(wsedit-make-line $i $showb $showk "$i_text")
+        local line_len=${#i_text}
+
+	# highlight part of text
+	ws-debug WSEDIT_MKFUL: showblock=$showblock
+        if [[ "$showblock" = "true" ]]; then
+            local hfrom=0
+            local hto=0
+            local rlim=$(ws-min $((x_from+wsedit_scols)) $line_len)
+            if [[ "$wsedit_blockcolmode" = "true" ]]; then
+                hfrom=$wsedit_bcol
+                hto=$wsedit_kcol
+            else
+                if [[ $wsedit_brow -eq $i ]]; then
+                    hfrom=$wsedit_bcol
+                else
+                    hfrom=0
+                fi
+                if [[ $wsedit_krow -eq $i ]]; then
+                    hto=$wsedit_kcol
+                else
+                    hto=$rlim
+                fi
+            fi
+            ws-debug line_start=$line_start x_from=$x_from rlim=$rlim
+            ws-debug hfrom0=$hfrom hto0=$hto
+            if [[ $hto -ge $x_from || $hfrom -le $rlim ]]; then
+                hfrom=$(($(ws-lim $hfrom $x_from $rlim)+line_start))
+                hto=$(($(ws-lim $hto $x_from $rlim)+line_start))
+                ws-debug hfrom=$hfrom hto=$hto
+                reg+=("$hfrom $hto standout")
+            fi
+        fi
 
         # add line to buffer
-        local line_len=${#i_text}
         local line_rlen=$((x_from>line_len?0:line_len-x_from))
         local display_len=$((line_rlen>wsedit_scols?wsedit_scols:line_rlen))
         local sub_text=$i_text[x_from,x_from+display_len]
         sbuf+="$sub_text" # $'\n'
-
-        # add highlight
 
         # add right margin end of line characters
         if [[ $line_len -lt $((wsedit_scols-1)) ]]; then
