@@ -228,6 +228,19 @@ ws-max() {
     fi
 }
 
+ws-lim() {
+    local n=$1
+    local min=$2
+    local max=$3
+    if [[ $n -le $min ]]; then
+    	echo $min
+    elif [[ $n -ge $max ]]; then
+        echo $max
+    else
+        echo $n
+    fi
+}
+
 # repeat insert $3 $2 times at $1 in BUFFER
 ws-insert-xtimes() {
     local pos=$1
