@@ -13,6 +13,7 @@ bindkey -M wsedit "^E" wsedit-prev-line
 
 # Jump forward or backward a number of lines, 
 # keeping column on screen if possible.
+# Take tabs into account.
 # If the source or the destination line contains <B> or <K>,
 # the position of the cursor must be adjusted.
 # When placing on the destination line, if line too short,
@@ -410,17 +411,43 @@ wsedit-make-line() {
           && $i -eq $wsedit_bcol ]]; then
             result+="<B>"
         fi
-        if [[ "$showk" = "true" && $row -eq $wsedit_krow 
+        if [[ "$showk" = "true" && $row -eq $wsedit_krow
           && $i -eq $wsedit_kcol ]]; then
             result+="<K>"
         fi
-        if [[ $i -lt $len ]]; then
+        if [[ $i -lt $len && ! $text[i+1] = $'\t' ]]; then
             result+=$text[i+1]
         fi
         i=$((i+1))
     done
     echo "$result"
 }
+
+# prints the real position in the line, but not in the middle of a tab
+wsedit-correct-tabs() {
+    local line=$1
+    local len=$2
+    local pos=$3
+
+    local i=1
+    local j=1
+    while [[ $i -le $len && $j -le $pos ]]; do
+        local c=$line[i]
+        if [[ "$c" = $'\t' ]]; then
+            local tablen=$((wsedit_tabwidth-j%wsedit_tabwidth))
+            if [[ $((j+wsedit_tablen)) -gt $pos ]]; then
+                echo $j
+                return
+            fi
+            j=$((j+wsedit_tablen))
+        else
+            j=$((j+1))
+        fi
+        i=$((i+1))
+    done
+    echo $j
+}
+
 
 wsedit-mkful() {
     ws-debug WSEDIT_MKFUL_1: row=$wsedit_row col=$wsedit_col \
@@ -436,8 +463,9 @@ wsedit-mkful() {
     # $wsedit_blockvis: defined if block visible
     # $wsedit_blockcolmode: defined if column mode
 #    ws-debug WSEDIT_MKFUL_2 bpos=$bpos kpos=$kpos \
-    ws-debug WSEDIT_MKFUL-a wsedit_bcol=$wsedit_bcol
-            vis=$wsedit_blockvis col=$wsedit_blockcolmode
+    ws-debug WSEDIT_MKFUL-a wsedit_bcol=$wsedit_bcol \
+            vis=$wsedit_blockvis col=$wsedit_blockcolmode \
+            bpos=$bpos kpos=$kpos
     if [[ -n "$bpos" ]]; then
         read wsedit_brow wsedit_bcol <<< $(wstxtfun-pos $bpos "$wsedit_text")
         local brow=$wsedit_brow
@@ -580,8 +608,8 @@ wsedit-mkful() {
         fi
 
         # make line as it will be displayed
-        i_text=$(wsedit-make-line $i $showb $showk "$i_text")
-        local line_len=${#i_text}
+        i_text_real=$(wsedit-make-line $i $showb $showk "$i_text")
+        local line_len=${#i_text_real}
 
 	# highlight part of text
 	ws-debug WSEDIT_MKFUL: showblock=$showblock
@@ -604,20 +632,38 @@ wsedit-mkful() {
                     hto=$rlim
                 fi
             fi
-            ws-debug line_start=$line_start x_from=$x_from rlim=$rlim
-            ws-debug hfrom0=$hfrom hto0=$hto
+            ws-debug WSEDIT_MKFUL line_start=$line_start x_from=$x_from rlim=$rlim
+#            ws-debug WSEDIT_MKFUL hfrom=$hfrom hto=$hto
             if [[ $hto -ge $x_from || $hfrom -le $rlim ]]; then
-                hfrom=$(($(ws-lim $hfrom $x_from $rlim)+line_start))
-                hto=$(($(ws-lim $hto $x_from $rlim)+line_start))
-                ws-debug hfrom=$hfrom hto=$hto
-                reg+=("$hfrom $hto standout")
+            	local rlen=${#i_text_real}
+            	local bcolr=$wsedit_bcol
+            	local kcolr=$wsedit_kcol
+            	local lbcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $bcolr)
+            	local lkcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $kcolr)
+                ws-debug WSEDIT_MKFUL lbcolr=$lbcolr lkcolr=$lkcolr
+            	if [[ $lbcolr -lt $((x_from+wsedit_scols))
+            	  && $lkcolr -ge $x_from ]]; then
+            	    local hfrom=$lbcolr
+            	    local hto=$lkcolr
+            	    if [[ $lbcolr -lt $x_from ]]; then
+            	        hfrom=$x_from
+            	    fi
+            	    if [[ $lkcolr -ge $((x_from+wsedit_scols)) ]]; then
+            	        hto=$((x_from+wsedit_scols-1))
+            	    fi
+            	    hto=$(ws-min $rlen $((x_from+wsedit_scols)))
+                    hfrom=$((hfrom+line_start))
+                    hto=$((hto+line_start))
+                    ws-debug WSEDIT_MKFUL hfrom=$hfrom hto=$hto
+                    reg+=("$hfrom $hto standout")
+                fi
             fi
         fi
 
         # add line to buffer
         local line_rlen=$((x_from>line_len?0:line_len-x_from))
         local display_len=$((line_rlen>wsedit_scols?wsedit_scols:line_rlen))
-        local sub_text=$i_text[x_from,x_from+display_len]
+        local sub_text=$i_text_real[x_from,x_from+display_len]
         sbuf+="$sub_text" # $'\n'
 
         # add right margin end of line characters
