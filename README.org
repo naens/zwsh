@@ -77,7 +77,6 @@ they are included only if selected completely.
  + launch wsedit as an application (runable command / script)
  + pipe to runable command: read text from standard input and put into
 wsedit.
- 
 
 ** prompt
  + Directory aliases
