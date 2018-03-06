@@ -91,11 +91,13 @@ On enter empty: return
 On enter text: options
 
 If could not find, display:
-#+BEGIN
+
+#+BEGIN_SRC
 Could not find:  <string>
 
 Press Esc to continue.
-#+END
+#+END_SRC
+
 bold: "Press Esc to continue."
 
 If found: cursor on first character of the first occurrence of string
@@ -118,7 +120,9 @@ message.
 
 *** find/replace
 Key: ~^QA~
+
 Dialog:
+
 #+BEGIN_SRC
    Find what? <cursor>
  *RETURN* done | *Backspace* or *^H* erase left
@@ -128,9 +132,10 @@ Dialog:
 If string is empty, returns without asking/displaying anything.
 
 After string input, L4 becomes:
-#+BEGIN
+
+#+BEGIN_SRC
 Replace with? <cursor>
-#+END
+#+END_SRC
 
 Replace string can be empty.
 
