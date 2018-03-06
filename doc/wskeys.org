@@ -31,7 +31,9 @@
 
 ** Delete
 ~^G~: char-right ~^H~: char-left ~^Y~: line ~^T~: word-right
+
 ~^QY~: line-right ~^QH~, ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
+
 *** Additional delete keys
 ~^[H~: word-left ~^[Y~: whole-word
 
@@ -46,6 +48,7 @@
 
 ** Select-Copy
 ~^KB~: mark-begin ~^KK~: mark-end
+
 ~^KC~: copy ~^KV~: move ~^KY~: delete
 
 *** Table
@@ -66,6 +69,7 @@ Or: ~^U~: paste deleted text
 
 ** Column mode
 ~^KN~: enter exit column mode
+
 ~^KI~: togle replace in column mode
 
 ** Files
@@ -83,6 +87,7 @@ Shows dialog:
 bold: "RETURN", "Backspace", "~^H~", "~^U~", "Del"
 
 On enter empty: return
+
 On enter text: options
 
 If could not find, display:
