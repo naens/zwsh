@@ -1,12 +1,22 @@
 * Wordstar Keys
 ** Cursor
 *** Position
-~^E~: up ~^X~: down ~^S~: left ~^D~: right                       
+~^E~: up ~^X~: down
+
+~^S~: left ~^D~: right
+
+~^R~: up-screen ~^C~: down-screen                     
+
 ~^QS~: start-line ~^QD~: end-line
+
 ~^QE~: start-screen ~^QX~: end-screen
-~^R~: up-screen ~^C~: down-screen
+
 ~^QR~: start-doc ~^QC~: end-doc
+
+~^QW~: start-scroll ~^QE~: end-scroll
+
 ~^QB~: start-block ~^QK~: end-block
+
 *** Words
 ~^A~: word-left ~^F~: word-right
 
@@ -21,7 +31,7 @@
 
 ** Delete
 ~^G~: char-right ~^H~: char-left ~^Y~: line ~^T~: word-right
-~^QY~: line-right ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
+~^QY~: line-right ~^QH~, ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
 *** Additional delete keys
 ~^[H~: word-left ~^[Y~: whole-word
 
@@ -51,6 +61,8 @@
 
 ** Undo
 ~^U~: undo ~^6~: redo
+
+Or: ~^U~: paste deleted text
 
 ** Column mode
 ~^KN~: enter exit column mode
