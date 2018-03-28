@@ -1,13 +1,13 @@
 #!/bin/sh
 set -e
 
-if [ $UID != 0 ]; then
+if [ ! $UID = 0 ]; then
     echo "Please run this script with sudo."
     exit 1
 fi
 
 if [ -z "$SUDO_USER" ]; then
-	echo "Error: SUDO_USER not set."
+	echo "Error: The script must be run using sudo."
 	exit 1
 fi
 
