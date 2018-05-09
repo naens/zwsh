@@ -100,6 +100,7 @@ Marks are stored in an array (wstext_marks), where each element is a pair name
 position.
 
 ** global
+ + set user for files in ~$HOME~
  + separate ZWSHDIR from ZDOTDIR: let the user use his own files like ~.zprofile~,
  ~.zshrc~, ~.zshenv~...  Load zwsh source file using a command in one of these files.
  + [DONE] implement the array of marks in the text
