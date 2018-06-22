@@ -36,16 +36,16 @@ tabs -8        # use standard tabs for this theme
 # set terminal options
 stty -ixon
 
-#stty intr    undef >2 /dev/null # ^C
-stty kill    undef >2 /dev/null # ^U
-#stty eof     undef >2 /dev/null # ^D
-stty start   undef >2 /dev/null # ^Q
-stty stop    undef >2 /dev/null # ^S
-stty susp    undef >2 /dev/null # ^Z
-stty rprnt   undef >2 /dev/null # ^R
-stty werase  undef >2 /dev/null # ^W
-stty lnext   undef >2 /dev/null # ^V
-stty discard undef >2 /dev/null # ^O
+#stty intr    undef 2> /dev/null # ^C
+stty kill    undef 2> /dev/null # ^U
+#stty eof     undef 2> /dev/null # ^D
+stty start   undef 2> /dev/null # ^Q
+stty stop    undef 2> /dev/null # ^S
+stty susp    undef 2> /dev/null # ^Z
+stty rprnt   undef 2> /dev/null # ^R
+stty werase  undef 2> /dev/null # ^W
+stty lnext   undef 2> /dev/null # ^V
+stty discard undef 2> /dev/null # ^O
 
 stty eof '^\\'
 stty intr '^]'
