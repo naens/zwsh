@@ -2,13 +2,20 @@
 set -e
 
 if [ $UID != 0 ]; then
-    echo "Please run this script with sudo."
+    echo "Please run this script with sudo." 1>&2
     exit 1
 fi
 
 if [ -z "$SUDO_USER" ]; then
-	echo "Error: SUDO_USER not set."
+	echo "Error: SUDO_USER not set." 1>&2
 	exit 1
+fi
+
+zsh -c "autoload -U is-at-least && is-at-least 5.5-1"
+if [ $? -ne 0 ] # 0 => OK, 1 => problem
+then
+    echo "Error: Version of zsh is too old." 1>&2
+    exit 1
 fi
 
 homedir=$(getent passwd $SUDO_USER | cut -d: -f6)
