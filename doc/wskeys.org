@@ -1,12 +1,22 @@
 * Wordstar Keys
 ** Cursor
 *** Position
-~^E~: up ~^X~: down ~^S~: left ~^D~: right                       
+~^E~: up ~^X~: down
+
+~^S~: left ~^D~: right
+
+~^R~: up-screen ~^C~: down-screen                     
+
 ~^QS~: start-line ~^QD~: end-line
+
 ~^QE~: start-screen ~^QX~: end-screen
-~^R~: up-screen ~^C~: down-screen
+
 ~^QR~: start-doc ~^QC~: end-doc
+
+~^QW~: start-scroll ~^QE~: end-scroll
+
 ~^QB~: start-block ~^QK~: end-block
+
 *** Words
 ~^A~: word-left ~^F~: word-right
 
@@ -21,7 +31,9 @@
 
 ** Delete
 ~^G~: char-right ~^H~: char-left ~^Y~: line ~^T~: word-right
-~^QY~: line-right ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
+
+~^QY~: line-right ~^QH~, ~^Q^H~, ~^QDEL~, ~^Q^DEL~: line-left
+
 *** Additional delete keys
 ~^[H~: word-left ~^[Y~: whole-word
 
@@ -36,6 +48,7 @@
 
 ** Select-Copy
 ~^KB~: mark-begin ~^KK~: mark-end
+
 ~^KC~: copy ~^KV~: move ~^KY~: delete
 
 *** Table
@@ -52,8 +65,11 @@
 ** Undo
 ~^U~: undo ~^6~: redo
 
+Or: ~^U~: paste deleted text
+
 ** Column mode
 ~^KN~: enter exit column mode
+
 ~^KI~: togle replace in column mode
 
 ** Files
@@ -71,14 +87,17 @@ Shows dialog:
 bold: "RETURN", "Backspace", "~^H~", "~^U~", "Del"
 
 On enter empty: return
+
 On enter text: options
 
 If could not find, display:
-#+BEGIN
+
+#+BEGIN_SRC
 Could not find:  <string>
 
 Press Esc to continue.
-#+END
+#+END_SRC
+
 bold: "Press Esc to continue."
 
 If found: cursor on first character of the first occurrence of string
@@ -101,7 +120,9 @@ message.
 
 *** find/replace
 Key: ~^QA~
+
 Dialog:
+
 #+BEGIN_SRC
    Find what? <cursor>
  *RETURN* done | *Backspace* or *^H* erase left
@@ -111,9 +132,10 @@ Dialog:
 If string is empty, returns without asking/displaying anything.
 
 After string input, L4 becomes:
-#+BEGIN
+
+#+BEGIN_SRC
 Replace with? <cursor>
-#+END
+#+END_SRC
 
 Replace string can be empty.
 

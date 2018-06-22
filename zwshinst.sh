@@ -7,7 +7,7 @@ if [ $UID != 0 ]; then
 fi
 
 if [ -z "$SUDO_USER" ]; then
-	echo "Error: SUDO_USER not set." 1>&2
+	echo "Error: The script must be run using sudo." 1>&2
 	exit 1
 fi
 
