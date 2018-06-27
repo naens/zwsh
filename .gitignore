@@ -13,5 +13,6 @@ DEADJOE
 *.bk
 *.back
 *.backup
+*.ignore
 .zcompdump
 wsdebug-tty.zsh
