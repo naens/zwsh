@@ -3,6 +3,8 @@ source $ZWSHDIR/zwsh.zsh
 
 # for testing
 zw() {
-    export ZWSHDIR=~/gproj/zwsh
+    export ZWSHDIR="%proj%"
     source $ZWSHDIR/zwsh.zsh
 }
+
+source ~/.zprofile

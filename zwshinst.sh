@@ -11,6 +11,8 @@ if [ -z "$SUDO_USER" ]; then
 	exit 1
 fi
 
+# TODO: don't use pcre => earlier version
+
 zsh -c "autoload -U is-at-least && is-at-least 5.5-1"
 if [ $? -ne 0 ] # 0 => OK, 1 => problem
 then
@@ -25,10 +27,15 @@ files=$(echo $tmp)
 mkdir -pv /opt/zwsh
 cp -v $files /opt/zwsh
 
-if [ -f "$homedir/.zshrc" ]; then
-    cp "$homedir/.zshrc" "$homedir/.zshrc.bak"
+if [ -z "$1" ]; then
+	if [ -f "$homedir/.zshrc" ]; then
+    	cp "$homedir/.zshrc" "$homedir/.zshrc.bak"
+	fi
+	cp .zshrc "$homedir"
 fi
-cp .zshrc "$homedir"
+
+# TODO: set to project directory in .zshrc
+sed -i -e "s|%proj%|$(pwd)|" "$homedir/.zshrc"
 
 for f in "$homedir/".zshrc{,.bak}; do
 	if [ -f "$f" ]; then
