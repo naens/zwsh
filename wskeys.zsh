@@ -58,7 +58,7 @@ bindkey -M wskeys "^A" ws-word-left
 ws-word-left() {
     wstext-prev-word
 }
-    
+
 zle -N ws-word-right
 bindkey -M wskeys "^F" ws-word-right
 ws-word-right() {
@@ -193,6 +193,7 @@ zle -N ws-split-line
 bindkey -M wskeys "^N" ws-split-line
 ws-split-line() {
     wstext-insert $'\n'
+    wstext-char-left
     ws-edit
 }
 
@@ -345,6 +346,40 @@ ws-insert-saved() {
 bindkey -M wskeys "^U" undo
 bindkey -M wskeys "^6" redo
 
+
+## wskeys-ctrl: begin
+bindkey -N wskeys-ctrl
+
+zle -N wskeys-insert-ctrl-mode
+bindkey -M wskeys "^\`" wskeys-insert-ctrl-mode
+wskeys-insert-ctrl-mode() {
+    wskeys_ctrl_saved_keymap=$KEYMAP
+    zle -K wskeys-ctrl
+}
+
+zle -N wskeys-ctrl-insert
+bindkey -M wskeys-ctrl -R "^@"-"\M-^?" wskeys-ctrl-insert
+wskeys-ctrl-insert() {
+    wstext-insert $KEYS
+    zle -K $wskeys_ctrl_saved_keymap
+}
+
+zle -N wskeys-ctrl-n
+bindkey -M wskeys-ctrl "^J" wskeys-ctrl-n
+wskeys-ctrl-n() {
+    zle -K $wskeys_ctrl_saved_keymap
+    ws-split-line
+}
+
+zle -N wskeys-ctrl-exit
+bindkey -M wskeys-ctrl "^\`" wskeys-ctrl-exit
+wskeys-ctrl-exit() {
+    zle -K $wskeys_ctrl_saved_keymap
+}
+
+## wskeys-ctrl: end
+
+
 # Other Keys
 zle -N wskeys-accept-line
 #bindkey -M wskeys "^[^M" accept-line
@@ -368,7 +403,7 @@ wskeys-accept-line() {
     while [[ $i -le ${#old_buffer} ]]; do
         local char=$old_buffer[$i]
         local found=""
-        if [[ -z $in_sq && -z $in_dq && -z $var_act && -z $bsl_act 
+        if [[ -z $in_sq && -z $in_dq && -z $var_act && -z $bsl_act
            && -z $in_wd && -z $in_com && "$char" =~ [[:alnum:]_-] ]]; then
             # if there is a substituable string beginning from $i, replace
             for k in ${(k)zw_special_folders}; do
@@ -418,10 +453,10 @@ wskeys-accept-line() {
         fi
 
         # test in_wd
-        if [[ -z $in_sq && -z $in_dq && -z $bsl_act 
+        if [[ -z $in_sq && -z $in_dq && -z $bsl_act
            && -z $in_wd && -z $in_com && "$char" =~ [[:alnum:]_-] ]]; then
             in_wd=1
-        elif [[ -z $in_sq && -z $in_dq && -z $bsl_act 
+        elif [[ -z $in_sq && -z $in_dq && -z $bsl_act
            && -n $in_wd && -z $in_com && ! "$char" =~ [[:alnum:]_-] ]]; then
             in_wd=""
         fi
@@ -436,7 +471,7 @@ wskeys-accept-line() {
         new_buffer+="$char"
         i=$((i+1))
     done
-    
+
     if [[ -d "$new_buffer" ]]; then # TODO: allow spaces before/after
         cd "$new_buffer"
         echo
@@ -502,7 +537,7 @@ wskeys-pre-redraw() {
     # TODO: fix fix fix
     if [[ -z "$ws_blockvis" ]]; then
         ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
-        ws_curs=$CURSOR    
+        ws_curs=$CURSOR
 #        ws-updfn # temporary
     fi
 }

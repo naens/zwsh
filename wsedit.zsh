@@ -11,7 +11,7 @@ bindkey -N wsedit wskeys
 zle -N wsedit-prev-line
 bindkey -M wsedit "^E" wsedit-prev-line
 
-# Jump forward or backward a number of lines, 
+# Jump forward or backward a number of lines,
 # keeping column on screen if possible.
 # Take tabs into account.
 # If the source or the destination line contains <B> or <K>,
@@ -314,6 +314,7 @@ wsedit-marks-order() {
 wsedit-mkprt() {
     local marks=($(wsedit-marks-order))
 
+    ws-debug WSEDIT_MKPART: wsedit_text=\"$wsedit_text\"
     if [[ ${#marks} -eq 3 ]]; then
         local from=$((wsedit_begin+wsedit_marks[B]-1))
         local to=$((wsedit_begin+wsedit_marks[K]-1))
@@ -494,7 +495,7 @@ wsedit-mkful() {
         unset wsedit_kcol
     fi
     ws-debug WSEDIT_MKFUL-b wsedit_bcol=$wsedit_bcol
- 
+
 #    ws-debug WSEDIT_MKFUL_3: brow=$brow bcol=$bcol \
 #                           krow=$krow kcol=$kcol
 
@@ -533,7 +534,7 @@ wsedit-mkful() {
     local line_to=$((line_from-1+$(ws-min $((wsedit_tlines-wsedit_yscroll)) \
                                               $((wsedit_slines-1)))))
 #    local tlen=${#wsedit_text}
-    
+
 #    local i=$(wstxtfun-line2pos line_from "$wsedit_text")
 #    local line_len=0
 #    local line_counter=1
@@ -711,7 +712,7 @@ wsedit-mkful() {
 #                           "$wsedit_krow" "$wsedit_kcol" \
 #                           "$wsedit_blockcolmode")
 #                    reg+=("$r")
-#                    
+#
 #                fi
 #                lnchr=$((lnchr+wsedit_scols))
 #                if [[ $wsedit_scols -gt $line_len ]]; then
@@ -937,7 +938,7 @@ wsedit-save-as-end() {
 }
 
 
-# save and close 
+# save and close
 zle -N wsedit-save-exit
 bindkey -M wsedit "^Kx" wsedit-save-exit
 bindkey -M wsedit "^KX" wsedit-save-exit
@@ -980,7 +981,7 @@ wskeys-replace() {
 wstext-replace-enter() {
     if [[ "$1" = "OK" ]]; then
         ws_text="$wsdfopen_text"
-        
+
         wsedit_fn="$wsdfopen_fn"
         ws-edit
     fi
