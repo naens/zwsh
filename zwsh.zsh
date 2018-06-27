@@ -41,14 +41,14 @@ stty kill    undef 2> /dev/null # ^U
 #stty eof     undef 2> /dev/null # ^D
 stty start   undef 2> /dev/null # ^Q
 stty stop    undef 2> /dev/null # ^S
-stty susp    undef 2> /dev/null # ^Z
+#stty susp    undef 2> /dev/null # ^Z
 stty rprnt   undef 2> /dev/null # ^R
 stty werase  undef 2> /dev/null # ^W
 stty lnext   undef 2> /dev/null # ^V
 stty discard undef 2> /dev/null # ^O
 
-stty eof '^\\'
-stty intr '^]'
+#stty eof '^\\'
+#stty intr '^]'
 
 stty erase '^H'
 
@@ -153,6 +153,8 @@ HISTFILE=~/.zsh_history
 # Remember about a years worth of history (AWESOME)
 SAVEHIST=10000
 HISTSIZE=10000
+
+ws_pts=$(tty)
 
 # Load user file
 userfile=~/.zwrc

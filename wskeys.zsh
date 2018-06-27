@@ -170,12 +170,12 @@ ws-start-doc() {
     eval "$wstext_posvar=0"
 }
 
-zle -N ws-end-doc
-bindkey -M wskeys "^C" ws-end-doc
-ws-end-doc() {
-    local text="${(P)wstext_textvar}"
-    eval "$wstext_posvar=${#text}"
-}
+#zle -N ws-end-doc
+#bindkey -M wskeys "^C" ws-end-doc
+#ws-end-doc() {
+#    local text="${(P)wstext_textvar}"
+#    eval "$wstext_posvar=${#text}"
+#}
 
 bindkey -M wskeys "^Q^[" undefined-key
 bindkey -M wskeys "^K^[" undefined-key
@@ -192,7 +192,8 @@ ws-self-insert() {
 zle -N ws-split-line
 bindkey -M wskeys "^N" ws-split-line
 ws-split-line() {
-    wstext-insert \\$'\n'
+    wstext-insert $'\n'
+    ws-edit
 }
 
 zle -N ws-kr
