@@ -192,8 +192,8 @@ ws-edit() {
     # don't know if it can be changed, if so, must be replaced
     wsedit_tabwidth=8
 
-    stty -F $ws_pts intr undef 2> /tmp/intr_enter
-    stty -F $ws_pts susp undef 2> /tmp/susp_enter
+    stty -F $ws_pts intr undef 2> /dev/null
+    stty -F $ws_pts susp undef 2> /dev/null
 
     wsedit_fullscreen=false
     zle -K wsedit
@@ -806,8 +806,8 @@ zle -N wsedit-exit
 bindkey -M wsedit "^Kd" wsedit-exit
 bindkey -M wsedit "^KD" wsedit-exit
 wsedit-exit() {
-    stty -F $ws_pts intr '^C' 2> /tmp/intr_exit
-    stty -F $ws_pts susp '^Z' 2> /tmp/susp_exit
+    stty -F $ws_pts intr '^C' 2> /dev/null
+    stty -F $ws_pts susp '^Z' 2> /dev/null
 
     CURSOR=$((CURSOR-wsedit_begin))
 
