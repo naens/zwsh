@@ -3,6 +3,6 @@ source $ZWSHDIR/zwsh.zsh
 
 # for testing
 zw() {
-    export ZWSHDIR=~/projects/zwsh
+    export ZWSHDIR=~/gproj/zwsh
     source $ZWSHDIR/zwsh.zsh
 }
