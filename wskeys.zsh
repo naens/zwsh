@@ -164,11 +164,11 @@ ws-updfn() {
 #    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
 }
 
-zle -N ws-start-doc
-bindkey -M wskeys "^R" ws-start-doc
-ws-start-doc() {
-    eval "$wstext_posvar=0"
-}
+#zle -N ws-start-doc
+#bindkey -M wskeys "^R" ws-start-doc
+#ws-start-doc() {
+#    eval "$wstext_posvar=0"
+#}
 
 #zle -N ws-end-doc
 #bindkey -M wskeys "^C" ws-end-doc

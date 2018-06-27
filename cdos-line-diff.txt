@@ -1,0 +1,16 @@
+^Q: cursor to beginning of the line
+^W: cursor to the end of the line
+^U: delete to the beginning of the line
+    -> undelete
+    => ^I?
+^K: delete to the end of the line
+    -> prefix
+    => ^O?
+^\: enter the next character literally
+    -> eof??
+^R: toggle search mode
+^_: toggles default search mode, sets curent line mode to default
+
++ ^B: toggle begin/end line
+free: ^I^O^P^[^]
+=> ^C, ^Z: initial function
