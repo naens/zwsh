@@ -34,7 +34,7 @@ if [ -z "$1" ]; then
 	cp .zshrc "$homedir"
 fi
 
-# TODO: set to project directory in .zshrc
+# set project directory of zw in .zshrc
 sed -i -e "s|%proj%|$(pwd)|" "$homedir/.zshrc"
 
 for f in "$homedir/".zshrc{,.bak}; do
