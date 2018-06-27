@@ -53,8 +53,6 @@ stty erase '^H'
 
 #setopt EXTENDED_GLOB
 
-zmodload zsh/pcre
-
 # global variables and functions
 . $srcdir/wsfun.zsh
 
@@ -72,7 +70,7 @@ zmodload zsh/pcre
 
 # dialog mode
 . $srcdir/wsdialog.zsh
-	    
+
 # ws block functions
 . $srcdir/wsblock.zsh
 

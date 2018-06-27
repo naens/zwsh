@@ -113,7 +113,7 @@ wstxtfun-end-word() {
 wstxtfun-line-start() {
     local pos=$1
     local text="$2"
-    
+
     local i=$pos
     while [[ ! "$text[i]" = $'\n' && $i -ge 1 ]]; do
         i=$((i-1))
@@ -155,7 +155,7 @@ wstxtfun-line-end() {
     local pos=$1
     local text="$2"
     local text_end=${#text}
-    
+
     local i=$((pos+1))
     while [[ ! "$text[i]" = $'\n' && $i -le $text_end ]]; do
         i=$((i+1))
@@ -226,11 +226,24 @@ wstxtfun-line-last-pos() {
     echo $((i-1))
 }
 
+wstxtfun-test-pcre() {
+    if type pcre_match > /dev/null 2>&1
+    then
+        return 0
+    else
+        zmodload zsh/pcre > /dev/null 2>&1
+        return $?
+    fi
+}
+
 
 # sentence functions
 wstxtfun-prev-sentence() {
     local pos=$1
     local text="$2"
+    if ! wstxtfun-test-pcre; then
+        return
+    fi
 
     local x=$(wstxtfun-prev-word $pos "$text")
     pcre_compile -m -x "(\\.|!|\\?)[[:punct:][:space:]]*(\s{2}|\t|\n|\Z)[[:punct:][:space:]]*"
@@ -258,6 +271,10 @@ wstxtfun-prev-sentence() {
 wstxtfun-next-sentence() {
     local pos=$1
     local text="$2"
+    if ! wstxtfun-test-pcre; then
+        return
+    fi
+
     # find next alphanumeric character
     pcre_compile -m -x "[[:alnum:]]"
     if pcre_match -b -n $pos -- $text; then
@@ -283,6 +300,10 @@ wstxtfun-sentence-pos() {
     local pos=$1
     local text="$2"
     local text_end=${#text}
+    if ! wstxtfun-test-pcre; then
+        return
+    fi
+
 
     local i=1
     while [[ ! "$text[i]" =~ "[[:alnum:]]" && $i -le $text_end ]]; do
@@ -322,6 +343,9 @@ wstxtfun-sentence-pos() {
 wstxtfun-prev-paragraph() {
     local pos=$1
     local text="$2"
+    if ! wstxtfun-test-pcre; then
+        return
+    fi
 
     # find an alnum character
     local i=$pos
@@ -356,6 +380,9 @@ wstxtfun-next-paragraph() {
     local pos=$1
     local text="$2"
     local text_end=${#text}
+    if ! wstxtfun-test-pcre; then
+        return
+    fi
 
     # find an alnum character
     local i=$pos
