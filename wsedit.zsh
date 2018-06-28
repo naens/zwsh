@@ -965,8 +965,8 @@ zle -N wsedit-quit
 bindkey -M wsedit "^Kq" wsedit-quit
 bindkey -M wsedit "^KQ" wsedit-quit
 wsedit-quit() {
-    wsedit_text=""
-    wsedit-exit
+    BUFFER=""
+    wsdquit-run wsedit-save-exit-end
 }
 
 # replace buffer with contents from file and enter edit mode
@@ -985,16 +985,6 @@ wstext-replace-enter() {
         wsedit_fn="$wsdfopen_fn"
         ws-edit
     fi
-}
-
-# save buffer contents and enter edit mode
-zle -N wskeys-save-edit
-bindkey -M wskeys "^Ks" wskeys-save-edit
-bindkey -M wskeys "^KS" wskeys-save-edit
-wskeys-save-edit() {
-    wsdfsave_text="$ws_text"
-    wsdfsave_endfn=wskeys-save-edit-end
-    wsdfsave-run
 }
 
 wskeys-save-edit-end() {

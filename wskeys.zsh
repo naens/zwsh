@@ -211,12 +211,40 @@ ws-kr-end() {
     fi
 }
 
+# save buffer contents and enter edit mode
+zle -N wskeys-save-edit
+bindkey -M wskeys "^Ks" wskeys-save-edit
+bindkey -M wskeys "^KS" wskeys-save-edit
+wskeys-save-edit() {
+    wsdfsave_text="$ws_text"
+    wsdfsave_endfn=wskeys-save-edit-end
+    wsdfsave-run
+}
+
 zle -N ws-kx
 bindkey -M wskeys "^Kx" ws-kx
-bindkey -M wskeys "^Kx" ws-kx
+bindkey -M wskeys "^KX" ws-kx
 ws-kx() {
     wsdfsave_text="$ws_text"
     wsdfsave-run
+}
+
+zle -N wskeys-exit
+bindkey -M wskeys "^Kq" wskeys-exit
+bindkey -M wskeys "^KQ" wskeys-exit
+wskeys-exit() {
+    if [[ ${#BUFFER} -gt 0 ]]; then
+        wsdquit-run wskeys-exit-yes wskeys-exit-no
+    else
+        wskeys-exit-yes
+    fi
+}
+
+wskeys-exit-yes() {
+    exit
+}
+
+wskeys-exit-no() {
 }
 
 zle -N ws-bracketed-paste
@@ -519,13 +547,6 @@ wskeys-exec-to-prompt() {
         ws_curs=0
         ws-updfn
     fi
-}
-
-zle -N wskeys-exit
-bindkey -M wskeys "^Kq" wskeys-exit
-bindkey -M wskeys "^KQ" wskeys-exit
-wskeys-exit() {
-    exit
 }
 
 bindkey -M wskeys "^Ql" wskwtest

@@ -80,6 +80,9 @@ stty erase '^H'
 # file for ^KR binding functions and file import
 . $srcdir/wsdfopen.zsh
 
+# file for ^KQ binding
+. $srcdir/wsdquit.zsh
+
 # ws find key bindings
 . $srcdir/wsfind.zsh
 
