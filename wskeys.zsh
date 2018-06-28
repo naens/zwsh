@@ -343,9 +343,19 @@ ws-insert-saved() {
 }
 
 # Undo Keys
-bindkey -M wskeys "^U" undo
+bindkey -M wskeys "^_" undo
 bindkey -M wskeys "^6" redo
 
+zle -N wskeys-unerase
+bindkey -M wskeys "^U" wskeys-unerase
+wskeys-unerase() {
+    if [[ -n "$ws_delbuf" ]]; then
+        wstext-insert "$ws_delbuf"
+        if [[ $(wstxtfun-nlines "$ws_delbuf") -gt 1 ]]; then
+            wsedit-mode
+        fi
+    fi
+}
 
 ## wskeys-ctrl: begin
 bindkey -N wskeys-ctrl

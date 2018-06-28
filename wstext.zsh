@@ -457,6 +457,9 @@ wstext-delete() {
     local text_len=${#text}
 
     wstext-marks-move-delete $from $((to-from+1))
+    if [[ $((to-from)) -gt 1 ]]; then
+        ws_delbuf="$text[from, to]"
+    fi
 
     if [[ $from -eq 0 ]]; then
         if [[ $to -lt $((text_len)) ]]; then
