@@ -23,19 +23,30 @@ fi
 homedir=$(getent passwd $SUDO_USER | cut -d: -f6)
 basedir=$(dirname $0)
 tmp="$basedir/*.zsh"
+instdir="/opt/zwsh"
 files=$(echo $tmp)
-mkdir -pv /opt/zwsh
-cp -v $files /opt/zwsh
+if [[ ! -d "$instdir" ]]; then
+	if [[ -n "$1" ]]; then
+		echo "Cannot update, no installation found." 1>&2
+		exit 1
+	else
+        mkdir -pv "$instdir"
+    fi
+fi
+
+cp -v $files "$instdir"
+chmod -R +r "$instdir"
 
 if [ -z "$1" ]; then
 	if [ -f "$homedir/.zshrc" ]; then
     	cp "$homedir/.zshrc" "$homedir/.zshrc.bak"
 	fi
 	cp .zshrc "$homedir"
+
+    # set project directory of zw in .zshrc
 fi
 
-# set project directory of zw in .zshrc
-sed -i -e "s|%proj%|$(pwd)|" "$homedir/.zshrc"
+sed -i -e "s|^.*%proj%$|    export ZWSHDIR=$(pwd) #%proj%|" "$homedir/.zshrc"
 
 for f in "$homedir/".zshrc{,.bak}; do
 	if [ -f "$f" ]; then
