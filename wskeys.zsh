@@ -549,13 +549,6 @@ wskeys-exec-to-prompt() {
     fi
 }
 
-bindkey -M wskeys "^Ql" wskwtest
-zle -N wskwtest
-wskwtest() {
-    wsblock_text=blabla
-    wsdialog_kwdial-run
-}
-
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
     local modefun=$KEYMAP-pre-redraw

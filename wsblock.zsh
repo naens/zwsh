@@ -304,8 +304,10 @@ wsblock-kc() {
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
+            local text=${(P)wstext_textvar}
+            local block=$text[b_pos+1,k_pos]
             local pos=${(P)wstext_posvar}
-            wstext-insert $BUFFER[b_pos+1,k_pos]
+            wstext-insert "$block"
             eval "${wstext_posvar}=$pos"
             wstext-upd
         fi
@@ -319,6 +321,7 @@ wsblock-kv() {
     if [[ -z "${(P)wstext_blockvisvar}" ]]; then
         return
     fi
+    local text=${(P)wstext_textvar}
     local pos=${(P)wstext_posvar}
     if [[ "$wstext_blockcolmodevar" = "true" ]]; then
     else
@@ -326,17 +329,17 @@ wsblock-kv() {
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
             ws-debug WSBLOCK_KV: pos=$pos b_pos=$b_pos k_pos=$k_pos
-            local text=$BUFFER[b_pos+1,k_pos]
-            local len=${#text}
+            local block=$text[b_pos+1,k_pos]
+            local len=${#block}
             if [[ $pos -lt $b_pos ]]; then
                 # cursor before block
                 wstext-delete $((b_pos+1)) $k_pos
-                wstext-insert "$text"
+                wstext-insert "$block"
                 b_pos=$pos
                 k_pos=$((b_pos+len))
             elif [[ $pos -ge $k_pos ]]; then
                 # cursor after block
-                wstext-insert "$text"
+                wstext-insert "$block"
                 wstext-delete $((b_pos+1)) $k_pos
                 b_pos=$((pos-len))
                 k_pos=$pos
@@ -351,13 +354,24 @@ wsblock-kv() {
 }
 
 # write selection to file
-#zle -N ws-kw
-#bindkey -M wsblock "^Kw" ws-kw
-#bindkey -M wsblock "^KW" ws-kw
-ws-kw() {
-    if [[ -n $kk ]]; then
-#        ws-kwfn
-        wsdialog_kwdial-run
+zle -N wsblock-kw
+bindkey -M wskeys "^Kw" wsblock-kw
+bindkey -M wskeys "^KW" wsblock-kw
+wsblock-kw() {
+    if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        return
+    fi
+    local pos=${(P)wstext_posvar}
+    local text=${(P)wstext_textvar}
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
+    else
+        local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+        local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+        if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
+            local block=$text[b_pos+1,k_pos]
+            local len=${#block}
+            # TODO: run write to file dialog, save $text to file
+        fi
     fi
 }
 
@@ -369,13 +383,14 @@ wsblock-ky() {
         return
     fi
     local pos=${(P)wstext_posvar}
+    local text=${(P)wstext_textvar}
     if [[ "$wstext_blockcolmodevar" = "true" ]]; then
     else
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
-            local text=$BUFFER[b_pos+1,k_pos]
-            local len=${#text}
+            local block=$text[b_pos+1,k_pos]
+            local len=${#block}
             wstext-delete $((b_pos+1)) $k_pos
             if [[ $pos -ge $b_pos && $pos -lt $k_pos ]]; then
                 pos=$b_pos
