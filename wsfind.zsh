@@ -34,6 +34,7 @@ bindkey -M isearch " " self-insert
 
 zle -N zle-history-line-set
 zle-history-line-set() {
+    wsblock-undef
     ws_text="$BUFFER"
 }
 
