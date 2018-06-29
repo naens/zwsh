@@ -17,11 +17,11 @@
 ## FUNCTIONS
 wsblock-cursupd() {
     if [[ -z $kk && $CURSOR -gt $kb && $CURSOR -le $(( $kb + 2 )) ]]; then
-	if [[ -n $1 ]]; then
-	    CURSOR=$kb
-	else
-	    CURSOR=$(( $kb + 3 ))
-	fi
+        if [[ -n $1 ]]; then
+            CURSOR=$kb
+        else
+            CURSOR=$(( $kb + 3 ))
+        fi
     fi
 }
 
@@ -43,11 +43,11 @@ wsblock-undef() {
 #wsblock-upd() {
 #    kbend=$(( ${#BUFFER} - $kb ))
 #    if [[ -n $kk ]]; then
-#	kkend=$(( ${#BUFFER} - $kk ))
-#	wsblock_text=$BUFFER[$(( $kb + 1 )),$kk]
-#	region_highlight=("$kb $kk standout")
+#        kkend=$(( ${#BUFFER} - $kk ))
+#        wsblock_text=$BUFFER[$(( $kb + 1 )),$kk]
+#        region_highlight=("$kb $kk standout")
 #    else
-#	region_highlight=("$kb $(( $kb + 3)) standout")
+#        region_highlight=("$kb $(( $kb + 3)) standout")
 #    fi
 #}
 
@@ -233,7 +233,7 @@ ws-kb() {
             eval "unset $wstext_blockvisvar"
         fi
     else
-    	eval "${wstext_marksvar}[B]=$pos"
+        eval "${wstext_marksvar}[B]=$pos"
         eval "$wstext_blockvisvar=true"
     fi
     # if $wsblock_col is undefined, leave undefined (by default column mode off)
@@ -254,7 +254,7 @@ ws-kk() {
             eval "unset $wstext_blockvisvar"
         fi
     else
-    	eval "${wstext_marksvar}[K]=$pos"
+        eval "${wstext_marksvar}[K]=$pos"
         eval "$wstext_blockvisvar=true"
     fi
 #    # if $wsblock_col is undefined, leave undefined (by default column mode off)
@@ -296,9 +296,9 @@ zle -N wsblock-kc
 bindkey -M wskeys "^Kc" wsblock-kc
 bindkey -M wskeys "^KC" wsblock-kc
 wsblock-kc() {
-#    local curs=$CURSOR
-#    wsblock-insert-string $wsblock_text
-#    CURSOR=$curs
+    if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        return
+    fi
     if [[ "$wstext_blockcolmodevar" = "true" ]]; then
     else
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
@@ -309,25 +309,42 @@ wsblock-kc() {
     fi
 }
 
-#zle -N ws-kv
-#bindkey -M wsblock "^Kv" ws-kv
-#bindkey -M wsblock "^KV" ws-kv
-ws-kv() {
-    if [ $CURSOR -ge $kb -a $CURSOR -lt $kk ]; then
-	CURSOR=$kb
-    else
-        local curs=$CURSOR
-        BUFFER=$BUFFER[1,$kb]$BUFFER[(( $kk + 1 )),${#BUFFER}]
-	if [[ $curs -ge $kk ]]; then
-	    curs=$(( $curs - ${#wsblock_text} ))
-            CURSOR=$curs
-        fi
-        LBUFFER+=$wsblock_text
-        CURSOR=$curs
-	kb=$CURSOR
-	kk=$(( $kb + ${#wsblock_text} ))
-        wsblock-upd
+zle -N wsblock-kv
+bindkey -M wskeys "^Kv" wsblock-kv
+bindkey -M wskeys "^KV" wsblock-kv
+wsblock-kv() {
+    if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        return
     fi
+    local pos=${(P)wstext_posvar}
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
+    else
+        local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+        local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+        if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
+            ws-debug WSBLOCK_KV: pos=$pos b_pos=$b_pos k_pos=$k_pos
+            local text=$BUFFER[b_pos+1,k_pos]
+            local len=${#text}
+            if [[ $pos -lt $b_pos ]]; then
+                # cursor before block
+                wstext-delete $((b_pos+1)) $k_pos
+                wstext-insert "$text"
+                b_pos=$pos
+                k_pos=$((b_pos+len))
+            elif [[ $pos -ge $k_pos ]]; then
+                # cursor after block
+                wstext-insert "$text"
+                wstext-delete $((b_pos+1)) $k_pos
+                b_pos=$((pos-len))
+                k_pos=$pos
+            fi
+            eval "${wstext_marksvar}[B]=$b_pos"
+            eval "${wstext_marksvar}[K]=$k_pos"
+            eval "${wstext_posvar}=$b_pos"
+            eval "$wstext_blockvisvar=true"
+        fi
+    fi
+    wstext-upd
 }
 
 # write selection to file
@@ -341,18 +358,32 @@ ws-kw() {
     fi
 }
 
-#zle -N ws-ky
-#bindkey -M wsblock "^Ky" ws-ky
-#bindkey -M wsblock "^KY" ws-ky
-ws-ky() {
-    if [[ $CURSOR -ge $kk ]]; then
-	local len=$(( $kk - $kb ))
-	CURSOR=$(( $CURSOR - $len ))
-    elif [[ $CURSOR -ge $kb ]]; then
-	CURSOR=$kb
+zle -N wsblock-ky
+bindkey -M wskeys "^Ky" wsblock-ky
+bindkey -M wskeys "^KY" wsblock-ky
+wsblock-ky() {
+    if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        return
     fi
-    BUFFER=$BUFFER[1,$kb]$BUFFER[(( $kk + 1 )),${#BUFFER}]
-    wsblock-leave-mode
+    local pos=${(P)wstext_posvar}
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
+    else
+        local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+        local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+        if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
+            local text=$BUFFER[b_pos+1,k_pos]
+            local len=${#text}
+            wstext-delete $((b_pos+1)) $k_pos
+            if [[ $pos -ge $b_pos && $pos -lt $k_pos ]]; then
+                pos=$b_pos
+            elif [[ $pos -ge $k_pos ]]; then
+                pos=$((pos-len))
+            fi
+            eval "${wstext_posvar}=$pos"
+            wsblock-undef
+        fi
+    fi
+    wstext-upd
 }
 
 #zle -N wsblock-qb
