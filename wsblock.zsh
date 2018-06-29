@@ -26,9 +26,10 @@ wsblock-cursupd() {
 }
 
 wsblock-undef() {
+    ws-debug WSBLOCK_UNDEF
     if [[ -n "${wstext_marksvar}" ]]; then
-        eval "${wstext_marksvar}[B]=\"\""
-        eval "${wstext_marksvar}[K]=\"\""
+        unset "${wstext_marksvar}[B]"
+        unset "${wstext_marksvar}[K]"
     fi
     if [[ -n "${wstext_blockvisvar}" ]]; then
         eval "unset $wstext_blockvisvar"
@@ -135,19 +136,6 @@ wsblock-split-line() {
     wsblock-insert-string \\$'\n'
 }
 
-# only when standalone mark: moves or deletes depending on positions
-wsblock-chkdel() {
-    local name=$1
-    local pos=$2
-    local from=$3
-    local to=$4
-    if [[ $from -le $pos && $pos -le $to ]]; then
-        eval "${wstext_marksvar}[$name]=\"\""
-    elif [[ $pos -ge $to ]]; then
-        eval "${wstext_marksvar}[$name]=$((pos-(to-from)))"
-    fi
-}
-
 wsblock-delupd() {
     local from=$1
     local to=$2
@@ -156,28 +144,30 @@ wsblock-delupd() {
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         local dlen=$((to-from))
-        if [[ -n "$b_pos" && -n "$k_pos" ]]; then
-            if [[ $b_pos -lt $k_pos ]]; then
-                if [[ $b_pos -ge $from && $k_pos -le $to ]]; then
-                    wsblock-undef
-                elif [[ $k_pos -gt $to ]]; then
-                    eval "${wstext_marksvar}[K]=$((kk-dlen))"
-                    if [[ $b_pos -ge $to ]]; then
-                        eval "${wstext_marksvar}[B]=$((kb-dlen))"
-                    elif [[ $b_pos -gt $from ]]; then
-                        eval "${wstext_marksvar}[B]=$from"
-                    fi
-                elif [[ $k_pos -gt $from ]]; then
-                    eval "${wstext_marksvar}[K]=$from"
-                fi
-            else
-                wsblock-chkdel B $b_pos $from $to
-                wsblock-chkdel K $k_pos $from $to
+        ws-debug WSBLOCK_DELUPD: from=$from to=$to b_pos=$b_pos k_pos=$k_pos
+        if [[ -n "$b_pos" && -n "$k_pos" && $b_pos -lt $k_pos ]]; then
+            if [[ $b_pos -ge $from && $k_pos -le $to ]]; then
+                ws-debug WSBLOCK_DELUPD: undef BK
+                wsblock-undef
             fi
-        elif [[ -n "$b_pos" ]]; then
-            wsblock-chkdel B $b_pos $from $to
-        elif [[ -n "$k_pos" ]]; then
-            wsblock-chkdel K $k_pos $from $to
+        else
+            if [[ -n "$b_pos" ]]; then
+                if [[ $b_pos -ge $from && $b_pos -lt $to ]]; then
+                    unset "${wstext_marksvar}[B]"
+                    ws-debug WSBLOCK_DELUPD: undef B
+                    b_pos=""
+                fi
+            fi
+            if [[ -n "$k_pos" ]]; then
+                if [[ $k_pos -ge $from && $b_pos -lt $to ]]; then
+                    unset "${wstext_marksvar}[K]"
+                    ws-debug WSBLOCK_DELUPD: undef K
+                    k_pos=""
+                fi
+            fi
+            if [[ "$b_pos" = "" && "$k_pos" = "" ]]; then
+                wsblock-undef
+            fi
         fi
     fi
 }
