@@ -58,7 +58,7 @@ zle -N wsfind-repeat
 bindkey -M wskeys "^L" wsfind-repeat
 wsfind-repeat() {
     if [[ -n $ws_search ]]; then
-	zle history-incremental-search-backward $ws_search
+        zle history-incremental-search-backward $ws_search
     fi
 }
 
@@ -66,11 +66,11 @@ wsfind-repeat() {
 zle -N zle-isearch-exit
 zle-isearch-exit() {
     if [[ "$hst" != "$HISTNO" ]]; then
-	unset kb
-	unset kk
-	unset region_highlight
+        unset kb
+        unset kk
+        unset region_highlight
     elif [[ -n $pre_rh ]]; then
-	region_highlight="$pre_rh"
+        region_highlight="$pre_rh"
     fi
     unset hst
 }

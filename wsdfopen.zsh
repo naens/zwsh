@@ -21,7 +21,7 @@ wsdialog-add wsdfopen
 wsdfopen-accept() {
     if [[ -n "$wsdialog_text" ]] && wsdfopen-read "$wsdialog_text"; then
         wsdfopen_fn="$wsdialog_text"
-      	unset wsdialog_l4mode
+        unset wsdialog_l4mode
     else
         wsdfopen-make-eread-msg
         wsdialog_l4mode=eread

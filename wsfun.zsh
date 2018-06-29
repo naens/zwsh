@@ -16,16 +16,15 @@ ws-do-bold() {
     base=$1
     y=0
     shift
-    for x in $@
-    do
+    for x in $@; do
         if [[ $y -eq 0 ]]; then
             v1=$(( $base + $x ))
             y=1
         else
             v2=$(( $base + $x ))
             y=0
-	    region_highlight[$i]=("$v1 $v2 bold")
-	    i=$(( $i + 1 ))
+            region_highlight[$i]=("$v1 $v2 bold")
+            i=$(( $i + 1 ))
         fi
     done
 }
@@ -233,7 +232,7 @@ ws-lim() {
     local min=$2
     local max=$3
     if [[ $n -le $min ]]; then
-    	echo $min
+        echo $min
     elif [[ $n -ge $max ]]; then
         echo $max
     else

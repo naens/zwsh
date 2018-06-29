@@ -476,8 +476,8 @@ wsedit-mkful() {
         local bcol=$((wsedit_bcol+1))
         local bp=$(wstxtfun-line-start $bpos "$wsedit_text")
         bcol=$(wstxtfun-real-col $((bcol-1)) $wsedit_tabwidth \
-        		 "$wsedit_text[bp+1,${#wsedit_text}]")
-#    	ws-debug REALBCOL=$bcol
+                 "$wsedit_text[bp+1,${#wsedit_text}]")
+#        ws-debug REALBCOL=$bcol
     else
         unset wsedit_brow
         unset wsedit_bcol
@@ -489,7 +489,7 @@ wsedit-mkful() {
         local kp=$(wstxtfun-line-start $kpos "$wsedit_text")
         ws-debug "WSEDIT_MKFUL_2k: wsedit_text=\"$wsedit_text\""
         kcol=$(wstxtfun-real-col $((kcol-1)) $wsedit_tabwidth \
-        		 "$wsedit_text[kp+1,${#wsedit_text}]")
+                 "$wsedit_text[kp+1,${#wsedit_text}]")
     else
         unset wsedit_krow
         unset wsedit_kcol
@@ -573,13 +573,12 @@ wsedit-mkful() {
         # calculate cursor position on screen
         local real_col=$((wsedit_pos-curr_pos+1))
         if [[ "$i" -eq "$wsedit_row" ]]; then
-            real_col=$(wstxtfun-real-col \
-                            $real_col $wsedit_tabwidth "$i_text")
+            real_col=$(wstxtfun-real-col $real_col $wsedit_tabwidth "$i_text")
             local screen_col=$real_col
             if [[ $col -lt $x_from ]]; then
                 screen_col=0
             else
-            	screen_col=$((screen_col-x_from))
+                screen_col=$((screen_col-x_from))
             fi
             screen_pos=$((screen_pos+screen_col))
             curs=$screen_pos
@@ -615,8 +614,8 @@ wsedit-mkful() {
         i_text_real=$(wsedit-make-line $i $showb $showk "$i_text")
         local line_len=${#i_text_real}
 
-	# highlight part of text
-	ws-debug WSEDIT_MKFUL: showblock=$showblock
+        # highlight part of text
+        ws-debug WSEDIT_MKFUL: showblock=$showblock
         if [[ "$showblock" = "true" ]]; then
             local hfrom=0
             local hto=0
@@ -639,23 +638,23 @@ wsedit-mkful() {
             ws-debug WSEDIT_MKFUL line_start=$line_start x_from=$x_from rlim=$rlim
 #            ws-debug WSEDIT_MKFUL hfrom=$hfrom hto=$hto
             if [[ $hto -ge $x_from || $hfrom -le $rlim ]]; then
-            	local rlen=${#i_text_real}
-            	local bcolr=$wsedit_bcol
-            	local kcolr=$wsedit_kcol
-            	local lbcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $bcolr)
-            	local lkcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $kcolr)
+                local rlen=${#i_text_real}
+                local bcolr=$wsedit_bcol
+                local kcolr=$wsedit_kcol
+                local lbcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $bcolr)
+                local lkcolr=$(wsedit-correct-tabs "$i_text_real" $rlen $kcolr)
                 ws-debug WSEDIT_MKFUL lbcolr=$lbcolr lkcolr=$lkcolr
-            	if [[ $lbcolr -lt $((x_from+wsedit_scols))
-            	  && $lkcolr -ge $x_from ]]; then
-            	    local hfrom=$lbcolr
-            	    local hto=$lkcolr
-            	    if [[ $lbcolr -lt $x_from ]]; then
-            	        hfrom=$x_from
-            	    fi
-            	    if [[ $lkcolr -ge $((x_from+wsedit_scols)) ]]; then
-            	        hto=$((x_from+wsedit_scols-1))
-            	    fi
-            	    hto=$(ws-min $rlen $((x_from+wsedit_scols)))
+                if [[ $lbcolr -lt $((x_from+wsedit_scols))
+                  && $lkcolr -ge $x_from ]]; then
+                    local hfrom=$lbcolr
+                    local hto=$lkcolr
+                    if [[ $lbcolr -lt $x_from ]]; then
+                        hfrom=$x_from
+                    fi
+                    if [[ $lkcolr -ge $((x_from+wsedit_scols)) ]]; then
+                        hto=$((x_from+wsedit_scols-1))
+                    fi
+                    hto=$(ws-min $rlen $((x_from+wsedit_scols)))
                     hfrom=$((hfrom+line_start))
                     hto=$((hto+line_start))
                     ws-debug WSEDIT_MKFUL hfrom=$hfrom hto=$hto

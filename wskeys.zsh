@@ -361,12 +361,12 @@ bindkey -M wskeys "^KV" ws-insert-saved
 # on ^Kc/^Kv insert saved substring if exists and nothing selected
 ws-insert-saved() {
 #    if [[ -n $ws_saved ]]; then
-#	kb=$CURSOR
-#	kk=$(( $CURSOR + ${#ws_saved} ))
-#	LBUFFER+=$ws_saved
-#	CURSOR=$(( $CURSOR + ${#ws_saved} ))
-#	zle -K wsblock
-#	wsblock-upd
+#    kb=$CURSOR
+#    kk=$(( $CURSOR + ${#ws_saved} ))
+#    LBUFFER+=$ws_saved
+#    CURSOR=$(( $CURSOR + ${#ws_saved} ))
+#    zle -K wsblock
+#    wsblock-upd
 #    fi
 }
 
