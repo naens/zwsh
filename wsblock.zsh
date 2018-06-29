@@ -304,7 +304,10 @@ wsblock-kc() {
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
+            local pos=${(P)wstext_posvar}
             wstext-insert $BUFFER[b_pos+1,k_pos]
+            eval "${wstext_posvar}=$pos"
+            wstext-upd
         fi
     fi
 }
