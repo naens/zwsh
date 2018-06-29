@@ -1,0 +1,21 @@
+#+TITLE: zwsh
+A Zpm3/Wordstar mode/theme for zsh
+
+* Description
+A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
+ - select copy and move blocks of text,
+ - edit multiline commands,
+ - import and export from and to files.
+
+* Other doc files
+ + [[doc/wsblock.org][wsblock]]
+ + [[doc/wsdialog.org][wsdialog]]
+ + [[doc/wsedit.org][wsedit]]
+ + [[doc/wsfind.org][wsfind]]
+ + [[doc/wskeys.org][key description]]
+ + [[doc/wstext.org][the concept of separating the text from the screen]]
+
+* Tests
+The directory *tests* contains tests to test different modules independently
+from the whole application.  Also allows to test features and cases rarely or
+not used in the main application, which could be useful in future versions.
