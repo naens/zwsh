@@ -118,8 +118,8 @@ ws-next-paragraph() {
 ws-updfn() {
     local b_pos=${ws_marks[B]}
     local k_pos=${ws_marks[K]}
-    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs \
-                       vis=$ws_blockvis text=\""$ws_text"\"
+#    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs \
+#                       vis=$ws_blockvis text=\""$ws_text"\"
 
     if [[ -n "$ws_blockvis" ]]; then
         local text="$ws_text"

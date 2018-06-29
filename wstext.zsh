@@ -404,12 +404,13 @@ wstext-marks-move-insert() {
     local pos=$1
     local len=$2
     ws-debug MARKS_MOVE_INSERT: pos=$pos len=$len
+    ws-debug MARKS_MOVE_INSERT: wstext_marksvar=${(P)wstext_marksvar}
     declare -A marks
     marks=(${(@Pkv)wstext_marksvar})
     for m_name m_pos in "${(@kv)marks}"; do
-        ws-debug MARKS_MOVE_INSERT: m_name=$m_name m_pos=$m_pos
+#        ws-debug MARKS_MOVE_INSERT: m_name=$m_name m_pos=$m_pos
         if [[ $m_pos -gt $pos ]]; then
-            ws-debug MARKS_MOVE_INSERT: move mark $m_name from $m_pos to $((m_pos+len))
+#            ws-debug MARKS_MOVE_INSERT: move mark $m_name from $m_pos to $((m_pos+len))
             eval ${wstext_marksvar}"[$m_name]"=$((m_pos+len))
         fi
     done
@@ -426,10 +427,10 @@ wstext-marks-move-delete() {
         if [[ $m_pos -lt $pos ]]; then
             continue
         elif [[ $m_pos -lt $((pos+len)) ]]; then
-            ws-debug MARKS_MOVE_DELETE: move mark $m_name from $m_pos to $pos
+            ws-debug MARKS_MOVE_DELETE'[1]': move mark $m_name from $m_pos to $pos
             eval ${wstext_marksvar}"[$m_name]"=$pos
         else
-            ws-debug MARKS_MOVE_DELETE: move mark $m_name from $m_pos to $((m_pos-len))
+            ws-debug MARKS_MOVE_DELETE'[2]': move mark $m_name from $m_pos to $((m_pos-len))
             eval ${wstext_marksvar}"[$m_name]"=$((m_pos-len))
         fi
     done
@@ -456,7 +457,10 @@ wstext-delete() {
     local text="${(P)wstext_textvar}"
     local text_len=${#text}
 
-    wstext-marks-move-delete $from $((to-from+1))
+    wsblock-delupd $((from-1)) $to
+
+    ws-debug WSTEXT_DELETE: from=$from to=$to
+    wstext-marks-move-delete $((from-1)) $((to-from+1))
     if [[ $((to-from)) -gt 1 ]]; then
         ws_delbuf="$text[from, to]"
     fi
