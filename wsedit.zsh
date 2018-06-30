@@ -452,6 +452,21 @@ wsedit-correct-tabs() {
     echo $j
 }
 
+wsedit-ctrl-cnt() {
+    local text="$1"
+    local len=${#text}
+    local i=0
+    local cnt=0
+    while [[ $i -lt $len ]]; do
+        local c=$(printf "%d" "'$text[i]")
+#        ws-debug WSEDIT_CTRL_CNT: c=$c
+        if [[ $c -gt 0 && $c -lt 32 && $c != 9 ]]; then
+            cnt=$((cnt+1))
+        fi
+        i=$((i+1))
+    done
+    echo $cnt
+}
 
 wsedit-mkful() {
     ws-debug WSEDIT_MKFUL_1: row=$wsedit_row col=$wsedit_col \
@@ -612,7 +627,8 @@ wsedit-mkful() {
 
         # make line as it will be displayed
         i_text_real=$(wsedit-make-line $i $showb $showk "$i_text")
-        local line_len=${#i_text_real}
+        local ctrl_cnt=$(wsedit-ctrl-cnt "$i_text_real")
+        local line_len=$((${#i_text_real}+ctrl_cnt))
 
         # highlight part of text
         ws-debug WSEDIT_MKFUL: showblock=$showblock
@@ -875,6 +891,7 @@ wsedit-kr-end() {
     if [[ -n "$wsdfopen_text" ]]; then
         wstext-insert "$wsdfopen_text"
     fi
+    wsedit-refresh
 }
 
 # open file
@@ -894,6 +911,7 @@ wsedit-open-end() {
 
         wsedit_pos=0
     fi
+    wsedit-refresh
 }
 
 # save file
@@ -916,6 +934,7 @@ wsedit-save-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfsave_fn"
     fi
+    wsedit-refresh
 }
 
 
@@ -934,6 +953,7 @@ wsedit-save-as-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfsave_fn"
     fi
+    wsedit-refresh
 }
 
 
@@ -955,6 +975,7 @@ wsedit-save-exit() {
 }
 
 wsedit-save-exit-end() {
+#    BUFFER=""
     wsedit_text=""
     wsedit-exit
 }
@@ -964,8 +985,11 @@ zle -N wsedit-quit
 bindkey -M wsedit "^Kq" wsedit-quit
 bindkey -M wsedit "^KQ" wsedit-quit
 wsedit-quit() {
-    BUFFER=""
-    wsdquit-run wsedit-save-exit-end
+    wsdquit-run wsedit-save-exit-end 
+}
+
+wsedit-quit-no() {
+    wsedit-refresh
 }
 
 # replace buffer with contents from file and enter edit mode
@@ -983,6 +1007,8 @@ wstext-replace-enter() {
 
         wsedit_fn="$wsdfopen_fn"
         ws-edit
+    else
+        wsedit-refresh
     fi
 }
 
