@@ -152,14 +152,14 @@ wsblock-delupd() {
             fi
         else
             if [[ -n "$b_pos" ]]; then
-                if [[ $b_pos -ge $from && $b_pos -lt $to ]]; then
+                if [[ $b_pos -ge $from && $b_pos -le $to ]]; then
                     unset "${wstext_marksvar}[B]"
                     ws-debug WSBLOCK_DELUPD: undef B
                     b_pos=""
                 fi
             fi
             if [[ -n "$k_pos" ]]; then
-                if [[ $k_pos -ge $from && $b_pos -lt $to ]]; then
+                if [[ $k_pos -ge $from && $b_pos -le $to ]]; then
                     unset "${wstext_marksvar}[K]"
                     ws-debug WSBLOCK_DELUPD: undef K
                     k_pos=""
