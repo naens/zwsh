@@ -148,7 +148,7 @@ ws-updfn() {
             text=$text[1,k_pos]"<K>"$text[k_pos+1,b_pos]"<B>"$text[b_pos+1,${#text}]
             region_highlight=("$k_pos $((k_pos+3)) standout" \
                               "$((b_pos+3)) $((b_pos+6)) standout")
-            if [[ $curs -ge $b_pos && $curs -lt $k_pos ]]; then
+            if [[ $curs -lt $b_pos && $curs -ge $k_pos ]]; then
                 curs=$((curs+3))
             elif [[ $curs -ge $b_pos && $curs -ge $k_pos ]]; then
                 curs=$((curs+6))
