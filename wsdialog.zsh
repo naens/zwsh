@@ -204,7 +204,7 @@ wsdialog-rml4() {
 #    ws-debug WSDIALOG_RML4: dialog=\"$dialog\"
 
     # remove old line4
-    BUFFER[wsdialog_l4start,wsdialog_l4start+wsdialog_l4len+1]=""
+    BUFFER[wsdialog_l4start+1,wsdialog_l4start+wsdialog_l4len+1]=""
 
     # restore region highlight
 #    ws-debug WSDIALOG_RML4: prel4-highlight=$wsdialog_prel4save_highlight

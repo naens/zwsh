@@ -57,7 +57,7 @@ wsdfsave-fexists-yes() {
         wsdfsave_fn="$wsdialog_text"
         wsdialog_l4mode="<accept>"
     else
-        wsdfsave-savemake-ewrite-msg
+        wsdfsave-make-ewrite-msg
         wsdialog_l4mode=ewrite
     fi
 }
