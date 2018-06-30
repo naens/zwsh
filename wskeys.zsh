@@ -389,7 +389,7 @@ wskeys-unerase() {
 bindkey -N wskeys-ctrl
 
 zle -N wskeys-insert-ctrl-mode
-bindkey -M wskeys "^\`" wskeys-insert-ctrl-mode
+bindkey -M wskeys "^P" wskeys-insert-ctrl-mode
 wskeys-insert-ctrl-mode() {
     wskeys_ctrl_saved_keymap=$KEYMAP
     zle -K wskeys-ctrl
