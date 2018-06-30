@@ -358,9 +358,6 @@ zle -N wsblock-kw
 bindkey -M wskeys "^Kw" wsblock-kw
 bindkey -M wskeys "^KW" wsblock-kw
 wsblock-kw() {
-    if [[ -z "${(P)wstext_blockvisvar}" ]]; then
-        return
-    fi
     local pos=${(P)wstext_posvar}
     local text=${(P)wstext_textvar}
     if [[ "$wstext_blockcolmodevar" = "true" ]]; then
@@ -368,9 +365,12 @@ wsblock-kw() {
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
-            local block=$text[b_pos+1,k_pos]
-            local len=${#block}
-            # TODO: run write to file dialog, save $text to file
+            wsdfsave_text=$text[b_pos+1,k_pos]
+            wsdfsave-run
+        else
+            wsdinfo_l1="#You have not yet defined a block. Use ^KB and ^KK."
+            wsdinfo_l3="*Press Esc to continue.*"
+            wsdinfo-run
         fi
     fi
 }

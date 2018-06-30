@@ -74,7 +74,7 @@ stty erase '^H'
 # ws block functions
 . $srcdir/wsblock.zsh
 
-# file for ^KW binding functions and file writing
+# file for ^KX, ^KS and ^KW binding functions for file writing
 . $srcdir/wsdfsave.zsh
 
 # file for ^KR binding functions and file import
@@ -82,6 +82,9 @@ stty erase '^H'
 
 # file for ^KQ binding
 . $srcdir/wsdquit.zsh
+
+# display message
+. $srcdir/wsdinfo.zsh
 
 # ws find key bindings
 . $srcdir/wsfind.zsh
