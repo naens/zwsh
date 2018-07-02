@@ -65,14 +65,14 @@ stty erase '^H'
 # bind ws keys
 . $srcdir/wskeys.zsh
 
+# ws block functions
+. $srcdir/wsblock.zsh
+
 # line mode
 . $srcdir/wsline.zsh
 
 # dialog mode
 . $srcdir/wsdialog.zsh
-
-# ws block functions
-. $srcdir/wsblock.zsh
 
 # file for ^KX, ^KS and ^KW binding functions for file writing
 . $srcdir/wsdfsave.zsh

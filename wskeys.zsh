@@ -549,6 +549,33 @@ wskeys-exec-to-prompt() {
     fi
 }
 
+# replace buffer with contents from file and enter edit mode
+zle -N wskeys-replace
+bindkey -M wskeys "^Ke" wskeys-replace
+bindkey -M wskeys "^KE" wskeys-replace
+wskeys-replace() {
+    wsdialog-wsdfopen-run
+    wsdfopen_endfn=wstext-replace-enter
+}
+
+wstext-replace-enter() {
+    if [[ "$1" = "OK" ]]; then
+        ws_text="$wsdfopen_text"
+
+        wsedit_fn="$wsdfopen_fn"
+        ws-edit
+    else
+        $wstext_updfnvar
+    fi
+}
+
+wskeys-save-edit-end() {
+    if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfsave_fn"
+        ws-edit
+    fi
+}
+
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
     local modefun=$KEYMAP-pre-redraw

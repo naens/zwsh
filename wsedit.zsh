@@ -891,7 +891,7 @@ wsedit-kr-end() {
     if [[ -n "$wsdfopen_text" ]]; then
         wstext-insert "$wsdfopen_text"
     fi
-    wsedit-refresh
+    $wstext_updfnvar
 }
 
 # open file
@@ -911,7 +911,7 @@ wsedit-open-end() {
 
         wsedit_pos=0
     fi
-    wsedit-refresh
+    $wstext_updfnvar
 }
 
 # save file
@@ -934,7 +934,7 @@ wsedit-save-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfsave_fn"
     fi
-    wsedit-refresh
+    $wstext_updfnvar
 }
 
 
@@ -953,7 +953,7 @@ wsedit-save-as-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfsave_fn"
     fi
-    wsedit-refresh
+    $wstext_updfnvar
 }
 
 
@@ -989,34 +989,7 @@ wsedit-quit() {
 }
 
 wsedit-quit-no() {
-    wsedit-refresh
-}
-
-# replace buffer with contents from file and enter edit mode
-zle -N wskeys-replace
-bindkey -M wskeys "^Ke" wskeys-replace
-bindkey -M wskeys "^KE" wskeys-replace
-wskeys-replace() {
-    wsdialog-wsdfopen-run
-    wsdfopen_endfn=wstext-replace-enter
-}
-
-wstext-replace-enter() {
-    if [[ "$1" = "OK" ]]; then
-        ws_text="$wsdfopen_text"
-
-        wsedit_fn="$wsdfopen_fn"
-        ws-edit
-    else
-        wsedit-refresh
-    fi
-}
-
-wskeys-save-edit-end() {
-    if [[ "$1" = "OK" ]]; then
-        wsedit_fn="$wsdfsave_fn"
-        ws-edit
-    fi
+    $wstext_updfnvar
 }
 
 # TODO: * Find functions

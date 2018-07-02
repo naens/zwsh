@@ -237,6 +237,7 @@ ws-kb() {
         eval "$wstext_blockvisvar=true"
     fi
     # if $wsblock_col is undefined, leave undefined (by default column mode off)
+    ws-debug WS_KB: b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
     wstext-upd
 }
 
@@ -257,6 +258,7 @@ ws-kk() {
         eval "${wstext_marksvar}[K]=$pos"
         eval "$wstext_blockvisvar=true"
     fi
+    ws-debug WS_KK: k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
 #    # if $wsblock_col is undefined, leave undefined (by default column mode off)
     wstext-upd
 }
