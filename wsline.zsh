@@ -6,6 +6,18 @@
 # if $wsline_maxlen is 0, then mute mode
 
 bindkey -N wsline wskeys
+bindkey -M wsline -r "^Ke"
+bindkey -M wsline -r "^KE"
+bindkey -M wsline -r "^Kd"
+bindkey -M wsline -r "^KD"
+bindkey -M wsline -r "^Ks"
+bindkey -M wsline -r "^KS"
+bindkey -M wsline -r "^Kx"
+bindkey -M wsline -r "^KX"
+bindkey -M wsline -r "^Km"
+bindkey -M wsline -r "^KM"
+bindkey -M wsline -r "^E"
+bindkey -M wsline -r "^X"
 
 # initialize mode and insert field at $begin in BUFFER
 wsline-init() {
@@ -27,6 +39,8 @@ wsline-init() {
     if typeset -f wsline-${name}-cancel > /dev/null; then
         zle -N wsline-${name}-cancel
         bindkey -M $mode "^U" wsline-${name}-cancel
+        bindkey -M $mode "^Kq" wsline-${name}-cancel
+        bindkey -M $mode "^KQ" wsline-${name}-cancel
     fi
 #    ws-debug WSLINE_INIT: name=$name
 #    ws-debug WSLINE_INIT"{1}": CURSOR=$CURSOR begin=$begin len=$len
@@ -98,7 +112,10 @@ wsline-update() {
 #    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
 #    ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
     BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
-    ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) " "
+    ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) "-"
+    #TODO: * display <B>, <K> + cursor skip <B>/<K>
+    #TODO: * exchange with buffer: ^U and ^KB/^KK and back
+    #TODO: * length: with control characters and <B>/<K> elements
     local cursorpos=$((begin+textpos-scrollpos))
 #    ws-debug cursorpos=$cursorpos
     CURSOR=$((begin+textpos-scrollpos))
