@@ -107,7 +107,7 @@ wsline-exit() {
 #     $2 - text
 #
 # Returns:
-#     prints the display version of the text
+#     stdout - display version of the text
 #
 wsline-get-display-text() {
     local name="$1"
@@ -137,7 +137,7 @@ wsline-get-display-text() {
 #     $2 - sorted array of positions to convert
 #
 # Returns:
-#     prints values of corresponding positions
+#     stdout - values of corresponding positions
 #
 wsline-convert-display-pos() {
     local text=$1

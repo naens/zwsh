@@ -12,14 +12,14 @@
  <div class="CTitle">Functions</div>
 </div>
 
-<a name="wsline-get-display-pos"></a><a name="Topic4"></a><div class="CTopic TFunction Lshell">
+<a name="wsline-get-display-pos"></a><a name="Topic3"></a><div class="CTopic TFunction Lshell">
  <div class="CTitle">wsline-get-display-pos</div>
- <div class="CBody"><p>Converts text to display representation: - insert &lt;B&gt; and &lt;K&gt; where needed - insert ^J instead of newline</p><div class="CHeading">Parameters</div><table class="CDefinitionList"><tr><td class="CDLEntry">$1</td><td class="CDLDefinition"><p>name</p></td></tr><tr><td class="CDLEntry">$2</td><td class="CDLDefinition"><p>text</p></td></tr></table><div class="CHeading">Returns</div><p>prints the display version of the text</p></div>
+ <div class="CBody"><p>Converts text to display representation: - insert &lt;B&gt; and &lt;K&gt; where needed - insert ^J instead of newline</p><div class="CHeading">Parameters</div><table class="CDefinitionList"><tr><td class="CDLEntry">$1</td><td class="CDLDefinition"><p>name</p></td></tr><tr><td class="CDLEntry">$2</td><td class="CDLDefinition"><p>text</p></td></tr></table><div class="CHeading">Returns</div><table class="CDefinitionList"><tr><td class="CDLEntry">stdout</td><td class="CDLDefinition"><p>display version of the text</p></td></tr></table></div>
 </div>
 
-<a name="wsline-display-pos"></a><a name="Topic2"></a><div class="CTopic TFunction Lshell last">
+<a name="wsline-display-pos"></a><a name="Topic5"></a><div class="CTopic TFunction Lshell last">
  <div class="CTitle">wsline-display-pos</div>
- <div class="CBody"><p>Converts positions in text to what they will be when displayed.&nbsp; &lt;B&gt; and &lt;K&gt;, while not taking space in text, are of width 3 when dislpayed.&nbsp; Control characters (^O, ^P) are counted as a single character in text, but are two characters when displayed.&nbsp; The newlines character is counted as '^J', because it is displayed this way in wsline mode.</p><div class="CHeading">Parameters</div><table class="CDefinitionList"><tr><td class="CDLEntry">$1</td><td class="CDLDefinition"><p>text</p></td></tr><tr><td class="CDLEntry">$2</td><td class="CDLDefinition"><p>sorted array of positions to convert</p></td></tr></table><div class="CHeading">Returns</div><p>prints values of corresponding positions</p></div>
+ <div class="CBody"><p>Converts positions in text to what they will be when displayed.&nbsp; &lt;B&gt; and &lt;K&gt;, while not taking space in text, are of width 3 when dislpayed.&nbsp; Control characters (^O, ^P) are counted as a single character in text, but are two characters when displayed.&nbsp; The newlines character is counted as '^J', because it is displayed this way in wsline mode.</p><div class="CHeading">Parameters</div><table class="CDefinitionList"><tr><td class="CDLEntry">$1</td><td class="CDLDefinition"><p>text</p></td></tr><tr><td class="CDLEntry">$2</td><td class="CDLDefinition"><p>sorted array of positions to convert</p></td></tr></table><div class="CHeading">Returns</div><table class="CDefinitionList"><tr><td class="CDLEntry">stdout</td><td class="CDLDefinition"><p>values of corresponding positions</p></td></tr></table></div>
 </div>
 
 </body></html>
