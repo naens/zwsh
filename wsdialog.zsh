@@ -76,6 +76,9 @@ wsdialog-close() {
     wstext_textvar=$wsdialog_oldtextvar
     wstext_updfnvar=$wsdialog_oldupdfnvar
     wstext_posvar=$wsdialog_oldposvar
+    wstext_marksvar=$wsdialog_oldmarksvar
+    wstext_blockvisvar=$wsdialog_oldblockvisvar
+    wstext_blockcolmodevar=$wsdialog_oldblockcolmodevar
     zle -K $wsdialog_savemode
 
     # unset variables
@@ -98,6 +101,9 @@ wsdialog-unsetvars() {
     unset wsdialog_oldtextvar
     unset wsdialog_oldupdfnvar
     unset wsdialog_oldposvar
+    unset wsdialog_oldmarksvar
+    unset wsdialog_oldblockvisvar
+    unset wsdialog_oldblockcolmodevar
 }
 
 # display line4 and enter l4 mode
@@ -157,9 +163,13 @@ wsdialog-run() {
 
     wsdialog_savecurs=$CURSOR
     wsdialog_savemode=$KEYMAP
+
     wsdialog_oldtextvar=$wstext_textvar
     wsdialog_oldupdfnvar=$wstext_updfnvar
     wsdialog_oldposvar=$wstext_posvar
+    wsdialog_oldmarksvar=$wstext_marksvar
+    wsdialog_oldblockvisvar=$wstext_blockvisvar
+    wsdialog_oldblockcolmodevar=$wstext_blockcolmodevar
 
     zle end-of-line
     LBUFFER+=$'\n'
@@ -177,7 +187,7 @@ wsdialog-run() {
     # insert wsline
     local cols=$(tput cols)
     local len=$((cols-l1len-1))
-    wsline-init wsdialog_$dialog $CURSOR $len
+    wsline-init wsdialog_$dialog $CURSOR $len $wstext_marksvar $wstext_blockvisvar
 
     local l2start=$((wsdialog_start+l1len+len))
     ws-insert-formatted-at $l2start $'\n'"$line2"

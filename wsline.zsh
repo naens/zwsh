@@ -24,11 +24,16 @@ wsline-init() {
     local name=$1
     local begin=$2
     local len=$3
+    local marksvar=$4
+    local visvar=$5
     eval "wsline_${name}_begin=$begin"
     eval "wsline_${name}_len=$len"
     eval "wsline_${name}_text=''"
     eval "wsline-${name}-update() { wsline-update $name }"
     eval "wsline_${name}_textpos=0"
+    eval "wsline_${name}_caller_marksvar=$marksvar"
+    eval "wsline_${name}_caller_visvar=$visvar"
+    declare -gA wsline_${name}_marksvar
 
     local mode=wsline-${name}-mode
     bindkey -N $mode wsline
@@ -64,6 +69,9 @@ wsline-activate() {
     wstext_textvar=wsline_${name}_text
     wstext_updfnvar=wsline-${name}-update
     wstext_posvar=wsline_${name}_textpos
+    wstext_marksvar=wsline_${name}_marksvar
+    wstext_blockvisvar=wsline_${name}_blockvisvar
+    wstext_blockcolmodevar=wsline_${name}_blockcolmodevar
     local beginvar=wsline_${name}_begin
 
 #    ws-debug WSLINE_ACTIVATE: entering mode \"wsline-${name}-mode\", begin=${(P)beginvar}
@@ -81,9 +89,56 @@ wsline-exit() {
     unset wsline_${name}_text
     unset wsline_${name}_textpos
     unset wsline_${name}_update
+    unset wsline_${name}_marksvar
+    unset wsline_${name}_blockvisvar
+    unset wsline_${name}_blockcolmodevar
     unset wstext_textvar
     unset wstext_updfnvar
     unset wstext_posvar
+}
+
+# Function: wsline-get-display-pos
+#     Converts text to display representation:
+#      - insert <B> and <K> where needed
+#      - insert ^J instead of newline
+# Parameters:
+#     $1 - name
+#     $2 - text
+# Returns:
+#     prints the display version of the text
+wsline-get-display-text() {
+    local name="$1"
+    local text="$2"
+    local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+    local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+    local vis=${(P)wstext_blockvisvar}
+    ws-debug WSLINE_GET_DISPLAY_TEXT: "name=$name text=$text"
+    ws-debug WSLINE_GET_DISPLAY_TEXT: b_pos=$b_pos k_pos=$k_pos vis=$vis
+    if [[ -z "$vis" ]]; then
+        b_pos=""
+        k_pos=""
+    fi
+    ws-debug WSLINE_GET_DISPLAY_TEXT: "text=$text b_pos=$b_pos k_pos=$k_pos"
+}
+
+# Function: wsline-display-pos
+#     Converts positions in text to what they will be when displayed.
+#     <B> and <K>, while not taking space in text, are of width 3 when dislpayed.
+#     Control characters (^O, ^P) are counted as a single character in text,
+#     but are two characters when displayed.
+#     The newlines character is counted as '^J', because it is displayed
+#     this way in wsline mode.
+# Parameters:
+#     $1 - text
+#     $2 - sorted array of positions to convert
+# Returns:
+#     prints values of corresponding positions
+#
+wsline-convert-display-pos() {
+    local text=$1
+    local positions=$2
+#    ws-debug WSLINE_CONVERT_DISLPAY_POS: "text=$text positions=$positions"
+    # TODO
 }
 
 # wsline variables:
@@ -109,14 +164,17 @@ wsline-update() {
     local scrollpos=$(ws-get-scrollpos $tlen $flen $textpos $oldscroll)
     eval "$scrollposvar=$scrollpos"
 
-#    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
+    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
 #    ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
+    local cursorpos=$((begin+textpos-scrollpos))
+    local display_text=$(wsline-get-display-text "$name" "$text")
+    read fstart pos <<< $(wsline-convert-display-pos \
+    				"$name" "$text" "($begin $cursorpos)")
     BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
     ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) "-"
     #TODO: * display <B>, <K> + cursor skip <B>/<K>
     #TODO: * exchange with buffer: ^U and ^KB/^KK and back
     #TODO: * length: with control characters and <B>/<K> elements
-    local cursorpos=$((begin+textpos-scrollpos))
 #    ws-debug cursorpos=$cursorpos
     CURSOR=$((begin+textpos-scrollpos))
 }
