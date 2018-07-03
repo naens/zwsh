@@ -101,11 +101,14 @@ wsline-exit() {
 #     Converts text to display representation:
 #      - insert <B> and <K> where needed
 #      - insert ^J instead of newline
+#
 # Parameters:
 #     $1 - name
 #     $2 - text
+#
 # Returns:
 #     prints the display version of the text
+#
 wsline-get-display-text() {
     local name="$1"
     local text="$2"
@@ -128,9 +131,11 @@ wsline-get-display-text() {
 #     but are two characters when displayed.
 #     The newlines character is counted as '^J', because it is displayed
 #     this way in wsline mode.
+#
 # Parameters:
 #     $1 - text
 #     $2 - sorted array of positions to convert
+#
 # Returns:
 #     prints values of corresponding positions
 #
