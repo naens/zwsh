@@ -97,6 +97,26 @@ wsline-exit() {
     unset wstext_posvar
 }
 
+# Function: wsline-updvars
+#     Updates global variables relative to the state of the block.
+#
+wsline-updvars() {
+    wsline_bpos=$(eval "echo \${${wstext_marksvar}[B]}")
+    wsline_kpos=$(eval "echo \${${wstext_marksvar}[K]}")
+    wsline_vis=${(P)wstext_blockvisvar}
+    wsline_showbk=true
+    if [[ -z "$wsline_vis" ]]; then
+        wsline_bpos=""
+        wsline_kpos=""
+    	wsline_showbk=false
+    elif [[ -n "$wsline_bpos" && -n "$wsline_kpos"
+                 && "$wsline_bpos" -lt "$wsline_kpos" ]]; then
+    	wsline_showbk=false
+    fi
+    ws-debug WSLINE_UPDVARS: bpos=$wsline_bpos kpos=$wsline_kpos \
+    	vis=$wsline_vis showbk=$wsline_showbk
+}
+
 # Function: wsline-get-display-pos
 #     Converts text to display representation:
 #      - insert <B> and <K> where needed
@@ -112,16 +132,24 @@ wsline-exit() {
 wsline-get-display-text() {
     local name="$1"
     local text="$2"
-    local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
-    local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
-    local vis=${(P)wstext_blockvisvar}
     ws-debug WSLINE_GET_DISPLAY_TEXT: "name=$name text=$text"
-    ws-debug WSLINE_GET_DISPLAY_TEXT: b_pos=$b_pos k_pos=$k_pos vis=$vis
-    if [[ -z "$vis" ]]; then
-        b_pos=""
-        k_pos=""
-    fi
-    ws-debug WSLINE_GET_DISPLAY_TEXT: "text=$text b_pos=$b_pos k_pos=$k_pos"
+    local result=""
+    local i=0
+    local len=${#text}
+    while [[ $i -lt $len ]]; do
+        local c=$text[i+1]
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
+            result+="<B>"
+        fi
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_kpos" ]]; then
+            result+="<K>"
+        fi
+        #: TODO: replace all control characters with ^... for display
+        result+=$c
+        i=$((i+1))
+    done
+    ws-debug WSLINE_GET_DISPLAY_TEXT: "display: \"$result\""
+    echo "$result"
 }
 
 # Function: wsline-display-pos
@@ -140,10 +168,40 @@ wsline-get-display-text() {
 #     stdout - values of corresponding positions
 #
 wsline-convert-display-pos() {
-    local text=$1
-    local positions=$2
-#    ws-debug WSLINE_CONVERT_DISLPAY_POS: "text=$text positions=$positions"
-    # TODO
+    local name=$1
+    local text=$2
+    eval "pos_arr=$3"
+    ws-debug WSLINE_CONVERT_DISLPAY_POS: "text=$text" $pos_arr[1] $pos_arr[2]
+    
+    local i=0
+    local len=${#text}
+    local dpos=0
+    local j=1
+    local -a r=()
+    while [[ $i -le $len ]]; do
+        local c=$text[i+1]
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
+            dpos=$((dpos+3))
+        fi
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_kpos" ]]; then
+            dpos=$((dpos+3))
+        fi
+        local code=$(printf "%d" "'$c")
+        if [[ $code -ge 1 && $code -lt 32 ]]; then
+            dpos=$((dpos+1))
+        fi
+        ws-debug WSLINE_CONVERT_DISPLAY_POS: c=$c code=$code i=$i dpos=$dpos
+        while [[ $j -le ${#pos_arr} && $pos_arr[j] -eq $i ]]; do
+            ws-debug WSLINE_CONVERT_DISPLAY_POS: $pos_arr[j] becomes $dpos
+            r[j]=$dpos
+            j=$((j+1))
+        done
+        result+=$c
+        i=$((i+1))
+        dpos=$((dpos+1))
+    done
+    ws-debug WSLINE_CONVERT_DISPLAY_POS: r=$r
+    echo $r
 }
 
 # wsline variables:
@@ -160,26 +218,31 @@ wsline-update() {
     local flen=${(P)flenvar}
     local beginvar=wsline_${name}_begin
     local begin=${(P)beginvar}
+
+    wsline-updvars
     
     local scrollposvar=wsline_${name}_scrollpos
     local posvar=wsline_${name}_textpos
     local textpos=${(P)posvar}
 
+    # variables for display version of the text
+    local dtext=$(wsline-get-display-text "$name" "$text")
+    read dtextpos dtlen <<< $(wsline-convert-display-pos \
+    	"$name" "$text" "($textpos $tlen)" )
+    ws-debug WSLINE_UPDATE dtextpos=$dtextpos dtlen=$dtlen  
+
     local oldscroll=${(P)scrollposvar}
-    local scrollpos=$(ws-get-scrollpos $tlen $flen $textpos $oldscroll)
+    local scrollpos=$(ws-get-scrollpos $dtlen $flen $dtextpos $oldscroll)
     eval "$scrollposvar=$scrollpos"
 
-    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
+#    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
 #    ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
-    local cursorpos=$((begin+textpos-scrollpos))
-    local display_text=$(wsline-get-display-text "$name" "$text")
-    read fstart pos <<< $(wsline-convert-display-pos \
-    				"$name" "$text" "($begin $cursorpos)")
-    BUFFER[begin+1,begin+flen]="$text[1+scrollpos,flen+scrollpos]"
-    ws-insert-xtimes $((begin+tlen-scrollpos)) $((scrollpos+flen-tlen)) "-"
+    local cursorpos=$((begin+dtextpos-scrollpos))
+    BUFFER[begin+1,begin+flen]="$dtext[1+scrollpos,flen+scrollpos]"
+    ws-insert-xtimes $((begin+dtlen-scrollpos)) $((scrollpos+flen-dtlen)) "-"
     #TODO: * display <B>, <K> + cursor skip <B>/<K>
     #TODO: * exchange with buffer: ^U and ^KB/^KK and back
     #TODO: * length: with control characters and <B>/<K> elements
 #    ws-debug cursorpos=$cursorpos
-    CURSOR=$((begin+textpos-scrollpos))
+    CURSOR=$((begin+dtextpos-scrollpos))
 }
