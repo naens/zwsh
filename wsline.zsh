@@ -78,6 +78,10 @@ wsline-activate() {
 
     zle -K wsline-${name}-mode
 #    eval "wsline_${name}_scrollpos=0"
+    wsline_orighl=( "${region_highlight[@]}" )
+    ws-debug WSLINE_ACTIVATE: rhl="$region_highlight"
+    ws-debug WSLINE_ACTIVATE: ohl="$wsline_orighl"
+
     wsline-update $name
 }
 
@@ -98,8 +102,9 @@ wsline-exit() {
     unset wstext_posvar
     unset wsline_bpos
     unset wsline_kpos
-    unset wsline_vis
+    unset wsline_blockvis
     unset wsline_showbk
+    unset wsline_orighl
 }
 
 # Function: wsline-updvars
@@ -109,9 +114,9 @@ wsline-updvars() {
     ws-debug WSLINE_UPDVARS marksvar="\"${wstext_marksvar}\""
     wsline_bpos=$(eval "echo \${${wstext_marksvar}[B]}")
     wsline_kpos=$(eval "echo \${${wstext_marksvar}[K]}")
-    wsline_vis=${(P)wstext_blockvisvar}
+    wsline_blockvis=${(P)wstext_blockvisvar}
     wsline_showbk=true
-    if [[ -z "$wsline_vis" ]]; then
+    if [[ -z "$wsline_blockvis" ]]; then
         wsline_bpos=""
         wsline_kpos=""
     	wsline_showbk=false
@@ -120,7 +125,7 @@ wsline-updvars() {
     	wsline_showbk=false
     fi
     ws-debug WSLINE_UPDVARS: bpos=$wsline_bpos kpos=$wsline_kpos \
-    	vis=$wsline_vis showbk=$wsline_showbk
+    	vis=$wsline_blockvis showbk=$wsline_showbk
 }
 
 # Function: wsline-get-display-pos
@@ -142,6 +147,7 @@ wsline-get-display-text() {
     local result=""
     local i=0
     local len=${#text}
+    local a=$(printf "%d" "'A")
     while [[ $i -lt $((len+1)) ]]; do
         local c=$text[i+1]
         if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
@@ -150,11 +156,17 @@ wsline-get-display-text() {
         if [[ "$wsline_showbk" = "true" && $i = "$wsline_kpos" ]]; then
             result+="<K>"
         fi
-        #: TODO: replace all control characters with ^... for display
-        result+=$c
+        local code=$(printf "%d" "'$c")
+        if [[ $code -ge 1 && $code -lt 32 ]]; then
+            n=$(printf '%x' $((code+a-1)))
+            ws-debug WSLINE_GET_DISPLAY_TEXT: code=$code n=$n
+            result+="^"$(printf '\x'$n)
+        else
+            result+=$c
+        fi
         i=$((i+1))
     done
-    ws-debug WSLINE_GET_DISPLAY_TEXT: "display: \"$result\""
+    ws-debug WSLINE_GET_DISPLAY_TEXT: "display: \"$result\"" highlight="($wsline_highlight)"
     echo "$result"
 }
 
@@ -182,8 +194,9 @@ wsline-convert-display-pos() {
     local i=0
     local len=${#text}
     local dpos=0
-    local j=1
+#    local j=1
     local -a r=()
+    local prevcode=0
     while [[ $i -le $len ]]; do
         local c=$text[i+1]
         if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
@@ -193,18 +206,23 @@ wsline-convert-display-pos() {
             dpos=$((dpos+3))
         fi
         local code=$(printf "%d" "'$c")
-        if [[ $code -ge 1 && $code -lt 32 ]]; then
+        if [[ $prevcode -ge 1 && $prevcode -lt 32 ]]; then
             dpos=$((dpos+1))
         fi
-        ws-debug WSLINE_CONVERT_DISPLAY_POS: c=$c code=$code i=$i dpos=$dpos
-        while [[ $j -le ${#pos_arr} && $pos_arr[j] -eq $i ]]; do
-            ws-debug WSLINE_CONVERT_DISPLAY_POS: $pos_arr[j] becomes $dpos
-            r[j]=$dpos
+#        ws-debug WSLINE_CONVERT_DISPLAY_POS: c=$c code=$code i=$i dpos=$dpos
+        j=1
+        while [[ $j -le ${#pos_arr} ]]; do
+#        while [[ $j -le ${#pos_arr} && $pos_arr[j] -eq $i ]]; do
+#            ws-debug WSLINE_CONVERT_DISPLAY_POS: $pos_arr[j] becomes $dpos
+            if [[ $pos_arr[j] -eq $i ]]; then
+                r[j]=$dpos
+            fi
             j=$((j+1))
         done
         result+=$c
         i=$((i+1))
         dpos=$((dpos+1))
+        prevcode=$code
     done
     ws-debug WSLINE_CONVERT_DISPLAY_POS: r=$r
     echo $r
@@ -233,9 +251,12 @@ wsline-update() {
 
     # variables for display version of the text
     local dtext=$(wsline-get-display-text "$name" "$text")
-    read dtextpos dtlen <<< $(wsline-convert-display-pos \
-    	"$name" "$text" "($textpos $tlen)" )
-    ws-debug WSLINE_UPDATE dtextpos=$dtextpos dtlen=$dtlen  
+    read dtextpos dtlen m1 m2 <<< $(wsline-convert-display-pos \
+    	"$name" "$text" "($textpos $tlen $wsline_bpos $wsline_kpos)" )
+    ws-debug WSLINE_UPDATE dtextpos=$dtextpos dtlen=$dtlen m1=$m1 m2=$m2
+
+    # TODO: convert highlight to screen positions, display
+    #       !! when leaving: remove all highlighting!
 
     local oldscroll=${(P)scrollposvar}
     local scrollpos=$(ws-get-scrollpos $dtlen $flen $dtextpos $oldscroll)
@@ -246,7 +267,33 @@ wsline-update() {
     local cursorpos=$((begin+dtextpos-scrollpos))
     BUFFER[begin+1,begin+flen]="$dtext[1+scrollpos,flen+scrollpos]"
     ws-insert-xtimes $((begin+dtlen-scrollpos)) $((scrollpos+flen-dtlen)) "-"
-    #TODO: * display <B>, <K> + cursor skip <B>/<K>
+
+
+    # display <B>, <K> + cursor skip <B>/<K>
+    ws-debug WSLINE_UPDATE: rhl="$region_highlight"
+    ws-debug WSLINE_UPDATE: ohl="$wsline_orighl"
+    ws-debug WSLINE_UPDATE: showbk=$wsline_showbk blockvis=$wsline_blockvis
+    region_highlight=( "${wsline_orighl[@]}" )
+    if [[ "$wsline_showbk" = "true" ]]; then
+        # TODO: find positions for <B> and <K>
+        if [[ -n "$m1" ]]; then
+            local m1end=$((begin+m1-scrollpos))
+            region_highlight+=("$((m1end-3)) $m1end standout")
+        fi
+        if [[ -n "$m2" ]]; then
+            local m2end=$((begin+m2-scrollpos))
+            region_highlight+=("$((m2end-3)) $m2end standout")
+        fi
+    elif [[ "$wsline_blockvis" = "true" ]]; then
+        local dbpos=$((begin+m1-scrollpos))
+        local dkpos=$((begin+m2-scrollpos))
+        ws-debug WSLINE_UPDATE: dbpos=$dbpos dkpos=$dkpos
+        region_highlight+=("$dbpos $dkpos standout")
+    fi
+    ws-debug WSLINE_UPDATE: region_highlight="$region_highlight"
+
+    # TODO: display ^ characters as *bold* (not standout)
+
     #TODO: * exchange with buffer: ^U and ^KB/^KK and back
     #TODO: * length: with control characters and <B>/<K> elements
 #    ws-debug cursorpos=$cursorpos
