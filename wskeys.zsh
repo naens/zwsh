@@ -402,12 +402,12 @@ wskeys-ctrl-insert() {
     zle -K $wskeys_ctrl_saved_keymap
 }
 
-zle -N wskeys-ctrl-n
-bindkey -M wskeys-ctrl "^J" wskeys-ctrl-n
-wskeys-ctrl-n() {
-    zle -K $wskeys_ctrl_saved_keymap
-    ws-split-line
-}
+#zle -N wskeys-ctrl-n
+#bindkey -M wskeys-ctrl "^J" wskeys-ctrl-n
+#wskeys-ctrl-n() {
+#    zle -K $wskeys_ctrl_saved_keymap
+#    ws-split-line
+#}
 
 zle -N wskeys-ctrl-exit
 bindkey -M wskeys-ctrl "^\`" wskeys-ctrl-exit
