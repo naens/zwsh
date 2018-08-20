@@ -83,6 +83,7 @@ wsline-activate() {
 
 wsline-exit() {
     local name=$1
+    ws-debug WSLINE_EXIT name="\"$name\""
 
     unset wsline_${name}_begin
     unset wsline_${name}_len
@@ -95,12 +96,16 @@ wsline-exit() {
     unset wstext_textvar
     unset wstext_updfnvar
     unset wstext_posvar
+    unset wsline_bpos
+    unset wsline_kpos
+    unset wsline_showbk
 }
 
 # Function: wsline-updvars
 #     Updates global variables relative to the state of the block.
 #
 wsline-updvars() {
+    ws-debug WSLINE_UPDVARS marksvar="\"${wstext_marksvar}\""
     wsline_bpos=$(eval "echo \${${wstext_marksvar}[B]}")
     wsline_kpos=$(eval "echo \${${wstext_marksvar}[K]}")
     wsline_vis=${(P)wstext_blockvisvar}
