@@ -98,6 +98,7 @@ wsline-exit() {
     unset wstext_posvar
     unset wsline_bpos
     unset wsline_kpos
+    unset wsline_vis
     unset wsline_showbk
 }
 
@@ -141,7 +142,7 @@ wsline-get-display-text() {
     local result=""
     local i=0
     local len=${#text}
-    while [[ $i -lt $len ]]; do
+    while [[ $i -lt $((len+1)) ]]; do
         local c=$text[i+1]
         if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
             result+="<B>"
