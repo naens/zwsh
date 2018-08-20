@@ -65,8 +65,9 @@ wsdialog-del() {
 wsdialog-close() {
     local dialog=$1
     # status in $2
+    ws-debug WSDIALOG_CLOSE dialog="\"$1\"" status="\"$2\""
     local do_restore=wsdialog_${dialog}_restore
-    wsline-exit "$dialog"
+    wsline-exit "wsdialog_${dialog}"
 
     #restore text, cursor and region_highlight
     wsdialog-del
@@ -147,7 +148,7 @@ wsdialog-acceptfn() {
 # close everything and call restore
 wsdialog-cancelfn() {
     local dialog=$1
-#    ws-debug WSDIALOG_CANCELFN: dialog=$dialog
+    ws-debug WSDIALOG_CANCELFN: dialog=$dialog
 
     unset wsdialog_text
     wsdialog-close $dialog "NO"
