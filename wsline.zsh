@@ -87,7 +87,7 @@ wsline-activate() {
 
 wsline-exit() {
     local name=$1
-    ws-debug WSLINE_EXIT name="\"$name\""
+    ws-debug WSLINE_EXIT name=$name
 
     unset wsline_${name}_begin
     unset wsline_${name}_len
@@ -105,6 +105,7 @@ wsline-exit() {
     unset wsline_blockvis
     unset wsline_showbk
     unset wsline_orighl
+    unset wsline_ctrl_chrs
 }
 
 # Function: wsline-updvars
@@ -159,7 +160,6 @@ wsline-get-display-text() {
         local code=$(printf "%d" "'$c")
         if [[ $code -ge 1 && $code -lt 32 ]]; then
             n=$(printf '%x' $((code+a-1)))
-            ws-debug WSLINE_GET_DISPLAY_TEXT: code=$code n=$n
             result+="^"$(printf '\x'$n)
         else
             result+=$c
@@ -168,6 +168,43 @@ wsline-get-display-text() {
     done
     ws-debug WSLINE_GET_DISPLAY_TEXT: "display: \"$result\"" highlight="($wsline_highlight)"
     echo "$result"
+}
+
+# Function: wsline-get-ctrl-chrs
+#     Returns the array of the positions of the control characters.
+#
+# Parameters:
+#     $1 - text
+#
+# Returns:
+#     stdout - the array of the positions of the control characters
+#
+wsline-get-ctrl-chrs() {
+    local text="$1"
+    local i=0
+    local len=${#text}
+    local dpos=0
+    local ctrl_chrs=()
+    while [[ $i -lt $((len+1)) ]]; do
+        local c=$text[i+1]
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_bpos" ]]; then
+            dpos=$((dpos+3))
+        fi
+        if [[ "$wsline_showbk" = "true" && $i = "$wsline_kpos" ]]; then
+            dpos=$((dpos+3))
+        fi
+        local code=$(printf "%d" "'$c")
+        if [[ $code -ge 1 && $code -lt 32 ]]; then
+            ctrl_chrs+=("$dpos")
+            dpos=$((dpos+1))
+        else
+            result+=$c
+        fi
+        dpos=$((dpos+1))
+        i=$((i+1))
+    done
+    ws-debug WSLINE_GET_CTRL_CHRS: ctrl_chrs=$ctrl_chrs
+    echo "$ctrl_chrs"
 }
 
 # Function: wsline-display-pos
@@ -228,6 +265,58 @@ wsline-convert-display-pos() {
     echo $r
 }
 
+wsline-highlight-bk() {
+    local begin=$1
+    local scrollpos=$2
+    local fieldwidth=$3
+    local markend=$4
+#    ws-debug WSLINE_HIGHLIGHT_BK markend=$markend
+    if [[ -z "$markend" ]]; then
+        return
+    fi
+    if [[ $markend -lt $scrollpos ]]; then
+        return
+    fi 
+    local markstart=$((markend-3))
+    local fieldend=$((scrollpos+fieldwidth))
+    if [[ $markstart -gt $fieldend ]]; then
+        return
+    fi
+    if [[ $markstart -lt $scrollpos ]]; then
+        markstart=$scrollpos
+    fi
+    if [[ $markend -gt $fieldend ]]; then
+        markend=$fieldend
+    fi
+    local display_mark_start=$((begin+markstart))
+    local display_mark_end=$((begin+markend))
+    region_highlight+=("$display_mark_start $display_mark_end standout")
+}
+
+wsline-highlight-ctrl-chr() {
+    local begin=$1
+    local scrollpos=$2
+    local fieldwidth=$3
+    local dpos=$4
+    local hlend=$((dpos+2))
+    if [[ $hlend -lt $scrollpos ]]; then
+        return
+    fi 
+    local fieldend=$((scrollpos+fieldwidth))
+    if [[ $dpos -gt $fieldend ]]; then
+        return
+    fi
+    if [[ $dpos -lt $scrollpos ]]; then
+        dpos=$scrollpos
+    fi
+    if [[ $hlend -gt $fieldend ]]; then
+        hlend=$fieldend
+    fi
+    local display_hlstart=$((begin+dpos))
+    local display_hlend=$((begin+hlend))
+    region_highlight+=("$display_hlstart $display_hlend bold")
+}
+
 # wsline variables:
 #  - begin: position where the editable area begins
 #  - len: length of the editable area
@@ -251,51 +340,39 @@ wsline-update() {
 
     # variables for display version of the text
     local dtext=$(wsline-get-display-text "$name" "$text")
+    local ctrl_chrs=($(wsline-get-ctrl-chrs "$text"))
     read dtextpos dtlen m1 m2 <<< $(wsline-convert-display-pos \
     	"$name" "$text" "($textpos $tlen $wsline_bpos $wsline_kpos)" )
-    ws-debug WSLINE_UPDATE dtextpos=$dtextpos dtlen=$dtlen m1=$m1 m2=$m2
-
-    # TODO: convert highlight to screen positions, display
-    #       !! when leaving: remove all highlighting!
+    if [[ -n "$m1" && -n "$m2" && "$m1" = "$m2" ]]; then
+        m1=$((m1-3))
+    fi
 
     local oldscroll=${(P)scrollposvar}
     local scrollpos=$(ws-get-scrollpos $dtlen $flen $dtextpos $oldscroll)
     eval "$scrollposvar=$scrollpos"
 
-#    ws-debug WSLINE_UPDATE: name=$name begin=$begin text=\"$text\"
-#    ws-debug WSLINE_UPDATE: tlen=$tlen flen=$flen textpos=$textpos oldscroll=$oldscroll scrollpos=$scrollpos
     local cursorpos=$((begin+dtextpos-scrollpos))
     BUFFER[begin+1,begin+flen]="$dtext[1+scrollpos,flen+scrollpos]"
     ws-insert-xtimes $((begin+dtlen-scrollpos)) $((scrollpos+flen-dtlen)) "-"
 
-
     # display <B>, <K> + cursor skip <B>/<K>
-    ws-debug WSLINE_UPDATE: rhl="$region_highlight"
-    ws-debug WSLINE_UPDATE: ohl="$wsline_orighl"
-    ws-debug WSLINE_UPDATE: showbk=$wsline_showbk blockvis=$wsline_blockvis
     region_highlight=( "${wsline_orighl[@]}" )
     if [[ "$wsline_showbk" = "true" ]]; then
-        # TODO: find positions for <B> and <K>
-        if [[ -n "$m1" ]]; then
-            local m1end=$((begin+m1-scrollpos))
-            region_highlight+=("$((m1end-3)) $m1end standout")
-        fi
-        if [[ -n "$m2" ]]; then
-            local m2end=$((begin+m2-scrollpos))
-            region_highlight+=("$((m2end-3)) $m2end standout")
-        fi
+        wsline-highlight-bk $begin $scrollpos $flen $m1
+        wsline-highlight-bk $begin $scrollpos $flen $m2
     elif [[ "$wsline_blockvis" = "true" ]]; then
         local dbpos=$((begin+m1-scrollpos))
         local dkpos=$((begin+m2-scrollpos))
         ws-debug WSLINE_UPDATE: dbpos=$dbpos dkpos=$dkpos
         region_highlight+=("$dbpos $dkpos standout")
     fi
-    ws-debug WSLINE_UPDATE: region_highlight="$region_highlight"
+#    ws-debug WSLINE_UPDATE: region_highlight="$region_highlight" 
+    for dpos in $ctrl_chrs; do
+        ws-debug WSLINE_UPDATE: highlight $dpos
+        wsline-highlight-ctrl-chr $begin $scrollpos $flen $dpos
+    done
 
-    # TODO: display ^ characters as *bold* (not standout)
-
-    #TODO: * exchange with buffer: ^U and ^KB/^KK and back
-    #TODO: * length: with control characters and <B>/<K> elements
-#    ws-debug cursorpos=$cursorpos
+    # TODO: * exchange with buffer: ^U and ^KB/^KK and back
+    # TODO: * length: with control characters and <B>/<K> elements
     CURSOR=$((begin+dtextpos-scrollpos))
 }
