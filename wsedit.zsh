@@ -853,7 +853,6 @@ wsedit-exit() {
     $wstext_updfnvar
 
     zle reset-prompt
-
 }
 
 # Close the currenpt file and save: ^KX (buffer empty)
@@ -956,7 +955,6 @@ wsedit-save-as-end() {
     $wstext_updfnvar
 }
 
-
 # save and close
 zle -N wsedit-save-exit
 bindkey -M wsedit "^Kx" wsedit-save-exit
@@ -975,9 +973,12 @@ wsedit-save-exit() {
 }
 
 wsedit-save-exit-end() {
-#    BUFFER=""
-    wsedit_text=""
-    wsedit-exit
+    if [[ "$1" = "OK" ]]; then
+        wsedit_text=""
+        wsedit-exit
+    else
+        $wstext_updfnvar
+    fi
 }
 
 # exit without saving.  TODO: ask if need saving
@@ -985,11 +986,19 @@ zle -N wsedit-quit
 bindkey -M wsedit "^Kq" wsedit-quit
 bindkey -M wsedit "^KQ" wsedit-quit
 wsedit-quit() {
-    wsdquit-run wsedit-save-exit-end 
+    BUFFER=""
+    wsdquit-run wsedit-quit-yes wsedit-quit-no
 }
 
 wsedit-quit-no() {
+    ws-debug WSEDIT_QUIT_NO
     $wstext_updfnvar
+}
+
+wsedit-quit-yes() {
+    ws-debug WSEDIT_QUIT_YES
+    wsedit_text=""
+    wsedit-exit
 }
 
 # TODO: * Find functions

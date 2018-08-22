@@ -16,24 +16,24 @@ zle -N wsdquit-yes
 bindkey -M wsdquit "Y" wsdquit-yes
 bindkey -M wsdquit "y" wsdquit-yes
 wsdquit-yes() {
+    wsdquit-restore
+    zle -K $wsdquit_saved_keymap
     if [[ -n "$wsdquit_yes" ]]; then
         $wsdquit_yes
     fi
-    wsdquit-restore
     wsdquit-undef
-    zle -K $wsdquit_saved_keymap
 }
 
 zle -N wsdquit-no
 bindkey -M wsdquit "N" wsdquit-no
 bindkey -M wsdquit "n" wsdquit-no
 wsdquit-no() {
+    wsdquit-restore
+    zle -K $wsdquit_saved_keymap
     if [[ -n "$wsdquit_no" ]]; then
         $wsdquit_no
     fi
-    wsdquit-restore
     wsdquit-undef
-    zle -K $wsdquit_saved_keymap
 }
 
 # prints quit dialog, asks for confirmation, returns true or false
