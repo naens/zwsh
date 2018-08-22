@@ -47,10 +47,30 @@ wsline-init() {
         bindkey -M $mode "^Kq" wsline-${name}-cancel
         bindkey -M $mode "^KQ" wsline-${name}-cancel
     fi
+    zle -N wsline-kc
+    bindkey -M $mode "^Kc" wsline-kc
+    bindkey -M $mode "^KC" wsline-kc
 #    ws-debug WSLINE_INIT: name=$name
 #    ws-debug WSLINE_INIT"{1}": CURSOR=$CURSOR begin=$begin len=$len
     ws-insert-xtimes $begin $len " "
 #    ws-debug WSLINE_INIT"{2}": CURSOR=$CURSOR
+}
+
+# inserts block if defined from wsline_other_textvar
+wsline-kc() {
+    if [[ -n "$wsline_blockvis" ]]; then
+        wsblock-kc
+    else
+        local obpos=$(eval "echo \${${wsline_other_marksvar}[B]}")
+        local okpos=$(eval "echo \${${wsline_other_marksvar}[K]}")
+        ws-debug WSLINE_KC: obpos=$obpos okpos=$okpos
+        if [[ -n "$obpos" && -n "$okpos" && "$obpos" -lt "$okpos" ]]; then
+            local text="${(P)wsline_other_textvar}"
+            local block="$text[obpos+1,okpos]"
+            ws-debug WSLINE_KC: inserting block="\"$block\""
+            wstext-insert "$block"
+        fi
+    fi
 }
 
 wsline-add-key() {
@@ -65,6 +85,9 @@ wsline-add-key() {
 wsline-activate() {
     local name=$1
 
+    wsline_other_textvar="$wstext_textvar"
+    wsline_other_marksvar="$wstext_marksvar"
+
    # enter new state
     wstext_textvar=wsline_${name}_text
     wstext_updfnvar=wsline-${name}-update
@@ -73,6 +96,7 @@ wsline-activate() {
     wstext_blockvisvar=wsline_${name}_blockvisvar
     wstext_blockcolmodevar=wsline_${name}_blockcolmodevar
     local beginvar=wsline_${name}_begin
+
 
 #    ws-debug WSLINE_ACTIVATE: entering mode \"wsline-${name}-mode\", begin=${(P)beginvar}
 
@@ -83,6 +107,7 @@ wsline-activate() {
     ws-debug WSLINE_ACTIVATE: ohl="$wsline_orighl"
 
     wsline-update $name
+    ws-debug WSLINE_ACTIVATTE: other_textvar="$wsline_other_textvar" other_marksvar="$wsline_other_marksvar"
 }
 
 wsline-exit() {
@@ -106,6 +131,8 @@ wsline-exit() {
     unset wsline_showbk
     unset wsline_orighl
     unset wsline_ctrl_chrs
+    unset wsline_other_textvar
+    unset wsline_other_marksvar
 }
 
 # Function: wsline-updvars
