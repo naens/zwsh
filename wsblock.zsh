@@ -406,18 +406,22 @@ wsblock-ky() {
     wstext-upd
 }
 
-#zle -N wsblock-qb
-#bindkey -M wsblock "^Qb" wsblock-qb
-#bindkey -M wsblock "^QB" wsblock-qb
+zle -N wsblock-qb
+bindkey -M wskeys "^Qb" wsblock-qb
+bindkey -M wskeys "^QB" wsblock-qb
 wsblock-qb() {
-    CURSOR=$kb
+    local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
+    eval "${wstext_posvar}=$b_pos"
+    wstext-upd
 }
 
-#zle -N wsblock-qk
-#bindkey -M wsblock "^Qk" wsblock-qk
-#bindkey -M wsblock "^QK" wsblock-qk
+zle -N wsblock-qk
+bindkey -M wskeys "^Qk" wsblock-qk
+bindkey -M wskeys "^QK" wsblock-qk
 wsblock-qk() {
-    CURSOR=$kk
+    local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
+    eval "${wstext_posvar}=$k_pos"
+    wstext-upd
 }
 
 #zle -N wsblock-kr
