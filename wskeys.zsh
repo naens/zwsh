@@ -221,6 +221,13 @@ wskeys-save-edit() {
     wsdfsave-run
 }
 
+wskeys-save-edit-end() {
+    if [[ "$1" = "OK" ]]; then
+        wsedit_fn="$wsdfsave_fn"
+        ws-edit
+    fi
+}
+
 zle -N ws-kx
 bindkey -M wskeys "^Kx" ws-kx
 bindkey -M wskeys "^KX" ws-kx
@@ -566,13 +573,6 @@ wstext-replace-enter() {
         ws-edit
     else
         $wstext_updfnvar
-    fi
-}
-
-wskeys-save-edit-end() {
-    if [[ "$1" = "OK" ]]; then
-        wsedit_fn="$wsdfsave_fn"
-        ws-edit
     fi
 }
 

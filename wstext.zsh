@@ -113,7 +113,7 @@ wstext-next-sentence() {
 
 wstext-upd() {
     if typeset -f $wstext_updfnvar > /dev/null; then
-        $wstext_updfnvar
+        $wstext_updfnvar "$@"
     fi
 }
 
@@ -164,7 +164,7 @@ wstext-del-char-left() {
         local text_end=${#text}
         wstext-delete $pos $pos
         eval "$wstext_posvar=$((pos-1))"
-        wstext-upd
+        wstext-upd true
     fi
 }
 
@@ -176,7 +176,7 @@ wstext-del-char-right() {
         wstext-delete $((pos+1)) $((pos+1))
     fi
     eval "$wstext_posvar=$pos"
-    wstext-upd
+    wstext-upd true
 }
 
 # Delete word functions
@@ -187,7 +187,7 @@ wstext-del-word-left() {
     local from=$(wstxtfun-prev-word $pos "$text")
     wstext-delete $((from+1)) $((pos))
     eval "$wstext_posvar=$from"
-    wstext-upd
+    wstext-upd true
 }
 
 # what it does: at word start: delete word, delete all non-printable characters that follow
@@ -220,7 +220,7 @@ wstext-del-word-right() {
         fi
     fi
     eval "$wstext_posvar=$pos"
-    wstext-upd
+    wstext-upd true
 }
 
 # delete whole word if inside a word and characters and non-printable outside
@@ -242,7 +242,7 @@ wstext-del-word() {
         wstext-delete $((prev_printable+1)) $((next_printable))
         eval "$wstext_posvar=$prev_printable"
     fi
-    wstext-upd
+    wstext-upd true
 }
 
 # Delete line functions
@@ -253,7 +253,7 @@ wstext-del-line-left() {
     local from=$(wstxtfun-line-start $pos "$text")
     wstext-delete $((from+1)) $pos
     eval "$wstext_posvar=$from"
-    wstext-upd
+    wstext-upd true
 }
 
 wstext-del-line-right() {
@@ -268,7 +268,7 @@ wstext-del-line-right() {
         wstext-delete $((pos+1)) $to
     fi
     eval "$wstext_posvar=$pos"
-    wstext-upd    
+    wstext-upd true
 }
 
 wstext-del-line() {
@@ -283,7 +283,7 @@ wstext-del-line() {
         wstext-delete $((from+1)) $to
     fi
     eval "$wstext_posvar=$from"
-    wstext-upd    
+    wstext-upd true
 }
 
 # Delete sentence functions
@@ -313,7 +313,7 @@ wstext-del-sentence-left() {
         # if in the middle, delete the beginning of the sentence
         wstext-delete $sp[1] $pos
         eval "$wstext_posvar=$(($sp[1]-1))"
-        wstext-upd
+        wstext-upd true
     fi
 }
 
@@ -328,7 +328,7 @@ wstext-del-sentence-right() {
     if [[ ! $sp[1] -eq -1 ]]; then
         wstext-delete $((pos+1)) $((sp[2]-1))
         eval "$wstext_posvar=$pos"
-        wstext-upd
+        wstext-upd true
     else
         eval "$wstext_posvar=$pos"
     fi
@@ -344,7 +344,7 @@ wstext-del-sentence() {
     if [[ ! $sp[1] -eq -1 ]]; then
         wstext-delete $sp[1] $((sp[3]-1))
         eval "$wstext_posvar=$(($sp[1]-1))"
-        wstext-upd
+        wstext-upd true
     else
         eval "$wstext_posvar=$pos"
     fi
@@ -361,7 +361,7 @@ wstext-del-paragraph-left() {
 
     wstext-delete $((from+1)) $pos
     eval "$wstext_posvar=$from"
-    wstext-upd
+    wstext-upd true
 }
 
 wstext-del-paragraph-right() {
@@ -373,7 +373,7 @@ wstext-del-paragraph-right() {
 
     wstext-delete $((pos+1)) $((to-1))
     eval "$wstext_posvar=$pos"
-    wstext-upd
+    wstext-upd true
 }
 
 wstext-del-paragraph() {
@@ -396,7 +396,7 @@ wstext-del-paragraph() {
 
     wstext-delete $((from+1)) $to
     eval "$wstext_posvar=$from"
-    wstext-upd
+    wstext-upd true
 }
 
 # marks insert/delete functions
@@ -448,7 +448,7 @@ wstext-insert() {
     fi
     wstext-marks-move-insert $pos ${#str}
     eval "$wstext_posvar=$((pos+${#str}))"
-    wstext-upd
+    wstext-upd true
 }
 
 wstext-delete() {

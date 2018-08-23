@@ -786,6 +786,9 @@ wsedit-mkful() {
 # TODO: restructure each function in manageable size
 # TODO: fullscreen: allow tabs
 wsedit-refresh() {
+    if [[ "$1" = "true" && ! "$wsedit_modified" = "true" ]]; then
+        wsedit_modified="true"
+    fi
     read wsedit_row wsedit_col <<< $(wstxtfun-pos $wsedit_pos "$wsedit_text")
 
     wsedit_tlines=$(wstxtfun-nlines "$wsedit_text")
@@ -806,7 +809,7 @@ wsedit-refresh() {
     else
         wsedit-mkprt
     fi
-    ws-debug WSEDIT_REFRESH: region_highlight="$region_highlight"
+    ws-debug WSEDIT_REFRESH: region_highlight="$region_highlight" wsedit_modified="$wsedit_modified"
 }
 
 # Switch to *editor mode* and open a file: ^KE
@@ -849,6 +852,8 @@ wsedit-exit() {
     unset wsedit_marksvar_array
     unset wsedit_blockvis
     unset wsedit_blockcolmode
+    unset wsedit_fn
+    unset wsedit_modified
     zle -K $wsedit_saved_keymap
     $wstext_updfnvar
 
@@ -909,6 +914,7 @@ wsedit-open-end() {
         wsedit_text="$wsdfopen_text"
 
         wsedit_pos=0
+        wsedit_modified="false"
     fi
     $wstext_updfnvar
 }
@@ -918,20 +924,22 @@ zle -N wsedit-save
 bindkey -M wsedit "^Ks" wsedit-save
 bindkey -M wsedit "^KS" wsedit-save
 wsedit-save() {
-    if [[ -n "$wsedit_fn" ]]; then
+    if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => overwrite
         if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
             return
         fi
+    else
+        BUFFER=""
+        wsdfsave_text="$wsedit_text"
+        wsdfsave_endfn=wsedit-save-end
+        wsdfsave-run
     fi
-    BUFFER=""
-    wsdfsave_text="$wsedit_text"
-    wsdfsave_endfn=wsedit-save-end
-    wsdfsave-run
 }
 
 wsedit-save-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfsave_fn"
+        wsedit_modified="false"
     fi
     $wstext_updfnvar
 }
@@ -945,7 +953,7 @@ wsedit-save-as() {
     BUFFER=""
     wsdfsave_text="$wsedit_text"
     wsdfsave_endfn=wsedit-save-as-end
-    wsdfsave-run
+    wsdfsave-run "$wsedit_fn"
 }
 
 wsedit-save-as-end() {
@@ -960,34 +968,45 @@ zle -N wsedit-save-exit
 bindkey -M wsedit "^Kx" wsedit-save-exit
 bindkey -M wsedit "^KX" wsedit-save-exit
 wsedit-save-exit() {
-    if [[ -n "$wsedit_fn" ]]; then
+    if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => just write
         if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
-            wsedit-save-exit-end
+            wsedit-save-exit-end "OK"
+            unset wsedit_fn
             return
         fi
+    else
+        if [[ "$wsedit_modified" = "true" ]]; then
+            BUFFER=""
+            wsdfsave_text="$wsedit_text"
+            wsdfsave_endfn=wsedit-save-exit-end
+            wsdfsave-run
+        else
+            wsedit-exit
+        fi
     fi
-    BUFFER=""
-    wsdfsave_text="$wsedit_text"
-    wsdfsave_endfn=wsedit-save-exit-end
-    wsdfsave-run
 }
 
 wsedit-save-exit-end() {
     if [[ "$1" = "OK" ]]; then
-        wsedit_text=""
         wsedit-exit
     else
         $wstext_updfnvar
     fi
 }
 
-# exit without saving.  TODO: ask if need saving
+# exit without saving.
 zle -N wsedit-quit
 bindkey -M wsedit "^Kq" wsedit-quit
 bindkey -M wsedit "^KQ" wsedit-quit
 wsedit-quit() {
+    ws-debug WSEDIT_QUIT wsedit_modified="$wsedit_modified"
     BUFFER=""
-    wsdquit-run wsedit-quit-yes wsedit-quit-no
+    if [[ "$wsedit_modified" = "true" ]]; then
+        wsdquit-run wsedit-quit-yes wsedit-quit-no
+    else
+        wsedit_text=""
+        wsedit-exit
+    fi
 }
 
 wsedit-quit-no() {
@@ -997,6 +1016,7 @@ wsedit-quit-no() {
 
 wsedit-quit-yes() {
     ws-debug WSEDIT_QUIT_YES
+    unset wsedit_fn
     wsedit_text=""
     wsedit-exit
 }

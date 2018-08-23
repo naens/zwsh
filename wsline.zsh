@@ -26,9 +26,10 @@ wsline-init() {
     local len=$3
     local marksvar=$4
     local visvar=$5
+    local text="$6"
     eval "wsline_${name}_begin=$begin"
     eval "wsline_${name}_len=$len"
-    eval "wsline_${name}_text=''"
+    eval "wsline_${name}_text=$text"
     eval "wsline-${name}-update() { wsline-update $name }"
     eval "wsline_${name}_textpos=0"
     eval "wsline_${name}_caller_marksvar=$marksvar"

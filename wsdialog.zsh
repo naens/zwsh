@@ -26,7 +26,7 @@ wsdialog-add() {
             eval "$funname() { wsdialog-l4keyfn $dialog $func }"
         done
     done
-    eval "wsdialog-${dialog}-run() { wsdialog-run $dialog }"
+    eval "wsdialog-${dialog}-run() { wsdialog-run $dialog \"\$@\" }"
     eval "wsdialog_${dialog}-ret-dial() { wsdialog-ret-dial $dialog }"
     eval "wsline-wsdialog_${dialog}-accept() { wsdialog-acceptfn $dialog }"
     eval "wsline-wsdialog_${dialog}-cancel() { wsdialog-cancelfn $dialog }"
@@ -159,6 +159,8 @@ wsdialog-cancelfn() {
 # display dialog
 wsdialog-run() {
     local dialog=$1
+    local text="$2"
+    ws-debug WSDIALOG_RUN: dialog="$dialog" text="$text"
     local msgvar=wsdialog_${dialog}_msg
     local msg=${(P)msgvar}
 
@@ -188,7 +190,8 @@ wsdialog-run() {
     # insert wsline
     local cols=$(tput cols)
     local len=$((cols-l1len-1))
-    wsline-init wsdialog_$dialog $CURSOR $len $wstext_marksvar $wstext_blockvisvar
+    wsline-init wsdialog_$dialog $CURSOR $len $wstext_marksvar \
+                                                $wstext_blockvisvar "$text"
 
     local l2start=$((wsdialog_start+l1len+len))
     ws-insert-formatted-at $l2start $'\n'"$line2"

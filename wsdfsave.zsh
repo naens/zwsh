@@ -7,10 +7,9 @@ wsdialog_wsdfsave_accept=wsdfsave-accept
 wsdialog_wsdfsave_restore=wsdfsave-restore
 
 wsdfsave-run() {
-    wsdialog-wsdfsave-run
+    wsdialog_fn="$1"    # if given: prefill wsdialog string TODO
+    wsdialog-wsdfsave-run "$wsdialog_fn"
 }
-
-# TODO: prefill file name
 
 # badfn
 wsdialog_wsdfsave_badfn_msg="Bad file name."
@@ -68,6 +67,8 @@ wsdfsave-fexists-no() {
 
 # file in first argument, text in second argument
 wsdfsave-save() {
-    $ws_echo "$2" 2>&- > "$1"
+    local filename="$1"
+    local text="$2"
+    $ws_echo "$text" 2>&- > "$filename"
     return $?
 }
