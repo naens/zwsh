@@ -381,7 +381,7 @@ wsline-update() {
 
     local cursorpos=$((begin+dtextpos-scrollpos))
     BUFFER[begin+1,begin+flen]="$dtext[1+scrollpos,flen+scrollpos]"
-    ws-insert-xtimes $((begin+dtlen-scrollpos)) $((scrollpos+flen-dtlen)) "-"
+    ws-insert-xtimes $((begin+dtlen-scrollpos)) $((scrollpos+flen-dtlen)) " "
 
     # display <B>, <K> + cursor skip <B>/<K>
     region_highlight=( "${wsline_orighl[@]}" )
