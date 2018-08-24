@@ -69,6 +69,6 @@ wsdfsave-fexists-no() {
 wsdfsave-save() {
     local filename="$1"
     local text="$2"
-    $ws_echo "$text" 2>&- > "$filename"
+    printf '%s' "$text" 2>&- > "$wsedit_fn"
     return $?
 }

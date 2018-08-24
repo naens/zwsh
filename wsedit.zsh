@@ -340,7 +340,7 @@ wsedit-mkprt() {
             pos=$((next_break+1))
             i=$((i+1))
         done
-        buf+=$wsedit_text[pos,${#wsedit_text}]
+        buf+="$wsedit_text[pos,${#wsedit_text}]"
         region_highlight=($reg)
         BUFFER+=$'\n'"$buf"
         CURSOR=$((csft+wsedit_pos-1))
@@ -925,7 +925,8 @@ bindkey -M wsedit "^Ks" wsedit-save
 bindkey -M wsedit "^KS" wsedit-save
 wsedit-save() {
     if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => overwrite
-        if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
+        if printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"; then
+            wsedit_modified="false"
             return
         fi
     else
@@ -969,7 +970,7 @@ bindkey -M wsedit "^Kx" wsedit-save-exit
 bindkey -M wsedit "^KX" wsedit-save-exit
 wsedit-save-exit() {
     if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => just write
-        if $ws_echo "$wsedit_text" 2>&- > "$wsedit_fn"; then
+        if printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"; then
             wsedit-save-exit-end "OK"
             unset wsedit_fn
             return
@@ -988,6 +989,7 @@ wsedit-save-exit() {
 
 wsedit-save-exit-end() {
     if [[ "$1" = "OK" ]]; then
+        wsedit_text=""
         wsedit-exit
     else
         $wstext_updfnvar
