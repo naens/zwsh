@@ -1,7 +1,9 @@
 # reads the contents of a file and puts them at cursor
 wsdialog_wsdfopen_msg="Document? "
-wsdialog_wsdfopen_modes[1]=eread
-wsdialog_wsdfopen_modes[2]=eempty
+wsdialog_wsdfopen_modes[1]=eempty
+wsdialog_wsdfopen_modes[2]=enotexists
+wsdialog_wsdfopen_modes[3]=enotafile
+wsdialog_wsdfopen_modes[4]=epermissions
 wsdialog_wsdfopen_accept=wsdfopen-accept
 wsdialog_wsdfopen_restore=wsdfopen-restore
 
@@ -9,18 +11,24 @@ wsdfopen-run() {
     wsdialog-wsdfopen-run
 }
 
-# TODO: prefill file name
-
-# ewrite
-wsdfopen-make-eread-msg() {
-    local msg='#ZSH could not open "<FN>".#  Press Enter to continue.'
-    local filename="$1"
-    wsdialog_wsdfopen_eread_msg="$(echo $msg | sed s:\<FN\>:$1:)"
-}
-
-# eempty
 wsdfopen-make-eempty-msg() {
     wsdialog_wsdfopen_eempty_msg='#Filename empty.#  Press Enter to continue.'
+}
+
+wsdfopen-make-enotexists-msg() {
+    local msg='#File "<FN>" does not exist.#  Press Enter to continue.'
+    local filename="$1"
+    wsdialog_wsdfopen_enotexists_msg="$(echo $msg | sed s:\<FN\>:$1:)"
+}
+
+wsdfopen-make-enotafile-msg() {
+    local msg='#File "<FN>" is not a file.#  Press Enter to continue.'
+    local filename="$1"
+    wsdialog_wsdfopen_enotafile_msg="$(echo $msg | sed s:\<FN\>:$1:)"
+}
+
+wsdfopen-make-epermissions-msg() {
+    wsdialog_wsdfopen_epermissions_msg='#Permission error.#  Press Enter to continue.'
 }
 
 wsdialog-add wsdfopen
@@ -34,15 +42,24 @@ wsdfopen-accept() {
     if [[ -z "$filename" ]]; then
         wsdfopen-make-eempty-msg
         wsdialog_l4mode=eempty
-        return
-    fi
-    if [[ -n "$filename" ]] && wsdfopen-read "$filename"; then
+    elif [[ ! -e "$filename" ]]; then
+        wsdfopen-make-enotexists-msg "$filename"
+        wsdialog_l4mode=enotexists
+    elif [[ ! -f "$filename" ]]; then
+        wsdfopen-make-enotafile-msg "$filename"
+        wsdialog_l4mode=enotafile
+    elif [[ -r "$filename" && -w "$filename" ]]; then
+        wsdfopen-read "$filename"
         wsdfopen_fn="$filename"
-        unset wsdialog_l4mode
-    else
-        wsdfopen-make-eread-msg "$filename"
-        wsdialog_l4mode=eread
+    else    # no permissions: TODO: to implement (not working implementation)
+        if wsdfopen-read "$filename" sudo; then
+            wsdfopen_fn="$filename"
+        else
+            wsdfopen-make-epermissions-msg
+            wsdialog_l4mode=epermissions
+        fi
     fi
+
 }
 
 wsdfopen-restore() {
@@ -57,8 +74,14 @@ wsdfopen-restore() {
 # get file contents, file name in first argument, contents in wskr_text
 wsdfopen-read() {
     local fn="$1"
-    wsdfopen_text=$(cat "$fn"; printf x)
-    wsdfopen_text=${wsdfopen_text%x}
-    ws-debug WSDFOPEN_READ: wsdfopen_text="\"$wsdfopen_text\""
-    return $?
+    local sudo="$2"
+    if [[ "$sudo" = "sudo" ]]; then
+        wsdfopen_text=$(sudo cat "$fn"; printf x)
+        wsdfopen_text=${wsdfopen_text%x}
+        return $?
+    else
+        wsdfopen_text=$(cat "$fn"; printf x)
+        wsdfopen_text=${wsdfopen_text%x}
+        return 0
+    fi
 }
