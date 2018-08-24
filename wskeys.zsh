@@ -378,8 +378,8 @@ ws-insert-saved() {
 }
 
 # Undo Keys
-bindkey -M wskeys "^_" undo
-bindkey -M wskeys "^6" redo
+#bindkey -M wskeys "^_" undo
+#bindkey -M wskeys "^6" redo
 
 zle -N wskeys-unerase
 bindkey -M wskeys "^U" wskeys-unerase
