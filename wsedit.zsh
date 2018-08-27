@@ -281,7 +281,7 @@ wsedit-mkhdr() {
     if [[ $ZLE_STATE == *overwrite* ]]; then
         ostr=""
     fi
-    local fn="<FILENAME>"
+    local fn="<SCRATCH>"
     if [[ -n "$wsedit_fn" ]]; then
         fn="$wsedit_fn"
     fi
@@ -1001,9 +1001,12 @@ zle -N wsedit-quit
 bindkey -M wsedit "^Kq" wsedit-quit
 bindkey -M wsedit "^KQ" wsedit-quit
 wsedit-quit() {
+    # When first enter edit mode: fileneame is not defined yet, it's the
+    # scratch mode.  On exit no y/n dialog is displayed.  It is displayed
+    # only if the buffer has a filename attached to it.
     ws-debug WSEDIT_QUIT wsedit_modified="$wsedit_modified"
     BUFFER=""
-    if [[ "$wsedit_modified" = "true" ]]; then
+    if [[ "$wsedit_modified" = "true" && -n "$wsedit_fn" ]]; then
         wsdquit-run wsedit-quit-yes wsedit-quit-no
     else
         wsedit_text=""
@@ -1021,6 +1024,26 @@ wsedit-quit-yes() {
     unset wsedit_fn
     wsedit_text=""
     wsedit-exit
+}
+
+# Execute the command in buffer and exit wsedit mode.
+# If there is a filename attached, the dialog is displayed to save
+# the file or not before executing.
+zle -N wsedit-run-exit
+bindkey -N wsedit "^Qm" wsedit-run-exit
+bindkey -N wsedit "^QM" wsedit-run-exit
+wsedit-run-exit() {
+    # TODO
+}
+
+# Execute the command replace the contents of the buffer with
+# the command output.  If there is a file opened and modeified in
+# the buffer, a dialog is displayed asking whether to save it or not.
+zle -N wsedit-run-to-buf
+bindkey -N wsedit "^Km" wsedit-run-to-buf
+bindkey -N wsedit "^KM" wsedit-run-to-buf
+wsedit-run-to-buf() {
+    #d TODO
 }
 
 # TODO: * Find functions
