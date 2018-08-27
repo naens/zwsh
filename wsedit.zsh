@@ -1007,7 +1007,9 @@ wsedit-quit() {
     ws-debug WSEDIT_QUIT wsedit_modified="$wsedit_modified"
     BUFFER=""
     if [[ "$wsedit_modified" = "true" && -n "$wsedit_fn" ]]; then
-        wsdquit-run wsedit-quit-yes wsedit-quit-no
+        local l1="*Modifications have just been made.*"
+        local l3="Are you sure you want to abandon them (Y/N)?"
+        wsdquit-run wsedit-quit-yes wsedit-quit-no "$l1" "$l3"
     else
         wsedit_text=""
         wsedit-exit
@@ -1029,21 +1031,70 @@ wsedit-quit-yes() {
 # Execute the command in buffer and exit wsedit mode.
 # If there is a filename attached, the dialog is displayed to save
 # the file or not before executing.
-zle -N wsedit-run-exit
-bindkey -N wsedit "^Qm" wsedit-run-exit
-bindkey -N wsedit "^QM" wsedit-run-exit
-wsedit-run-exit() {
-    # TODO
+zle -N wsedit-runexit
+bindkey -M wsedit "^Qm" wsedit-runexit
+bindkey -M wsedit "^QM" wsedit-runexit
+wsedit-runexit() {
+    BUFFER=""
+    if [[ "$wsedit_modified" = "true" && -n "$wsedit_fn" ]]; then
+        local l1="*Modifications have just been made.*"
+        local l3="Do you want to save the file (Y/N)?"
+        wsdquit-run wsedit-runexit-saverun wsedit-runexit-runexit "$l1" "$l3"
+    else
+        wsedit-runexit-runexit
+    fi
+}
+
+# save, run, update buffer
+wsedit-runexit-saverun() {
+    printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"
+    wsedit-runexit-runexit
+}
+
+# run, run, update buffer
+wsedit-runexit-runexit() {
+    local newbuf=$(eval "$wsedit_text" 2>&1)
+    wsedit_text="$newbuf"
+    wsedit_pos=0
+    local nlines=$(wstxtfun-nlines "$newbuf")
+    if [[ $nlines -eq 1 ]]; then
+        wsedit-exit
+    else
+        unset wsedit_fn
+        $wstext_updfnvar
+    fi
 }
 
 # Execute the command replace the contents of the buffer with
-# the command output.  If there is a file opened and modeified in
-# the buffer, a dialog is displayed asking whether to save it or not.
-zle -N wsedit-run-to-buf
-bindkey -N wsedit "^Km" wsedit-run-to-buf
-bindkey -N wsedit "^KM" wsedit-run-to-buf
-wsedit-run-to-buf() {
-    #d TODO
+# the command output.  If there is a file opened in the buffer,
+# a dialog is displayed asking whether to save it or not.
+zle -N wsedit-runtobuf
+bindkey -M wsedit "^Km" wsedit-runtobuf
+bindkey -M wsedit "^KM" wsedit-runtobuf
+wsedit-runtobuf() {
+    BUFFER=""
+    if [[ "$wsedit_modified" = "true" && -n "$wsedit_fn" ]]; then
+        local l1="*Modifications have just been made.*"
+        local l3="Do you want to save the file (Y/N)?"
+        wsdquit-run wsedit-runtobuf-saverun wsedit-runtobuf-exitrun "$l1" "$l3"
+    else
+        wsedit-runtobuf-exitrun
+    fi
+}
+
+# save, run, update buffer
+wsedit-runtobuf-saverun() {
+    printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"
+    wsedit-runtobuf-exitrun
+}
+
+# run, run, update buffer
+wsedit-runtobuf-exitrun() {
+    local newbuf=$(eval "$wsedit_text" 2>&1)
+    wsedit_text="$newbuf"
+    wsedit_pos=0
+    unset wsedit_fn
+    $wstext_updfnvar
 }
 
 # TODO: * Find functions
