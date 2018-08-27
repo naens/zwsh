@@ -29,12 +29,13 @@ wsdfsave-make-ewrite-msg() {
 wsdialog-add wsdfsave
 
 wsdfsave-accept() {
-    if [[ -z "$wsdialog_text" || ${#wsdialog_text} -eq 0 ]]; then
+    local filename="${wsdialog_text// /}"
+    if [[ -z "$filename" || ${#filename} -eq 0 ]]; then
         wsdialog_l4mode=badfn
-    elif [[ -e "$wsdialog_text" ]]; then
+    elif [[ -e "$filename" ]]; then
         wsdialog_l4mode=fexists
-    elif wsdfsave-save "$wsdialog_text" "$wsdfsave_text"; then
-        wsdfsave_fn="$wsdialog_text"
+    elif wsdfsave-save "$wsdialog_text" "$filename"; then
+        wsdfsave_fn="$filename"
         unset wsdialog_l4mode
     else
         wsdfsave-make-ewrite-msg
@@ -69,6 +70,6 @@ wsdfsave-fexists-no() {
 wsdfsave-save() {
     local filename="$1"
     local text="$2"
-    printf '%s' "$text" 2>&- > "$wsedit_fn"
+    printf '%s' "$text" 2>&- > "$filename"
     return $?
 }
