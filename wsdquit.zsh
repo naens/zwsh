@@ -43,9 +43,9 @@ wsdquit-run() {
     wsdquit_saved_length=$length
     wsdquit_yes="$1"
     wsdquit_no="$2"
+    local l1="$3"
+    local l3="$4"
     wsdquit_saved_keymap=$KEYMAP
-    l1="*Modifications have just been made.*"
-    l3="Are you sure you want to abandon them (Y/N)?"
     ws-insert-formatted-at $length $'\n'"$l1"$'\n'$'\n'"$l3"
     zle -K wsdquit
 }
