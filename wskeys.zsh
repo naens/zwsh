@@ -108,60 +108,77 @@ ws-next-paragraph() {
     wstext-next-paragraph
 }
 
-#    if [[ -n $kk ]]; then
-#        region_highlight=("$kb $kk standout")
-#    else
-#        region_highlight=("$kb $(( $kb + 3)) standout")
-#    fi
-
-# TODO: use marks for wsblock kb and kk!!!
 ws-updfn() {
     local b_pos=${ws_marks[B]}
     local k_pos=${ws_marks[K]}
-#    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs \
-#                       vis=$ws_blockvis text=\""$ws_text"\"
+    ws-debug WS_UPDFN: b_pos=$b_pos k_pos=$k_pos pos=$ws_curs \
+                       vis=$ws_blockvis text=\""$ws_text"\"
 
-    if [[ -n "$ws_blockvis" ]]; then
-        local text="$ws_text"
-        local curs=$ws_curs
-        if [[ -n "$b_pos" && -n "$k_pos" && $k_pos -gt $b_pos ]]; then
-            region_highlight=("$b_pos $k_pos standout")
-        elif [[ -n "$b_pos" && -z "$k_pos" ]]; then
-            text=$text[1,b_pos]"<B>"$text[b_pos+1,${#text}]
-            region_highlight=("$b_pos $((b_pos+3)) standout")
-            if [[ $curs -ge $b_pos ]]; then
-                curs=$((curs+3))
+    local text="$ws_text"
+    local curs=$ws_curs
+    local tpos=0    # logical position
+    local dpos=0    # display position
+    local len=${#text}
+    if [[ -n "$b_pos" && -n "$k_pos" && $k_pos -gt $b_pos ]]; then
+        local show_block=true
+    else
+        local show_block=false
+    fi
+    local dtext=""
+    local a=$(printf "%d" "'A")
+    region_highlight=()
+    while [[ $tpos -lt $len ]]; do
+        local chr=$text[tpos+1]
+        if [[ "$show_block" = "false" ]]; then
+            if [[ -n "$ws_blockvis" ]] then
+                if [[ -n "$b_pos" && $tpos -eq $b_pos ]]; then
+                    dtext+="<B>"
+                    region_highlight+=("$dpos $((dpos+3)) standout")
+                    dpos=$((dpos+3))
+                    if [[ $ws_curs -ge $b_pos ]]; then
+                        curs=$((curs+3))
+                    fi
+                fi
+                if [[ -n "$k_pos" && $tpos -eq $k_pos ]]; then
+                    dtext+="<K>"
+                    region_highlight+=("$dpos $((dpos+3)) standout")
+                    dpos=$((dpos+3))
+                    if [[ $ws_curs -ge $k_pos ]]; then
+                        curs=$((curs+3))
+                    fi
+                fi
             fi
-        elif [[ -n "$k_pos" && -z "$b_pos" ]]; then
-            text=$text[1,k_pos]"<K>"$text[k_pos+1,${#text}]
-            region_highlight=("$k_pos $((k_pos+3)) standout")
-            if [[ $curs -ge $k_pos ]]; then
-                curs=$((curs+3))
-            fi
-        elif [[ $b_pos -eq $k_pos ]]; then
-            text=$text[1,b_pos]"<B><K>"$text[b_pos+1,${#text}]
-            region_highlight=("$b_pos $((b_pos+6)) standout")
-            if [[ $curs -ge $b_pos ]]; then
-                curs=$((curs+6))
-            fi
-        else # b > k
-            text=$text[1,k_pos]"<K>"$text[k_pos+1,b_pos]"<B>"$text[b_pos+1,${#text}]
-            region_highlight=("$k_pos $((k_pos+3)) standout" \
-                              "$((b_pos+3)) $((b_pos+6)) standout")
-            if [[ $curs -lt $b_pos && $curs -ge $k_pos ]]; then
-                curs=$((curs+3))
-            elif [[ $curs -ge $b_pos && $curs -ge $k_pos ]]; then
-                curs=$((curs+6))
+        else
+            if [[ -n "$ws_blockvis" ]] then
+                if [[ -n "$b_pos" && $tpos -eq $b_pos ]]; then
+                    local block_from=$dpos
+                fi
+                if [[ -n "$k_pos" && $tpos -eq $k_pos ]]; then
+                    local block_to=$dpos
+                fi
             fi
         fi
-        BUFFER="$text"
-        CURSOR=$curs
-    else
-        region_highlight=()
-        BUFFER="$ws_text"
-        CURSOR=$ws_curs
-   fi
-#    ws-debug WS_UPDFN: pos=$ws_curs text=\""$ws_text"\"
+        local code=$(printf "%d" "'$chr")
+        if [[ $code -ge 1 && $code -lt 32 ]]; then
+            local n=$(printf '%x' $((code+a-1)))
+            dtext+="^"$(printf '\x'$n)
+            region_highlight+=("$dpos $((dpos+2)) bold")
+            dpos=$((dpos+1))
+            if [[ $ws_curs -gt $tpos ]]; then
+                curs=$((curs+1))
+            fi
+        else
+            dtext+=$chr
+        fi
+        dpos=$((dpos+1))
+        tpos=$((tpos+1))
+#        ws-debug WS_UPDFN: curs=$curs tpos=$tpos dpos=$dpos chr=$chr dtext="\"$dtext\""
+    done
+    if [[ "$show_block" = "true" ]]; then
+        region_highlight+=("$block_from $block_to standout")
+    fi
+    BUFFER="$dtext"
+    CURSOR=$curs
 }
 
 #zle -N ws-start-doc
@@ -241,7 +258,9 @@ bindkey -M wskeys "^Kq" wskeys-exit
 bindkey -M wskeys "^KQ" wskeys-exit
 wskeys-exit() {
     if [[ ${#BUFFER} -gt 0 ]]; then
-        wsdquit-run wskeys-exit-yes wskeys-exit-no
+        local l1="*Modifications have just been made.*"
+        local l3="Do you want to exit ZSH (Y/N)?"
+        wsdquit-run wskeys-exit-yes wskeys-exit-no "$l1" "$l3"
     else
         wskeys-exit-yes
     fi
@@ -578,10 +597,11 @@ wstext-replace-enter() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
-    local modefun=$KEYMAP-pre-redraw
-    if typeset -f $modefun > /dev/null; then
-        $modefun
-    fi
+# TODO: ???
+#    local modefun=$KEYMAP-pre-redraw
+#    if typeset -f $modefun > /dev/null; then
+#        $modefun
+#    fi
 }
 
 wskeys-pre-redraw() {
@@ -589,6 +609,6 @@ wskeys-pre-redraw() {
     if [[ -z "$ws_blockvis" ]]; then
         ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
         ws_curs=$CURSOR
-#        ws-updfn # temporary
+        ws-updfn # temporary
     fi
 }
