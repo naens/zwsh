@@ -598,17 +598,17 @@ wstext-replace-enter() {
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
 # TODO: ???
-#    local modefun=$KEYMAP-pre-redraw
+    local modefun=$KEYMAP-pre-redraw
 #    if typeset -f $modefun > /dev/null; then
-#        $modefun
+        $modefun
 #    fi
 }
 
 wskeys-pre-redraw() {
     # TODO: fix fix fix
-    if [[ -z "$ws_blockvis" ]]; then
+#    if [[ -z "$ws_blockvis" ]]; then
         ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
         ws_curs=$CURSOR
         ws-updfn # temporary
-    fi
+#    fi
 }
