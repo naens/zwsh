@@ -599,9 +599,9 @@ zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
 # TODO: ???
     local modefun=$KEYMAP-pre-redraw
-#    if typeset -f $modefun > /dev/null; then
+    if typeset -f $modefun > /dev/null; then
         $modefun
-#    fi
+    fi
 }
 
 wskeys-pre-redraw() {
