@@ -1,0 +1,7 @@
+#+TITLE: Ideas for zwsh
+
+* Edit mode for the whole terminal
+ - be able to enter into the edit mode in order to copy/scroll parts
+   of the screen
+ - be able from the edit terminal mode to enter the fullscreen mode in
+   order to be able to save what's on the terminal to a file
