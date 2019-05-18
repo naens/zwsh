@@ -445,7 +445,7 @@ wskeys-ctrl-exit() {
 
 
 # Other Keys
-#zle -N wskeys-accept-line
+zle -N wskeys-accept-line
 bindkey -M wskeys "^[^M" accept-line
 bindkey -M wskeys "^[m" accept-line
 bindkey -M wskeys "^M" wskeys-accept-line
