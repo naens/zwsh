@@ -159,17 +159,17 @@ ws-updfn() {
             fi
         fi
         local code=$(printf "%d" "'$chr")
-        if [[ $code -ge 1 && $code -lt 32 ]]; then
-            local n=$(printf '%x' $((code+a-1)))
-            dtext+="^"$(printf '\x'$n)
-            region_highlight+=("$dpos $((dpos+2)) bold")
-            dpos=$((dpos+1))
-            if [[ $ws_curs -gt $tpos ]]; then
-                curs=$((curs+1))
-            fi
-        else
+#        if [[ $code -ge 1 && $code -lt 32 ]]; then
+#            local n=$(printf '%x' $((code+a-1)))
+#            dtext+="^"$(printf '\x'$n)
+#            region_highlight+=("$dpos $((dpos+2)) bold")
+#            dpos=$((dpos+1))
+#            if [[ $ws_curs -gt $tpos ]]; then
+#                curs=$((curs+1))
+#            fi
+#        else
             dtext+=$chr
-        fi
+#        fi
         dpos=$((dpos+1))
         tpos=$((tpos+1))
 #        ws-debug WS_UPDFN: curs=$curs tpos=$tpos dpos=$dpos chr=$chr dtext="\"$dtext\""
