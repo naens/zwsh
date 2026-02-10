@@ -16,3 +16,4 @@ DEADJOE
 *.ignore
 .zcompdump
 wsdebug-tty.zsh
+.vscode
