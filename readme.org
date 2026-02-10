@@ -1,21 +1,162 @@
-#+TITLE: zwsh
-A Zpm3/Wordstar mode/theme for zsh
+#+TITLE: zwsh — WordStar keybindings for zsh
 
 * Description
-A zsh mode that uses Zpm3/Wordstar keybindings and functionality.  It can
- - select copy and move blocks of text,
- - edit multiline commands,
- - import and export from and to files.
+*zwsh* is a zsh mode that replaces the default line editor with
+[[https://en.wikipedia.org/wiki/WordStar#Commands][WordStar/Zpm3-style keybindings]].
+If you grew up with WordStar, Turbo Pascal, or Borland IDEs, you'll feel
+right at home.
 
-* Other doc files
- + [[doc/wsblock.org][wsblock]]
- + [[doc/wsdialog.org][wsdialog]]
- + [[doc/wsedit.org][wsedit]]
- + [[doc/wsfind.org][wsfind]]
- + [[doc/wskeys.org][key description]]
- + [[doc/wstext.org][the concept of separating the text from the screen]]
+Features:
+- Classic WordStar cursor movement (~^E~/~^X~/~^S~/~^D~, words, lines, document)
+- Block select, copy, move, delete, write-to-file (~^KB~/~^KK~/~^KC~/~^KV~/~^KY~/~^KW~)
+- Multiline command editing with a built-in editor mode (~^KE~/~^KS~)
+- File import and export (~^KR~/~^KX~) with sudo support
+- Incremental history search (~^QF~, ~^L~ repeat, ~^W~/~^Z~ prefix search)
+- Paste from clipboard (~^KC~/~^KV~ when no block selected)
+- Unerase last deleted text (~^U~)
+- Special folder shortcuts in prompt and on the command line
+- User configuration via =~/.zwrc=
 
-* Tests
-The directory *tests* contains tests to test different modules independently
-from the whole application.  Also allows to test features and cases rarely or
-not used in the main application, which could be useful in future versions.
+* Requirements
+- Zsh 5.0 or later
+
+* Installation
+#+BEGIN_SRC sh
+git clone <repository-url> zwsh
+cd zwsh
+sudo ./zwshinst.sh
+#+END_SRC
+
+The installer copies files to =/opt/zwsh= and adds the startup line to
+=~/.zshrc=.  To update an existing installation:
+
+#+BEGIN_SRC sh
+sudo ./zwshupd.sh
+#+END_SRC
+
+To uninstall, remove the =source= line from =~/.zshrc= and delete
+=/opt/zwsh=.
+
+* Quick start
+Once installed, open a new terminal.  You are now in WordStar mode.
+
+** Cursor movement
+| Key   | Action              |
+|-------+---------------------|
+| ~^S~  | character left      |
+| ~^D~  | character right     |
+| ~^E~  | line up / history ↑ |
+| ~^X~  | line down / hist ↓  |
+| ~^A~  | word left           |
+| ~^F~  | word right          |
+| ~^QS~ | beginning of line   |
+| ~^QD~ | end of line         |
+| ~^R~  | start of document   |
+| ~^C~  | end of document     |
+
+** Delete keys
+| Key   | Action               |
+|-------+----------------------|
+| ~^G~  | delete char right    |
+| ~^H~  | delete char left     |
+| ~^T~  | delete word right    |
+| ~^Y~  | delete entire line   |
+| ~^QY~ | delete to end of line|
+| ~^Q^H~ | delete to begin of line |
+
+** Block operations
+| Key   | Action                 |
+|-------+------------------------|
+| ~^KB~ | mark block begin       |
+| ~^KK~ | mark block end         |
+| ~^KC~ | copy block (or paste)  |
+| ~^KV~ | move block (or paste)  |
+| ~^KY~ | delete block           |
+| ~^KW~ | write block to file    |
+| ~^KH~ | hide/show block        |
+| ~^QB~ | go to block begin      |
+| ~^QK~ | go to block end        |
+
+** File operations
+| Key   | Action                       |
+|-------+------------------------------|
+| ~^KR~ | import text from file        |
+| ~^KS~ | save buffer to file + edit   |
+| ~^KX~ | save buffer to file          |
+| ~^KE~ | open file in editor mode     |
+| ~^KD~ | exit editor, text → buffer   |
+| ~^KQ~ | quit zsh (with confirmation) |
+
+** Search / History
+| Key   | Action                     |
+|-------+----------------------------|
+| ~^QF~ | incremental history search |
+| ~^L~  | repeat last search         |
+| ~^W~  | history search backward    |
+| ~^Z~  | history search forward     |
+| ~^QR~ | beginning of history       |
+| ~^QC~ | end of history             |
+
+** Editor mode
+| Key   | Action                   |
+|-------+--------------------------|
+| ~^R~  | page up                  |
+| ~^C~  | page down                |
+| ~^W~  | scroll up one line       |
+| ~^Z~  | scroll down one line     |
+| ~^QE~ | go to top of screen      |
+| ~^QX~ | go to bottom of screen   |
+| ~^QR~ | go to start of document  |
+| ~^QC~ | go to end of document    |
+| ~^KF~ | toggle fullscreen        |
+
+** Other keys
+| Key   | Action                            |
+|-------+-----------------------------------|
+| ~^U~  | unerase (paste last deleted text) |
+| ~^P~  | insert control character          |
+| ~^V~  | toggle insert/overwrite mode      |
+| ~^N~  | split line (insert newline)       |
+| ~^J~  | help (run-help)                   |
+| ~^I~  | tab completion                    |
+| ~^KM~ | execute buffer, result → buffer   |
+| ~Esc~ | send break                        |
+
+* Configuration
+Create =~/.zwrc= to define special folders and other settings.
+This file is sourced after zwsh loads.
+
+#+BEGIN_SRC zsh
+typeset -A zw_special_folders
+zw_special_folders[PROJ]=~/projects
+zw_special_folders[DOC]=~/Documents
+zw_special_folders[TMP]=/tmp
+#+END_SRC
+
+With these defined, you can type =PROJ:subdir= on the command line
+and it will expand to =~/projects/subdir=.  The prompt also shows
+the short folder name.
+
+* Sudo support
+When opening a file with ~^KE~ or ~^KR~ that requires root access,
+zwsh will prompt for a sudo password and read/write via =sudo=.
+
+* Known limitations
+- Column block mode (~^KN~) is not yet implemented
+- Undo/redo is not available
+- Find/replace within the editor is not implemented
+- Tab characters in fullscreen editor are not properly handled
+
+* Documentation
+Detailed module documentation is in the [[doc/][doc/]] directory:
+- [[doc/wskeys.org][wskeys]] — key reference and binding scheme
+- [[doc/wsblock.org][wsblock]] — block operations
+- [[doc/wsedit.org][wsedit]] — editor mode
+- [[doc/wsfind.org][wsfind]] — find / history search
+- [[doc/wsdialog.org][wsdialog]] — dialog framework
+- [[doc/wsline.org][wsline]] — single-line input
+- [[doc/wstext.org][wstext]] — text variable abstraction
+- [[doc/wstxtfun.org][wstxtfun]] — pure text navigation functions
+
+* License
+GPLv3 — see [[LICENSE]].

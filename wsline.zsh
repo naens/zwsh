@@ -400,7 +400,7 @@ wsline-update() {
         wsline-highlight-ctrl-chr $begin $scrollpos $flen $dpos
     done
 
-    # TODO: * exchange with buffer: ^U and ^KB/^KK and back
-    # TODO: * length: with control characters and <B>/<K> elements
+    # FUTURE: exchange with buffer: ^U and ^KB/^KK and back
+    # FUTURE: length: with control characters and <B>/<K> elements
     CURSOR=$((begin+dtextpos-scrollpos))
 }

@@ -102,7 +102,7 @@ stty erase '^H'
 # zw_special_folders[OPT]=/opt
 
 
-# TODO directory autocompletion
+# FUTURE: directory autocompletion
 
 for k in ${(k)zw_special_folders}; do
     folder=$zw_special_folders[$k]

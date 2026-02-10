@@ -7,7 +7,7 @@ wsdialog_wsdfsave_accept=wsdfsave-accept
 wsdialog_wsdfsave_restore=wsdfsave-restore
 
 wsdfsave-run() {
-    wsdialog_fn="$1"    # if given: prefill wsdialog string TODO
+    wsdialog_fn="$1"    # if given: prefill wsdialog string
     wsdialog-wsdfsave-run "$wsdialog_fn"
 }
 

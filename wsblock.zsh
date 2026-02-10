@@ -15,16 +15,6 @@
 # $wsblock_vis: defined if block is in visible mode
 
 ## FUNCTIONS
-wsblock-cursupd() {
-    if [[ -z $kk && $CURSOR -gt $kb && $CURSOR -le $(( $kb + 2 )) ]]; then
-        if [[ -n $1 ]]; then
-            CURSOR=$kb
-        else
-            CURSOR=$(( $kb + 3 ))
-        fi
-    fi
-}
-
 wsblock-undef() {
     ws-debug WSBLOCK_UNDEF
     if [[ -n "${wstext_marksvar}" ]]; then
@@ -40,107 +30,11 @@ wsblock-undef() {
 }
 
 
-#wsblock-upd() {
-#    kbend=$(( ${#BUFFER} - $kb ))
-#    if [[ -n $kk ]]; then
-#        kkend=$(( ${#BUFFER} - $kk ))
-#        wsblock_text=$BUFFER[$(( $kb + 1 )),$kk]
-#        region_highlight=("$kb $kk standout")
-#    else
-#        region_highlight=("$kb $(( $kb + 3)) standout")
-#    fi
-#}
-
-
-## CURSOR
-#zle -N wsblock-up-line-or-history
-#bindkey -M wsblock "^E" wsblock-up-line-or-history
-wsblock-up-line-or-history() {
-    zle up-line-or-history
-    wsblock-cursupd 1
-}
-
-#zle -N wsblock-down-line-or-history
-#bindkey -M wsblock "^X" wsblock-down-line-or-history
-wsblock-down-line-or-history() {
-    zle down-line-or-history
-    wsblock-cursupd
-}
-
-#zle -N wsblock-backward-char
-#bindkey -M wsblock "^S" wsblock-backward-char
-wsblock-backward-char() {
-    zle backward-char
-    wsblock-cursupd 1
-}
-
-#zle -N wsblock-forward-char
-#bindkey -M wsblock "^D" wsblock-forward-char
-wsblock-forward-char() {
-    zle forward-char
-    wsblock-cursupd
-}
-
-#zle -N wsblock-beginning-of-line
-#bindkey -M wsblock "^Qs" wsblock-beginning-of-line
-#bindkey -M wsblock "^QS" wsblock-beginning-of-line
-wsblock-beginning-of-line() {
-    zle beginning-of-line
-    wsblock-cursupd 1
-}
-
-#zle -N wsblock-end-of-line
-#bindkey -M wsblock "^Qd" wsblock-end-of-line
-#bindkey -M wsblock "^QD" wsblock-end-of-line
-wsblock-end-of-line() {
-    zle end-of-line
-    wsblock-cursupd
-}
-
-#zle -N wsblock-backward-word
-#bindkey -M wsblock "^A" wsblock-backward-word
-wsblock-backward-word() {
-    zle backward-word
-    wsblock-cursupd 1
-}
-
-#zle -N wsblock-forward-word
-#bindkey -M wsblock "^F" wsblock-forward-word
-wsblock-forward-word() {
-    zle forward-word
-    wsblock-cursupd
-}
-
-# insert character
-#zle -N wsblock-self-insert
-#bindkey -M wsblock -R " "-"~" wsblock-self-insert
-wsblock-self-insert() {
-    wsblock-insert-string $KEYS
-}
-
-#zle -N wsblock-accept
-#bindkey -M wsblock "^M" wsblock-accept
-wsblock-accept() {
-    if [[ -z $kk ]]; then
-        BUFFER=$BUFFER[1,$kb]$BUFFER[$(( $kb + 4 )),${#BUFFER}]
-    fi
-#    zle -M "buffer=#$BUFFER#"
-    wsblock-leave-mode
-    zle accept-line
-}
-
-# insert line
-#zle -N wsblock-split-line
-#bindkey -M wsblock "^N" wsblock-split-line
-wsblock-split-line() {
-    wsblock-insert-string \\$'\n'
-}
-
 wsblock-delupd() {
     local from=$1
     local to=$2
-    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
-    else
+    # FUTURE: column mode support for delupd
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then return; fi
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         local dlen=$((to-from))
@@ -169,54 +63,6 @@ wsblock-delupd() {
                 wsblock-undef
             fi
         fi
-    fi
-}
-
-# delete char
-#zle -N wsblock-delchar
-#bindkey -M wsblock "^G" wsblock-delchar
-wsblock-delchar() {
-    zle delete-char-or-list
-    wsblock-delupd
-}
-
-#zle -N wsblock-backdelchar
-#bindkey -M wsblock "^H" wsblock-backdelchar
-#bindkey -M wsblock "^?" wsblock-backdelchar
-wsblock-backdelchar() {
-    zle backward-delete-char
-    wsblock-delupd
-}
-
-# delete word
-#zle -N wsblock-delword-right
-#bindkey -M wsblock "^T" wsblock-delword-right
-wsblock-delword-right() {
-    zle kill-word
-    wsblock-delupd
-}
-
-# delete line
-#zle -N wsblock-delline
-#bindkey -M wsblock "^Y" wsblock-delline
-wsblock-delline() {
-    zle kill-whole-line
-    wsblock-delupd
-}
-
-#zle -N wsblock-delline-right
-#bindkey -M wsblock "^Qy" wsblock-delline-right
-#bindkey -M wsblock "^QY" wsblock-delline-right
-wsblock-delline-right() {
-    zle kill-line
-    wsblock-delupd
-}
-
-#zle -N wsblock-delline-left
-#bindkey -M wsblock "^Q^H" wsblock-delline-left
-wsblock-delline-left() {
-    zle backward-kill-line
-    wsblock-delupd
 }
 
 zle -N ws-kb
@@ -305,8 +151,8 @@ wsblock-kc() {
         fi
         return
     fi
-    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
-    else
+    # FUTURE: column mode copy
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then return; fi
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
@@ -317,7 +163,6 @@ wsblock-kc() {
             eval "${wstext_posvar}=$pos"
             wstext-upd
         fi
-    fi
 }
 
 zle -N wsblock-kv
@@ -333,8 +178,8 @@ wsblock-kv() {
     fi
     local text=${(P)wstext_textvar}
     local pos=${(P)wstext_posvar}
-    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
-    else
+    # FUTURE: column mode move
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then return; fi
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
@@ -359,7 +204,6 @@ wsblock-kv() {
             eval "${wstext_posvar}=$b_pos"
             eval "$wstext_blockvisvar=true"
         fi
-    fi
     wstext-upd
 }
 
@@ -370,8 +214,8 @@ bindkey -M wskeys "^KW" wsblock-kw
 wsblock-kw() {
     local pos=${(P)wstext_posvar}
     local text=${(P)wstext_textvar}
-    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
-    else
+    # FUTURE: column mode write-to-file
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then return; fi
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
@@ -382,7 +226,6 @@ wsblock-kw() {
             wsdinfo_l3="*Press Esc to continue.*"
             wsdinfo-run
         fi
-    fi
 }
 
 zle -N wsblock-ky
@@ -394,8 +237,8 @@ wsblock-ky() {
     fi
     local pos=${(P)wstext_posvar}
     local text=${(P)wstext_textvar}
-    if [[ "$wstext_blockcolmodevar" = "true" ]]; then
-    else
+    # FUTURE: column mode delete
+    if [[ "$wstext_blockcolmodevar" = "true" ]]; then return; fi
         local b_pos=$(eval "echo \${${wstext_marksvar}[B]}")
         local k_pos=$(eval "echo \${${wstext_marksvar}[K]}")
         if [[ -n "$b_pos" && -n "$k_pos" && "$b_pos" -lt "$k_pos" ]]; then
@@ -410,7 +253,6 @@ wsblock-ky() {
             eval "${wstext_posvar}=$pos"
             wsblock-undef
         fi
-    fi
     wstext-upd
 }
 

@@ -1,101 +1,47 @@
-#+TITLE: Tasks to be done for tests
+#+TITLE: Test status
 
-* Introduction
-
-Each function must be described and tested (if needed).
+* Running tests
+#+BEGIN_SRC sh
+zsh tests/run-tests.zsh
+#+END_SRC
 
 * Modules
 
-** TODO wsblock
+** wsblock
+ - [X] basic block operations (mark, copy, paste, delete, toggle, jump)
 
-
-** TODO wsdfopen
- - [ ] list functions
- - [ ] document functions
+** wsdfopen
  - [ ] test functions
 
-** TODO wsdfsave
- - [ ] list functions
- - [ ] document functions
+** wsdfsave
  - [ ] test functions
 
-** TODO wsdialog
- - [ ] list functions
- - [ ] document functions
+** wsdialog
  - [ ] test functions
 
-** TODO wsedit
- - [ ] list functions
- - [ ] document functions
+** wsedit
  - [ ] test functions
 
-** TODO wsfind
- - [ ] list functions
- - [ ] document functions
+** wsfind
  - [ ] test functions
 
-** TODO wsfun
- - [ ] list functions
- - [ ] document functions
+** wsfun
  - [ ] test functions
 
-** TODO wskeys
- - [ ] list functions
- - [ ] document functions
- - [ ] test functions
+** wskeys
+ - [ ] test functions (requires ZLE context)
 
-** TODO wsline
- - [ ] list functions
- - [ ] document functions
- - [ ] test functions
+** wsline
+ - [X] functional test (wsline-test.zsh, manual)
 
-** TODO wstext
- - [ ] list functions
- - [ ] document functions
- - [ ] test functions
+** wstext
+ - [X] insert, delete, cursor movement, line nav, word nav
 
-** TODO wstxtfun
- - [X] list functions
- - [-] document functions
-   - [ ] wstxtfun-pos
-   - [ ] wstxtfun-yx-pos
-   - [ ] wstxtfun-prev-printable
-   - [ ] wstxtfun-next-printable
-   - [ ] wstxtfun-prev-word
-   - [ ] wstxtfun-next-word
-   - [ ] wstxtfun-end-word
-   - [ ] wstxtfun-line-start
-   - [X] wstxtfun-real-col
-   - [ ] wstxtfun-line-end
-   - [ ] wstxtfun-line2pos
-   - [ ] wstxtfun-nlines
-   - [ ] wstxtfun-pos2line
-   - [ ] wstxtfun-line-len
-   - [ ] wstxtfun-line-last-pos
-   - [ ] wstxtfun-prev-sentence
-   - [ ] wstxtfun-next-sentence
-   - [ ] wstxtfun-sentence-pos
-   - [ ] wstxtfun-prev-paragraph
-   - [ ] wstxtfun-next-paragraph
- - [-] test functions
-   - [ ] wstxtfun-pos
-   - [ ] wstxtfun-yx-pos
-   - [ ] wstxtfun-prev-printable
-   - [ ] wstxtfun-next-printable
-   - [ ] wstxtfun-prev-word
-   - [ ] wstxtfun-next-word
-   - [ ] wstxtfun-end-word
-   - [ ] wstxtfun-line-start
-   - [X] wstxtfun-real-col
-   - [ ] wstxtfun-line-end
-   - [ ] wstxtfun-line2pos
-   - [ ] wstxtfun-nlines
-   - [ ] wstxtfun-pos2line
-   - [ ] wstxtfun-line-len
-   - [ ] wstxtfun-line-last-pos
-   - [ ] wstxtfun-prev-sentence
-   - [ ] wstxtfun-next-sentence
-   - [ ] wstxtfun-sentence-pos
-   - [ ] wstxtfun-prev-paragraph
-   - [ ] wstxtfun-next-paragraph
+** wstxtfun
+ - [X] position functions (pos, yx-pos)
+ - [X] word navigation (prev-word, next-word, end-word)
+ - [X] line functions (line-start, line-end, line2pos, nlines, pos2line, line-len, line-last-pos)
+ - [X] real-col (legacy test, separate format)
+ - [ ] sentence functions (prev-sentence, next-sentence, sentence-pos)
+ - [ ] paragraph functions (prev-paragraph, next-paragraph)
 

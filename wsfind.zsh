@@ -15,19 +15,7 @@ ws-find() {
     zle history-incremental-search-backward $ws_search
 }
 
-# TODO: find block
-#zle -N wsblock-find
-#bindkey -M wsblock "^Qf" wsblock-find
-#bindkey -M wsblock "^QF" wsblock-find
-wsblock-find() {
-    if [[ -n $kk ]]; then
-        ws_search=$wsblock_text
-        pre_rh=$region_highlight
-        unset region_highlight
-        hst=$HISTNO
-        zle history-incremental-search-backward $ws_search
-    fi
-}
+# FUTURE: find within block selection
 
 bindkey -M isearch -R "!"-"~" self-insert
 bindkey -M isearch " " self-insert

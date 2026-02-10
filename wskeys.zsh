@@ -80,33 +80,18 @@ ws-line-end() {
     wstext-line-end
 }
 
-# Cursor move: sentence
+# FUTURE: sentence/paragraph navigation (functions ready, bindings disabled)
 zle -N ws-prev-sentence
-#bindkey -M wskeys "^Os" ws-prev-sentence
-#bindkey -M wskeys "^OS" ws-prev-sentence
-ws-prev-sentence() {
-    wstext-prev-sentence
-}
+ws-prev-sentence() { wstext-prev-sentence; }
 
 zle -N ws-next-sentence
-#bindkey -M wskeys "^Od" ws-next-sentence
-#bindkey -M wskeys "^OD" ws-next-sentence
-ws-next-sentence() {
-    wstext-next-sentence
-}
+ws-next-sentence() { wstext-next-sentence; }
 
-# Cursor move: paragraph
 zle -N ws-prev-paragraph
-#bindkey -M wskeys "^O^S" ws-prev-paragraph
-ws-prev-paragraph() {
-    wstext-prev-paragraph
-}
+ws-prev-paragraph() { wstext-prev-paragraph; }
 
 zle -N ws-next-paragraph
-#bindkey -M wskeys "^O^D" ws-next-paragraph
-ws-next-paragraph() {
-    wstext-next-paragraph
-}
+ws-next-paragraph() { wstext-next-paragraph; }
 
 ws-updfn() {
     local b_pos=${ws_marks[B]}
@@ -278,7 +263,7 @@ ws-bracketed-paste() {
     local ws_pasted_text="$zle_bracketed_paste"
     zle bracketed-paste ws_pasted_text
     wstext-insert $ws_pasted_text
-    #TODO: select (kb-kk), insert into kill ring...
+    #FUTURE: select (kb-kk), insert into kill ring
 }
 
 # Delete keys: char
@@ -302,19 +287,12 @@ ws-del-word-right() {
     wstext-del-word-right
 }
 
+# FUTURE: word deletion by alt-key (functions ready, bindings disabled)
 zle -N ws-del-word-left
-#bindkey -M wskeys "^[h" ws-del-word-left
-#bindkey -M wskeys "^[H" ws-del-word-left
-ws-del-word-left() {
-    wstext-del-word-left
-}
+ws-del-word-left() { wstext-del-word-left; }
 
 zle -N ws-del-word
-#bindkey -M wskeys "^[y" ws-del-word
-#bindkey -M wskeys "^[Y" ws-del-word
-ws-del-word() {
-    wstext-del-word
-}
+ws-del-word() { wstext-del-word; }
 
 # Delete keys: line
 zle -N ws-del-line-left
@@ -336,55 +314,33 @@ ws-del-line() {
     wstext-del-line
 }
 
-# Delete keys: sentence
+# FUTURE: sentence/paragraph deletion (functions ready, bindings disabled)
 zle -N ws-del-sentence-left
-#bindkey -M wskeys "^Oh" ws-del-sentence-left
-#bindkey -M wskeys "^OH" ws-del-sentence-left
-ws-del-sentence-left() {
-    wstext-del-sentence-left
-}
+ws-del-sentence-left() { wstext-del-sentence-left; }
 
 zle -N ws-del-sentence-right
-#bindkey -M wskeys "^Og" ws-del-sentence-right
-#bindkey -M wskeys "^OG" ws-del-sentence-right
-ws-del-sentence-right() {
-    wstext-del-sentence-right
-}
+ws-del-sentence-right() { wstext-del-sentence-right; }
 
 zle -N ws-del-sentence
-#bindkey -M wskeys "^Oy" ws-del-sentence
-#bindkey -M wskeys "^OY" ws-del-sentence
-ws-del-sentence() {
-    wstext-del-sentence
-}
+ws-del-sentence() { wstext-del-sentence; }
 
-# Delete keys: paragraph
 zle -N ws-del-paragraph-left
-#bindkey -M wskeys "^O^H" ws-del-paragraph-left
-ws-del-paragraph-left() {
-    wstext-del-paragraph-left
-}
+ws-del-paragraph-left() { wstext-del-paragraph-left; }
 
 zle -N ws-del-paragraph-right
-#bindkey -M wskeys "^O^G" ws-del-paragraph-right
-ws-del-paragraph-right() {
-    wstext-del-paragraph-right
-}
+ws-del-paragraph-right() { wstext-del-paragraph-right; }
 
 zle -N ws-del-paragraph
-#bindkey -M wskeys "^O^Y" ws-del-paragraph
-ws-del-paragraph() {
-    wstext-del-paragraph
-}
+ws-del-paragraph() { wstext-del-paragraph; }
 
 
 # ^Kc/^KC and ^Kv/^KV are bound in wsblock.zsh to wsblock-kc/wsblock-kv
 # which handle block copy/move when a block is selected,
 # and paste $ws_delbuf when no block is selected.
 
-# Undo Keys
-#bindkey -M wskeys "^_" undo
-#bindkey -M wskeys "^6" redo
+# FUTURE: undo/redo (no implementation yet)
+# bindkey -M wskeys "^_" undo
+# bindkey -M wskeys "^6" redo
 
 zle -N wskeys-unerase
 bindkey -M wskeys "^U" wskeys-unerase
@@ -522,7 +478,7 @@ wskeys-accept-line() {
         i=$((i+1))
     done
 
-    if [[ -d "$new_buffer" ]]; then # TODO: allow spaces before/after
+    if [[ -d "$new_buffer" ]]; then # FUTURE: allow spaces before/after
         cd "$new_buffer"
         echo
         BUFFER=""
@@ -531,7 +487,7 @@ wskeys-accept-line() {
 #        print -s "$BUFFER"
 #        zle down-history
 #        echo
-#        echo "$new_buffer" | source /dev/stdin # TODO: improve
+#        echo "$new_buffer" | source /dev/stdin
 #        eval "$new_buffer"
 #        - "$new_buffer"
 
@@ -584,7 +540,6 @@ wstext-replace-enter() {
 
 zle -N zle-line-pre-redraw
 zle-line-pre-redraw() {
-# TODO: ???
     local modefun=$KEYMAP-pre-redraw
     if typeset -f $modefun > /dev/null; then
         $modefun
@@ -592,9 +547,8 @@ zle-line-pre-redraw() {
 }
 
 wskeys-pre-redraw() {
-    # TODO: fix fix fix
 #    if [[ -z "$ws_blockvis" ]]; then
-        ws_text="$BUFFER" # TODO: on tab expand: redefine ws_text
+        ws_text="$BUFFER" # FUTURE: on tab expand, redefine ws_text
         ws_curs=$CURSOR
         ws-updfn # temporary
 #    fi

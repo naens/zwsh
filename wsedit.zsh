@@ -106,7 +106,7 @@ wsedit-end-document() {
     wstext-end-document
 }
 
-# Cursor Scroll Functions TODO: ^ W/^Z (scroll line)
+# Cursor Scroll Functions: ^W (scroll up) / ^Z (scroll down)
 zle -N wsedit-scroll-up
 bindkey -M wsedit "^W" wsedit-scroll-up
 wsedit-scroll-up() {
@@ -136,7 +136,7 @@ wsedit-scroll-down() {
     fi
 }
 
-# Cursor Screen Functions TODO: ^QE/^QX (begin/end screen)
+# Cursor Screen Functions: ^QE (begin screen) / ^QX (end screen)
 zle -N wsedit-begin-screen
 bindkey -M wsedit "^Qe" wsedit-begin-screen
 bindkey -M wsedit "^QE" wsedit-begin-screen
@@ -781,10 +781,8 @@ wsedit-mkful() {
 
 # overwrite area between 0 and $wsedit_begin with an updated header
 # update $wsedit_begin to match the next character after the header
-# TODO: restructure function
-# TODO: separate: make-header, make-partscreen, make-fullscreen
-# TODO: restructure each function in manageable size
-# TODO: fullscreen: allow tabs
+# FUTURE: restructure into separate make-header, make-partscreen, make-fullscreen
+# FUTURE: fullscreen: allow tabs
 wsedit-refresh() {
     if [[ "$1" = "true" && ! "$wsedit_modified" = "true" ]]; then
         wsedit_modified="true"
@@ -817,9 +815,9 @@ wsedit-refresh() {
 
 # Switch /editor mode/ to main mode
 # Exit *editor mode* (do not save), with file contents as buffer: ^KD
-# TODO: in fullscreen mode, text can have more lines than the buffer
-#       if text bigger, than the buffer, put the whole text in the buffer
-#       if text smaller, remove supplementary lines from the buffer
+# FUTURE: in fullscreen mode, handle text with more lines than buffer
+#         if text bigger than the buffer, put the whole text in the buffer
+#         if text smaller, remove supplementary lines from the buffer
 #         => !!! cursor position
 zle -N wsedit-exit
 bindkey -M wsedit "^Kd" wsedit-exit
@@ -880,8 +878,8 @@ wsedit-fullscreen() {
 #bindkey -M wsedit "^Kb" wseditblock-kb
 #bindkey -M wsedit "^KB" wseditblock-kb
 
-# TODO: * file import/export functions
-# TODO: * dialog=new screen!!! => save-and-replace buffer
+# FUTURE: file import/export functions
+# FUTURE: dialog=new screen => save-and-replace buffer
 zle -N wsedit-kr
 bindkey -M wsedit "^Kr" wsedit-kr
 bindkey -M wsedit "^KR" wsedit-kr
@@ -1110,7 +1108,7 @@ wsedit-runtobuf-exitrun() {
     $wstext_updfnvar
 }
 
-# TODO: * Find functions
+# FUTURE: find/replace functions in editor mode
 bindkey -M wsedit "^Qf" undefined-key
 bindkey -M wsedit "^QF" undefined-key
 bindkey -M wsedit "^L" undefined-key

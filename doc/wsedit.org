@@ -31,15 +31,14 @@ outside)
  * ~^N~ acts the same way, except that it leaves the cursor on the
    previous line (?inconsistency with the main mode?)
  * No history commands
- * ~^QF~ and ~^QA~: Search & replace commands: search in text instead of
- history
+ * ~^QF~ and ~^QA~ (find/replace in editor): not yet implemented
  * In order to tell the difference between two modes, a status bar at
    the top (? or bottom/end) of file is inserted
  * Open/Save/Write-block/Insert-from-file dialogs are on seperate
    screen (?if full screen?)
- * ?make the editor fullscreen?
- * ?implement scroll functions/keybindings?
  * ~^QE~ and ~^QX~: move cursor to the beginning or the end of the screen
+ * ~^W~ and ~^Z~: scroll one line up/down (fullscreen only)
+ * ~^KF~: toggle fullscreen mode
 
 * Key bindings for editor mode
 ** main mode key bindings

@@ -13,8 +13,6 @@
 
 ~^QR~: start-doc ~^QC~: end-doc
 
-~^QW~: start-scroll ~^QE~: end-scroll
-
 ~^QB~: start-block ~^QK~: end-block
 
 *** Words
@@ -37,7 +35,7 @@
 *** Additional delete keys
 ~^[H~: word-left ~^[Y~: whole-word
 
-*** Sentence and paragraph deletion
+*** Sentence and paragraph deletion (FUTURE: bindings currently disabled)
 | item	    | go-left | go-right | del-left | del-right | del-whole |
 |-----------+---------+----------+----------+-----------+-----------|
 | sentence  | 	^O S  |   ^O D   |   ^O G   |    ^O H   |   ^O Y    |
