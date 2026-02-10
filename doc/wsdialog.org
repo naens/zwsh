@@ -1,6 +1,4 @@
 #+TITLE: wsdialog
-#+AUTHOR: naens
-#+EMAIL: naens@gmx.com
 
 #+OPTIONS: toc:nil
 
