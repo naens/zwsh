@@ -96,7 +96,7 @@ wstext-jump-lines() {
 wstext-prev-sentence() {
     local pos=${(P)wstext_posvar}
 
-    local prev_sentence_pos=$(wstxt-prev-sentence $pos "${(P)wstext_textvar}")
+    local prev_sentence_pos=$(wstxtfun-prev-sentence $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$prev_sentence_pos"
     wstext-upd
@@ -105,7 +105,7 @@ wstext-prev-sentence() {
 wstext-next-sentence() {
     local pos=${(P)wstext_posvar}
 
-    local next_sentece_pos=$(wstxt-next-sentence $pos "${(P)wstext_textvar}")
+    local next_sentence_pos=$(wstxtfun-next-sentence $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$next_sentence_pos"
     wstext-upd
@@ -121,7 +121,7 @@ wstext-upd() {
 wstext-prev-paragraph() {
     local pos=${(P)wstext_posvar}
 
-    local prev_paragraph_pos=$(wstxtfun-prev-paragraph-pos $pos "${(P)wstext_textvar}")
+    local prev_paragraph_pos=$(wstxtfun-prev-paragraph $pos "${(P)wstext_textvar}")
 
     eval "$wstext_posvar=$prev_paragraph_pos"
     wstext-upd
@@ -238,7 +238,7 @@ wstext-del-word() {
         eval "$wstext_posvar=$from"
     else
         local prev_printable=$(wstxtfun-prev-printable $pos "$text")
-        local next_printable=$(wstxt-next-printable $((pos+1)) "$text")
+        local next_printable=$(wstxtfun-next-printable $((pos+1)) "$text")
         wstext-delete $((prev_printable+1)) $((next_printable))
         eval "$wstext_posvar=$prev_printable"
     fi

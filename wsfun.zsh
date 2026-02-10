@@ -32,7 +32,7 @@ ws-do-bold() {
 # get screen dimensions in $ws_rows and $ws_cols
 ws-size() {
     ws_rows=$(tput lines)
-    ws_cols=$(tupt cols)
+    ws_cols=$(tput cols)
 }
 
 

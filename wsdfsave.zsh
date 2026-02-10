@@ -34,7 +34,7 @@ wsdfsave-accept() {
         wsdialog_l4mode=badfn
     elif [[ -e "$filename" ]]; then
         wsdialog_l4mode=fexists
-    elif wsdfsave-save "$wsdialog_text" "$filename"; then
+    elif wsdfsave-save "$filename" "$wsdfsave_text"; then
         wsdfsave_fn="$filename"
         unset wsdialog_l4mode
     else
