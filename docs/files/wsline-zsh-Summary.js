@@ -1,1 +1,0 @@
-NDFramePage.OnPageTitleLoaded("File:wsline.zsh","wsline.zsh");NDSummary.OnSummaryLoaded("File:wsline.zsh",[["Shell Script","shell"]],[["Functions","Function"],["Groups","Group"]],[[1,0,1,"Functions","Functions"],[3,0,0,"wsline-get-display-pos","wsline-get-display-pos"],[5,0,0,"wsline-display-pos","wsline-display-pos"]]);

@@ -1,1 +1,0 @@
-NDSearch.OnPrefixDataLoaded("wsl",["Function"],[["wsline-display-pos",,[[,,,,0,"File:wsline.zsh:wsline-display-pos"]]],["wsline-get-display-pos",,[[,,,,0,"File:wsline.zsh:wsline-get-display-pos"]]]]);
