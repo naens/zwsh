@@ -67,9 +67,16 @@ wsdfsave-fexists-no() {
 }
 
 # file in first argument, text in second argument
+# optional third argument: "sudo" to write via sudo
 wsdfsave-save() {
     local filename="$1"
     local text="$2"
-    printf '%s' "$text" 2>&- > "$filename"
-    return $?
+    local sudo="$3"
+    if [[ "$sudo" = "sudo" ]]; then
+        ws-sudo-write "$filename" "$text"
+        return $?
+    else
+        printf '%s' "$text" 2>&- > "$filename"
+        return $?
+    fi
 }

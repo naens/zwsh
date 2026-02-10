@@ -51,9 +51,10 @@ wsdfopen-accept() {
     elif [[ -r "$filename" && -w "$filename" ]]; then
         wsdfopen-read "$filename"
         wsdfopen_fn="$filename"
-    else    # no permissions: TODO: to implement (not working implementation)
+    else    # no permissions: try sudo
         if wsdfopen-read "$filename" sudo; then
             wsdfopen_fn="$filename"
+            wsdfopen_sudo=true
         else
             wsdfopen-make-epermissions-msg
             wsdialog_l4mode=epermissions
@@ -69,16 +70,18 @@ wsdfopen-restore() {
     fi
     unset wsdfopen_text
     unset wsdfopen_fn
+    unset wsdfopen_sudo
 }
 
-# get file contents, file name in first argument, contents in wskr_text
+# get file contents, file name in first argument, contents in wsdfopen_text
 wsdfopen-read() {
     local fn="$1"
     local sudo="$2"
     if [[ "$sudo" = "sudo" ]]; then
-        wsdfopen_text=$(sudo cat "$fn"; printf x)
-        wsdfopen_text=${wsdfopen_text%x}
-        return $?
+        ws-sudo-read "$fn"
+        local rc=$?
+        wsdfopen_text="$REPLY"
+        return $rc
     else
         wsdfopen_text=$(cat "$fn"; printf x)
         wsdfopen_text=${wsdfopen_text%x}

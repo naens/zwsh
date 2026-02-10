@@ -853,6 +853,7 @@ wsedit-exit() {
     unset wsedit_blockvis
     unset wsedit_blockcolmode
     unset wsedit_fn
+    unset wsedit_sudo
     unset wsedit_modified
     zle -K $wsedit_saved_keymap
     $wstext_updfnvar
@@ -912,11 +913,23 @@ wsedit-open-end() {
     if [[ "$1" = "OK" ]]; then
         wsedit_fn="$wsdfopen_fn"
         wsedit_text="$wsdfopen_text"
+        [[ "$wsdfopen_sudo" = "true" ]] && wsedit_sudo=true || unset wsedit_sudo
 
         wsedit_pos=0
         wsedit_modified="false"
     fi
     $wstext_updfnvar
+}
+
+# Write wsedit_text to wsedit_fn, using sudo if wsedit_sudo is set.
+# Returns 0 on success.
+wsedit-write-file() {
+    if [[ "$wsedit_sudo" = "true" ]]; then
+        ws-sudo-write "$wsedit_fn" "$wsedit_text"
+    else
+        printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"
+    fi
+    return $?
 }
 
 # save file
@@ -925,7 +938,7 @@ bindkey -M wsedit "^Ks" wsedit-save
 bindkey -M wsedit "^KS" wsedit-save
 wsedit-save() {
     if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => overwrite
-        if printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"; then
+        if wsedit-write-file; then
             wsedit_modified="false"
             return
         fi
@@ -970,7 +983,7 @@ bindkey -M wsedit "^Kx" wsedit-save-exit
 bindkey -M wsedit "^KX" wsedit-save-exit
 wsedit-save-exit() {
     if [[ -n "$wsedit_fn" ]]; then      # file exists and is open => just write
-        if printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"; then
+        if wsedit-write-file; then
             wsedit-save-exit-end "OK"
             unset wsedit_fn
             return
@@ -1047,7 +1060,7 @@ wsedit-runexit() {
 
 # save, run, update buffer
 wsedit-runexit-saverun() {
-    printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"
+    wsedit-write-file
     wsedit-runexit-runexit
 }
 
@@ -1084,7 +1097,7 @@ wsedit-runtobuf() {
 
 # save, run, update buffer
 wsedit-runtobuf-saverun() {
-    printf '%s' "$wsedit_text" 2>&- > "$wsedit_fn"
+    wsedit-write-file
     wsedit-runtobuf-exitrun
 }
 

@@ -152,8 +152,6 @@ wstext-end-document() {
     wstext-upd
 }
 
-# TODO: start document, end document
-
 # Delete character functions
 wstext-del-char-left() {
     local pos=${(P)wstext_posvar}

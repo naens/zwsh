@@ -181,18 +181,17 @@ ws-updfn() {
     CURSOR=$curs
 }
 
-#zle -N ws-start-doc
-#bindkey -M wskeys "^R" ws-start-doc
-#ws-start-doc() {
-#    eval "$wstext_posvar=0"
-#}
+zle -N ws-start-doc
+bindkey -M wskeys "^R" ws-start-doc
+ws-start-doc() {
+    wstext-start-document
+}
 
-#zle -N ws-end-doc
-#bindkey -M wskeys "^C" ws-end-doc
-#ws-end-doc() {
-#    local text="${(P)wstext_textvar}"
-#    eval "$wstext_posvar=${#text}"
-#}
+zle -N ws-end-doc
+bindkey -M wskeys "^C" ws-end-doc
+ws-end-doc() {
+    wstext-end-document
+}
 
 bindkey -M wskeys "^Q^[" undefined-key
 bindkey -M wskeys "^K^[" undefined-key
@@ -379,22 +378,9 @@ ws-del-paragraph() {
 }
 
 
-zle -N ws-insert-saved
-bindkey -M wskeys "^Kc" ws-insert-saved
-bindkey -M wskeys "^KC" ws-insert-saved
-bindkey -M wskeys "^Kv" ws-insert-saved
-bindkey -M wskeys "^KV" ws-insert-saved
-# on ^Kc/^Kv insert saved substring if exists and nothing selected
-ws-insert-saved() {
-#    if [[ -n $ws_saved ]]; then
-#    kb=$CURSOR
-#    kk=$(( $CURSOR + ${#ws_saved} ))
-#    LBUFFER+=$ws_saved
-#    CURSOR=$(( $CURSOR + ${#ws_saved} ))
-#    zle -K wsblock
-#    wsblock-upd
-#    fi
-}
+# ^Kc/^KC and ^Kv/^KV are bound in wsblock.zsh to wsblock-kc/wsblock-kv
+# which handle block copy/move when a block is selected,
+# and paste $ws_delbuf when no block is selected.
 
 # Undo Keys
 #bindkey -M wskeys "^_" undo
@@ -589,6 +575,7 @@ wstext-replace-enter() {
         ws_text="$wsdfopen_text"
 
         wsedit_fn="$wsdfopen_fn"
+        [[ "$wsdfopen_sudo" = "true" ]] && wsedit_sudo=true || unset wsedit_sudo
         ws-edit
     else
         $wstext_updfnvar

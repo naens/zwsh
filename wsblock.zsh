@@ -299,6 +299,10 @@ bindkey -M wskeys "^Kc" wsblock-kc
 bindkey -M wskeys "^KC" wsblock-kc
 wsblock-kc() {
     if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        # no block selected: paste last deleted text
+        if [[ -n "$ws_delbuf" ]]; then
+            wstext-insert "$ws_delbuf"
+        fi
         return
     fi
     if [[ "$wstext_blockcolmodevar" = "true" ]]; then
@@ -321,6 +325,10 @@ bindkey -M wskeys "^Kv" wsblock-kv
 bindkey -M wskeys "^KV" wsblock-kv
 wsblock-kv() {
     if [[ -z "${(P)wstext_blockvisvar}" ]]; then
+        # no block selected: paste last deleted text
+        if [[ -n "$ws_delbuf" ]]; then
+            wstext-insert "$ws_delbuf"
+        fi
         return
     fi
     local text=${(P)wstext_textvar}
@@ -424,15 +432,4 @@ wsblock-qk() {
     wstext-upd
 }
 
-#zle -N wsblock-kr
-#bindkey -M wsblock "^Kr" wsblock-kr
-#bindkey -M wsblock "^KR" wsblock-kr
-wsblock-kr() {
-    ws-krfn
-    wskr_insert="wsblock-kr-insert"
-}
 
-wsblock-kr-insert() {
-    wsblock-insert-string $wskr_text
-    unset wskr_text
-}

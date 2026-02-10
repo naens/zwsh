@@ -276,3 +276,34 @@ ws-get-scrollpos() {
 ws-uc() {
     echo $(tr "[:lower:]" "[:upper:]" <<< "$1")
 }
+
+# -- sudo file I/O helpers --
+# These use sudo cat / sudo tee to read/write files that require root.
+# Inside ZLE, we use `zle -I` to temporarily give the terminal to sudo
+# for its password prompt, then `zle -R` to refresh afterwards.
+
+# Read a file via sudo.  Result in $REPLY.  Returns 0 on success.
+# Usage: ws-sudo-read filename
+ws-sudo-read() {
+    local fn="$1"
+    # Allow sudo to interact with the terminal for password prompt
+    [[ -n "$WIDGET" ]] && zle -I
+    REPLY=$(sudo cat "$fn"; printf x)
+    local rc=$?
+    REPLY=${REPLY%x}
+    [[ -n "$WIDGET" ]] && zle -R
+    return $rc
+}
+
+# Write text to a file via sudo.  Returns 0 on success.
+# Usage: ws-sudo-write filename text
+ws-sudo-write() {
+    local fn="$1"
+    local text="$2"
+    # Allow sudo to interact with the terminal for password prompt
+    [[ -n "$WIDGET" ]] && zle -I
+    printf '%s' "$text" | sudo tee "$fn" > /dev/null
+    local rc=$?
+    [[ -n "$WIDGET" ]] && zle -R
+    return $rc
+}
